@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,114 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        String @id
+  usernames String @unique
+}
+
+model Paciente {
+  id_paciente      Int               @id @default(autoincrement())
+  nombre           String
+  apellido         String
+  dni              String            @unique
+  sexo             Sexo
+  fecha_nacimiento DateTime
+  direccion        String?
+  telefono         String            @unique
+  citas            Cita[]
+  tickets          Ticket[]
+  historiaClinica  Historia_Clinica?
+  fecha_creacion   DateTime          @default(now())
+}
+
+model Servicio {
+  id_servicio     Int     @id @default(autoincrement())
+  nombre_servicio String
+  descripcion     String?
+  tarifa          Float
+  citas           Cita[]
+}
+
+model Empleado {
+  id_empleado    Int          @id @default(autoincrement())
+  nombre         String
+  apellido       String
+  dni            String       @unique
+  sexo           Sexo
+  especialidad   String
+  telefono       String       @unique
+  email          String?      @unique
+  tipo_empleado  TipoEmpleado
+  citas          Cita[]
+  fecha_creacion DateTime     @default(now())
+}
+
+model Cita {
+  id_cita           Int        @id @default(autoincrement())
+  id_paciente       Int
+  id_empleado       Int
+  id_servicio       Int
+  fecha_cita        DateTime
+  hora_cita_inicial DateTime
+  hora_cita_final   DateTime
+  estado            EstadoCita
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+  empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
+  servicio Servicio @relation(fields: [id_servicio], references: [id_servicio])
+}
+
+model Ticket {
+  id_ticket        Int      @id @default(autoincrement())
+  id_paciente      Int
+  fecha_emision    DateTime
+  tipo_comprobante String
+  medio_pago       String
+  monto_total      Float
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+  pagos    Pago[]
+}
+
+model Pago {
+  id_pago        Int      @id @default(autoincrement())
+  id_ticket      Int
+  monto          Float
+  fecha_pago     DateTime
+  medio_pago     String
+  fecha_creacion DateTime
+
+  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
+}
+
+model Historia_Clinica {
+  id_historia    Int      @id @default(autoincrement())
+  id_paciente    Int      @unique
+  fecha_creacion DateTime @default(now())
+  antecedentes   String?
+  tratamientos   String?
+  medicamentos   String?
+  observaciones  String?
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+}
+
+enum Sexo {
+  MASCULINO
+  FEMENINO
+}
+
+enum EstadoCita {
+  AGENDADO
+  COMPLETADO
+  EN_PROCESO
+  FINALIZADO
+  CANCELADO
+}
+
+enum TipoEmpleado {
+  RECEPCIONISTA
+  ODONTOLOGO
 }
