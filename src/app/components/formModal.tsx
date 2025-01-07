@@ -12,7 +12,7 @@ const FormModal = ({
     | "empleado";
     type: "create" | "update" | "delete" | "view";
     data?: any;
-    id?: number;
+    id?: number | string;
 }) => {
 
     const [open, setOpen] = useState(false);
@@ -28,7 +28,7 @@ const FormModal = ({
                 </button>
             </form>
         ) : (
-            <CitaForm type="create" />
+            <CitaForm type="update" data={data} />
         );
     };
 

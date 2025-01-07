@@ -8,8 +8,8 @@ import InputField from "../inputField";
 const schema = z.object({
     paciente: z.string().min(1, { message: "Paciente requerido" }),
     fecha: z.date({ message: "Fecha requerida" }),
-    horaInicio: z.number({ message: "Hora requerida" }),
-    horaFinal: z.number({ message: "Hora requerida" }),
+    horaInicio: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
+    horaFinal: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
     servicio: z.enum(["Limpieza dental", "Consulta", "Extracción"], { message: "Servicio requerido" }),
     tarifaServicio: z.number().min(1, { message: "Servicio requerido" }),
     doctorAsignado: z.enum(["Jose Luis", "Pedro Paramo"], { message: "Doctor requerido" }),
@@ -63,14 +63,14 @@ const CitaForm = ({
                 <InputField
                     label="Hora Inicial"
                     name="horaInicio"
-                    defaultValue={data?.horaCita}
+                    defaultValue={data?.horaInicio}
                     register={register}
                     error={errors.horaInicio}
                 />
                 <InputField
                     label="Hora Final"
                     name="horaFinal"
-                    defaultValue={data?.horaCita}
+                    defaultValue={data?.horaFinal}
                     register={register}
                     error={errors.horaFinal}
                 />
@@ -87,9 +87,9 @@ const CitaForm = ({
                 <InputField
                     label="Tarifa"
                     name="tarifa"
-                    defaultValue={data?.paciente}
+                    defaultValue={data?.tarifaServicio}
                     register={register}
-                    error={errors.paciente}
+                    error={errors.tarifaServicio}
                 />
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Doctor Asignado</label>
