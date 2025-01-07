@@ -1,10 +1,20 @@
+"use client"
+
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 const LoginPage = () => {
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    router.push('/doctor');
+  }
+
   return (
     <>
       <h1 className='text-center text-lg font-semibold mb-4'>Iniciar Sesión</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         <input
           type='text'
           placeholder='Usuario'
