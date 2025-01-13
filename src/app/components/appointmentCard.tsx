@@ -1,4 +1,4 @@
-const CitasCard = ({ type }: { type: string }) => {
+const AppointmentCard = ({ type }: { type: string }) => {
     return (
         <div className="rounded-2xl bg-gray-200 p-4 flex-1 min-w-[130px]">
             <h1 className="text-2xl font-semibold my-2">100</h1>
@@ -7,4 +7,4 @@ const CitasCard = ({ type }: { type: string }) => {
     )
 }
 
-export default CitasCard
+export default AppointmentCard

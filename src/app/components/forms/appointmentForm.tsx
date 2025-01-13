@@ -6,19 +6,19 @@ import { z } from "zod";
 import InputField from "../inputField";
 
 const schema = z.object({
-    paciente: z.string().min(1, { message: "Paciente requerido" }),
-    fecha: z.date({ message: "Fecha requerida" }),
-    horaInicio: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
-    horaFinal: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
-    servicio: z.enum(["Limpieza dental", "Consulta", "Extracción"], { message: "Servicio requerido" }),
-    tarifaServicio: z.number().min(1, { message: "Servicio requerido" }),
-    doctorAsignado: z.enum(["Jose Luis", "Pedro Paramo"], { message: "Doctor requerido" }),
-    descripcion: z.string().optional(),
+    patient: z.string().min(1, { message: "Paciente requerido" }),
+    date: z.date({ message: "Fecha requerida" }),
+    startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
+    endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
+    service: z.enum(["Limpieza dental", "Consulta", "Extracción"], { message: "Servicio requerido" }),
+    serviceFee: z.number().min(1, { message: "Servicio requerido" }),
+    assignedDoctor: z.enum(["Jose Luis", "Pedro Paramo"], { message: "Doctor requerido" }),
+    note: z.string().optional(),
 });
 
 type Inputs = z.infer<typeof schema>;
 
-const CitaForm = ({
+const AppointmentForm = ({
     type,
     data,
 }: {
@@ -43,12 +43,12 @@ const CitaForm = ({
             <div className="flex flex-col gap-2 w-full">
                 <label className="text-xs text-gray-500">Paciente</label>
                 <input type={type}
-                    {...register("paciente")}
+                    {...register("patient")}
                     className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                    {...register("paciente")}
+                    {...register("patient")}
                     defaultValue={data?.paciente}
                 />
-                {errors.paciente?.message && <p className="text-xs text-red-500">{errors.paciente?.message.toString()}</p>}
+                {errors.patient?.message && <p className="text-xs text-red-500">{errors.patient?.message.toString()}</p>}
             </div>
 
             <div className="flex justify-between flex-wrap gap-4">
@@ -57,7 +57,7 @@ const CitaForm = ({
                     name="fecha"
                     defaultValue={data?.fecha}
                     register={register}
-                    error={errors.fecha}
+                    error={errors.date}
                     type="date"
                 />
                 <InputField
@@ -65,47 +65,47 @@ const CitaForm = ({
                     name="horaInicio"
                     defaultValue={data?.horaInicio}
                     register={register}
-                    error={errors.horaInicio}
+                    error={errors.startTime}
                 />
                 <InputField
                     label="Hora Final"
                     name="horaFinal"
                     defaultValue={data?.horaFinal}
                     register={register}
-                    error={errors.horaFinal}
+                    error={errors.endTime}
                 />
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Servicio</label>
-                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("servicio")} defaultValue={data?.servicio || ""}>
+                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("service")} defaultValue={data?.servicio || ""}>
                         <option value="" disabled>Seleccionar</option>
                         <option value="Limpieza dental">Limpieza dental</option>
                         <option value="Consulta">Consulta</option>
                         <option value="Extracción">Extracción</option>
                     </select>
-                    {errors.servicio?.message && <p className="text-xs text-red-500">{errors.servicio?.message.toString()}</p>}
+                    {errors.service?.message && <p className="text-xs text-red-500">{errors.service?.message.toString()}</p>}
                 </div>
                 <InputField
                     label="Tarifa"
                     name="tarifa"
                     defaultValue={data?.tarifaServicio}
                     register={register}
-                    error={errors.tarifaServicio}
+                    error={errors.serviceFee}
                 />
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Doctor Asignado</label>
-                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("doctorAsignado")} defaultValue={data?.doctorAsignado || ""}>
+                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("assignedDoctor")} defaultValue={data?.doctorAsignado || ""}>
                         <option value="" disabled>Seleccionar</option>
                         <option value="Jose Luis">Jose Luis</option>
                         <option value="Pedro Paramo">Pedro Paramo</option>
                     </select>
-                    {errors.doctorAsignado?.message && <p className="text-xs text-red-500">{errors.doctorAsignado?.message.toString()}</p>}
+                    {errors.assignedDoctor?.message && <p className="text-xs text-red-500">{errors.assignedDoctor?.message.toString()}</p>}
                 </div>
                 <InputField
                     label="Descripcion"
                     name="descripcion"
                     defaultValue={data?.descripcion}
                     register={register}
-                    error={errors.descripcion}
+                    error={errors.note}
                 />
             </div>
             <button className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
@@ -113,4 +113,4 @@ const CitaForm = ({
     );
 };
 
-export default CitaForm
+export default AppointmentForm

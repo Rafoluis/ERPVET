@@ -1,14 +1,17 @@
-import CitasCard from "@/app/components/citasCard"
+import AppointmentCard from "@/app/components/appointmentCard"
 import FormModal from "@/app/components/formModal"
+import Pagination from "@/app/components/pagination"
 import Table from "@/app/components/table"
 import TableSearch from "@/app/components/tableSearch"
 import { clientesData } from "@/lib/data"
 import prisma from "@/lib/prisma"
+import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
+import { useSearchParams } from 'next/navigation';
 
-type CitaList = Cita & { paciente: Paciente, empleado: Empleado, servicio: Servicio }
+type AppointmentList = Cita & { paciente: Paciente, empleado: Empleado, servicio: Servicio }
 
 const columns = [
     {
@@ -37,7 +40,7 @@ const columns = [
     },
 ];
 
-const renderRow = (item: CitaList) => (
+const renderRow = (item: AppointmentList) => (
     <tr key={item.id_cita} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-sky-50">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
@@ -88,17 +91,30 @@ const renderRow = (item: CitaList) => (
     </tr>
 );
 
-const RecepcionPage = async () => {
+const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: string]: string | undefined } }) => {
 
-    const citas = await prisma.cita.findMany({
-        include: {
-            paciente: true,
-            empleado: true,
-            servicio: true,
-        },
-    });
+    const params = await searchParams;
 
-    console.log(citas);
+    const { page, ...queryParams } = params;
+
+    const p = page ? parseInt(page) : 1;
+
+    const [data, count] = await prisma.$transaction([
+        prisma.cita.findMany({
+            include: {
+                paciente: true,
+                empleado: true,
+                servicio: true,
+            },
+            take: numPage,
+            skip: numPage * (p - 1),
+        }),
+        prisma.cita.count(),
+    ]);
+
+    //console.log("searchParams:", params)
+    //console.log(data);
+    //console.log(count);
 
     return (
         <div className='bg-white p-4 rounded-md flex-1 m-4 mt-0'>
@@ -109,12 +125,12 @@ const RecepcionPage = async () => {
                 </div>
 
                 <div className='flex gap-4 justify-between flex-wrap'>
-                    <CitasCard type='Citas totales' />
-                    <CitasCard type='Pacientes totales' />
-                    <CitasCard type='Próximas citas' />
+                    <AppointmentCard type='Citas totales' />
+                    <AppointmentCard type='Pacientes totales' />
+                    <AppointmentCard type='Próximas citas' />
                 </div>
             </div>
-
+            {/* BUSQUEDA Y AGREGAR CITA */}
             <div className='p-4 rounded-md flex-1 m-4 mt-0'>
                 <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Citas</h2>
@@ -125,12 +141,13 @@ const RecepcionPage = async () => {
                         </div>
                     </div>
                 </div>
-                {/*LIST*/}
-                <Table columns={columns} renderRow={renderRow} data={citas} />
+                {/*LISTA*/}
+                <Table columns={columns} renderRow={renderRow} data={data} />
             </div>
-
+            {/*PAGINACION*/}
+            <Pagination page={p} count={count} />
         </div>
     )
 }
 
-export default RecepcionPage
+export default AppointmentListPage

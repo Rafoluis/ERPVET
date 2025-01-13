@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image"
 import { useState } from "react";
-import CitaForm from "@/app/components/forms/citaForm";
+import AppointmentForm from "@/app/components/forms/appointmentForm";
 
 const FormModal = ({
     table, type, data, id,
@@ -28,7 +28,7 @@ const FormModal = ({
                 </button>
             </form>
         ) : (
-            <CitaForm type="update" data={data} />
+            <AppointmentForm type="update" data={data} />
         );
     };
 
