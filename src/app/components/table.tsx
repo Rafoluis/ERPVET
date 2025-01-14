@@ -1,4 +1,3 @@
-
 const Table = ({ columns, renderRow, data, }: {
     columns: { header: string; accessor: string; className?: string }[];
     renderRow: (item: any) => React.ReactNode;

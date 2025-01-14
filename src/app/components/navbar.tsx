@@ -12,7 +12,7 @@ const menuItems = [
             },
             {
                 label: "Gestion de citas",
-                href: "/GestionCitas",
+                href: "/list/appointments",
                 visible: ["admin", "recepcionista"]
             },
             {
