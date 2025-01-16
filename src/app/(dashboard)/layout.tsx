@@ -22,7 +22,9 @@ export default function DashboardLayout({
                         <Navbar />
                     </div>
                 </div>
-                {children}
+                <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
+                    {children}
+                </div>
             </div>
         </div>
     );

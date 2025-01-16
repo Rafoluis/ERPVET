@@ -27,7 +27,7 @@ const menuItems = [
             },
             {
                 label: "Boleteria",
-                href: "/Boleteria",
+                href: "/ticketing",
                 visible: ["admin", "recepcionista"]
             }
         ]

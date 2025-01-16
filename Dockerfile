@@ -7,20 +7,20 @@ WORKDIR /app
 # Copy package.json and package-lock.json files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies, including devDependencies
 RUN npm install
 
 # Copy the rest of the application code
 COPY . .
 
 # Generate Database
-RUN npx prisma migrate dev --name init
-
-# Build the Next.js application
-RUN npm run build
+RUN npx prisma generate
 
 # Expose the port the app runs on
 EXPOSE 3000
 
-# Start the Next.js application
-CMD ["npm", "start"]
+# Set environment variable to development
+ENV NODE_ENV=development
+
+# Start the application in development mode
+CMD ["npm", "run", "dev"]
