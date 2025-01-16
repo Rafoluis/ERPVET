@@ -1,5 +1,6 @@
-'use server';
+"use server"
 
+import { signIn } from '@/app/api/auth/[...nextauth]/route';
 import { loginSchema } from '@/schemas/login-schema';
 
 export async function handleLogin(formData: FormData) {
@@ -11,7 +12,17 @@ export async function handleLogin(formData: FormData) {
     return { success: false, errors: result.error.errors };
   }
 
-  const validData = result.data;
+  const { dni, password } = result.data;
 
-  return { success: true, data: validData, redirectTo: '/doctor' };
+  const response = await signIn('credentials', {
+    redirect: false,
+    dni,
+    password,
+  });
+
+  if (!response || !response.ok) {
+    return { success: false, errors: [{ message: response?.error || 'Error al iniciar sesión' }] };
+  }
+
+  return { success: true, redirectTo: '/doctor' };
 }

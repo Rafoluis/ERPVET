@@ -1,3 +1,5 @@
+import { getToken } from "next-auth/jwt";
+import { useSession } from "next-auth/react";
 import Image from "next/image"
 import Link from "next/link";
 
@@ -34,6 +36,14 @@ const menuItems = [
     }
 ]
 const Navbar = () => {
+    const {data: session} = useSession()
+    // const nameComplete = session?.user?.firstName.concat(" ", session?.user?.lastName)
+    const nameComplete = "Admin"
+    const role = "admin"
+
+    console.log(session)
+    
+
     return (
         <div className='flex items-center justify-between p-4'>
             {/* MENU */}
@@ -55,8 +65,8 @@ const Navbar = () => {
             {/* USER */}
             <div className='flex items-center gap-6 justify-end w-full'>
                 <div className='flex flex-col'>
-                    <span className="text-xs leading-3 font-medium">Rafael Corzo</span>
-                    <span className="text-[10px] text-gray-500 text-right">Admin</span>
+                    <span className="text-xs leading-3 font-medium">{nameComplete}</span>
+                    <span className="text-[10px] text-gray-500 text-right">{role}</span>
                 </div>
                 <Image src="/avatar.png" alt="" width={36} height={36} className="rounded-full" />
             </div>

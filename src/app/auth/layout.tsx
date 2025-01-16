@@ -15,14 +15,6 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         height={60}
         alt='Logo'
       />
-      {/* <div className='absolute top-4 right-4'>
-        <Link
-          href={'/auth/register'}
-          className='px-4 py-2 bg-gray-300 text-black rounded'
-        >
-          Registrarse
-        </Link>
-      </div> */}
       <div className='w-96 bg-gray-200 p-6 rounded shadow-md'>{children}</div>
     </div>
   );
