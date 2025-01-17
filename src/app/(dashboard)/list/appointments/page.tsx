@@ -1,8 +1,9 @@
-import AppointmentCard from "@/app/components/appointmentCard"
-import FormModal from "@/app/components/formModal"
-import Pagination from "@/app/components/pagination"
-import Table from "@/app/components/table"
-import TableSearch from "@/app/components/tableSearch"
+import AppointmentCard from "@/components/appointmentCard"
+import FormContainer from "@/components/formContainer"
+import FormModal from "@/components/formModal"
+import Pagination from "@/components/pagination"
+import Table from "@/components/table"
+import TableSearch from "@/components/tableSearch"
 import { clientesData } from "@/lib/data"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
@@ -48,42 +49,24 @@ const renderRow = (item: AppointmentList) => (
                 <p className="text-xs text-gray-500">{item.paciente.dni}</p>
             </div>
         </td>
+        <td className="hidden md:table-cell">
+            {new Intl.DateTimeFormat("es-PE").format(item.fecha_cita)}</td>
         <td className="table-cell">
-            {new Intl.DateTimeFormat('es-ES', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit'
-            }).format(item.fecha_cita)}</td>
-        <td className="table-cell">
-            {new Intl.DateTimeFormat('es-ES', {
-                hour: '2-digit',
-                minute: '2-digit'
-            }).format(item.hora_cita_inicial)}
-        </td>
+            {item.hora_cita_inicial.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.nombre} ${item.empleado.apellido}`}</td>
         <td className="hidden md:table-cell">{item.servicio.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.servicio.tarifa}</td>
         <td className="hidden md:table-cell">{item.estado}</td>
         <td>
             <div className="flex items-center gap-2">
-                <Link href={'/list/clientes/${item.id}'}>
-                    <FormModal table="cita" type="view" />
+                <Link href={`/list/clientes/${item.id_cita}`}>
+                    <FormContainer table="cita" type="view" />
                 </Link>
                 {"recepcionista" === "recepcionista" && (
                     <>
-                        <FormModal table="cita" type="update" data={{
-                            id: 3,
-                            paciente: "Maria Perez",
-                            fecha: "2015-01-01",
-                            horaInicio: "20:00",
-                            horaFinal: "21:00",
-                            servicio: "Limpieza dental",
-                            tarifaServicio: "20",
-                            doctorAsignado: "Pedro Paramo",
-                            descripcion: "Pago al contado",
-                        }}
+                        <FormContainer table="cita" type="update" data={item}
                         />
-                        <FormModal table="cita" type="delete" id={item.id_cita} />
+                        <FormContainer table="cita" type="delete" id={item.id_cita} />
                     </>
                 )}
             </div>
@@ -99,17 +82,50 @@ const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: st
 
     const p = page ? parseInt(page) : 1;
 
+    const query: Prisma.CitaWhereInput = {}
+
+    if (queryParams) {
+        for (const [key, value] of Object.entries(queryParams)) {
+            if (value !== undefined) {
+                switch (key) {
+                    case "doctorId":
+                        query.empleado = {
+                            id_empleado: parseInt(value)
+                        }
+
+                        break;
+                    case "search":
+                        const searchTerms = value.split(" ");
+                        query.AND = searchTerms.map(term => ({
+                            OR: [
+                                { paciente: { nombre: { contains: term, mode: "insensitive" } } },
+                                { paciente: { apellido: { contains: term, mode: "insensitive" } } },
+                                { paciente: { dni: { contains: term, mode: "insensitive" } } },
+                                { paciente: { telefono: { contains: term, mode: "insensitive" } } },
+                                { empleado: { nombre: { contains: term, mode: "insensitive" } } },
+                                { empleado: { apellido: { contains: term, mode: "insensitive" } } },
+                            ]
+                        }));
+                        break;
+                    default:
+                        break;
+                };
+            }
+        }
+    }
+
     const [data, count] = await prisma.$transaction([
         prisma.cita.findMany({
+            where: query,
             include: {
-                paciente: true,
-                empleado: true,
-                servicio: true,
+                paciente: { select: { nombre: true, apellido: true, dni: true } },
+                empleado: { select: { nombre: true, apellido: true } },
+                servicio: { select: { nombre_servicio: true, tarifa: true } },
             },
             take: numPage,
             skip: numPage * (p - 1),
         }),
-        prisma.cita.count(),
+        prisma.cita.count({ where: query }),
     ]);
 
     //console.log("searchParams:", params)

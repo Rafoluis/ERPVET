@@ -2,51 +2,68 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import InputField from "../inputField";
-
-const schema = z.object({
-    patient: z.string().min(1, { message: "Paciente requerido" }),
-    date: z.date({ message: "Fecha requerida" }),
-    startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
-    endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: "Formato de hora HH:mm incorrecto" }),
-    service: z.enum(["Limpieza dental", "Consulta", "Extracción"], { message: "Servicio requerido" }),
-    serviceFee: z.number().min(1, { message: "Servicio requerido" }),
-    assignedDoctor: z.enum(["Jose Luis", "Pedro Paramo"], { message: "Doctor requerido" }),
-    note: z.string().optional(),
-});
-
-type Inputs = z.infer<typeof schema>;
+import { createAppointment } from "@/lib/serverActions";
+import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
+import { startTransition, useActionState } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 const AppointmentForm = ({
     type,
     data,
+    setOpen,
+    relatedData,
 }: {
     type: "create" | "update";
     data?: any;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+    relatedData?: any;
 }) => {
     const {
         register,
         handleSubmit,
         formState: { errors },
-    } = useForm<Inputs>({
-        resolver: zodResolver(schema),
+    } = useForm<AppointmentSchema>({
+        resolver: zodResolver(appointmentSchema),
     });
 
-    const onSubmit = handleSubmit(data => {
+    const [state, formAction] = useActionState(createAppointment,
+        //type === "create" ? createAppointment : createAppointment,
+        { success: false, error: false }
+    );
+
+    const onSubmit = handleSubmit((data) => {
         console.log(data);
+        startTransition(() => {
+            formAction(data);
+        });
     });
+
+    const router = useRouter()
+
+    useEffect(() => {
+        if (state.success) {
+            toast(`La cita a sido ${type === "create" ? "creada" : "actualizada"}!`);
+            setOpen(false);
+            router.refresh();
+        }
+    }, [state]);
+
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
-            <h1 className="text-xl font-semibold">Registrar Cita</h1>
+            <h1 className="text-xl font-semibold">
+                {type === "create" ? "Registrar nueva cita" : "Actualizar cita"}
+            </h1>
             <div className="flex flex-col gap-2 w-full">
                 <label className="text-xs text-gray-500">Paciente</label>
                 <input type={type}
                     {...register("patient")}
                     className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                     {...register("patient")}
-                    defaultValue={data?.paciente}
+                    defaultValue={data?.paciente.nombre}
                 />
                 {errors.patient?.message && <p className="text-xs text-red-500">{errors.patient?.message.toString()}</p>}
             </div>
@@ -54,22 +71,22 @@ const AppointmentForm = ({
             <div className="flex justify-between flex-wrap gap-4">
                 <InputField
                     label="Fecha de cita"
-                    name="fecha"
-                    defaultValue={data?.fecha}
+                    name="date"
+                    defaultValue={data?.fecha_cita}
                     register={register}
                     error={errors.date}
                     type="date"
                 />
                 <InputField
                     label="Hora Inicial"
-                    name="horaInicio"
+                    name="startTime"
                     defaultValue={data?.horaInicio}
                     register={register}
                     error={errors.startTime}
                 />
                 <InputField
                     label="Hora Final"
-                    name="horaFinal"
+                    name="endTime"
                     defaultValue={data?.horaFinal}
                     register={register}
                     error={errors.endTime}
@@ -86,8 +103,8 @@ const AppointmentForm = ({
                 </div>
                 <InputField
                     label="Tarifa"
-                    name="tarifa"
-                    defaultValue={data?.tarifaServicio}
+                    name="serviceFee"
+                    defaultValue={data?.servicio.tarifa}
                     register={register}
                     error={errors.serviceFee}
                 />
@@ -108,6 +125,7 @@ const AppointmentForm = ({
                     error={errors.note}
                 />
             </div>
+            {state.error && <span className="text-red-400"> Algo paso mal </span>}
             <button className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
         </form>
     );
