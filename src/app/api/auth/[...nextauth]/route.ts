@@ -1,5 +1,3 @@
- 
- 
 import prisma from '@/lib/prisma';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import NextAuth, { NextAuthOptions } from 'next-auth';
@@ -46,25 +44,18 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.AUTH_SECRET,
   callbacks: {
-    async jwt({token, user}){
-      if (user) {
-        token.id = user.id; // Agrega datos personalizados al token
-        token.email = user.email;
-        token.name = user.name;
-      }
-      return token;
+    async jwt({ token, user }) {
+      return { ...token, ...user };
     },
-    async session ({ session, token }) {
-      session.user.id = token.id;
-      session.user.email = token.email;
-      session.user.name = token.name;
+    async session({ session, token }) {
+      session.user = token as any;
       return session;
-    }
+    },
   },
-
   pages: {
-    signIn: "/auth/login",
-  }
+    signIn: '/auth/login',
+    signOut: '/',
+  },
 };
 
 const handler = NextAuth(authOptions);
