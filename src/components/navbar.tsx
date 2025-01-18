@@ -44,7 +44,7 @@ const Navbar = () => {
                         {i.items.map((item) => {
                             if (item.visible.includes("admin")) {
                                 return (
-                                    <Link href={item.href} key={item.label} className="flex items-center justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-gray-200 ">
+                                    <Link href={item.href} key={item.label} className="flex items-center justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-gray-300 ">
                                         <span>{item.label}</span>
                                     </Link>
                                 );
@@ -54,13 +54,13 @@ const Navbar = () => {
                 ))}
             </div>
             {/* USER */}
-            <div className='flex items-center gap-6 justify-end w-full'>
+            <div className='flex items-center gap-4 justify-end w-full'>
                 <div className='flex flex-col'>
                     <span className="text-xs leading-3 font-medium">Rafael Corzo</span>
                     <span className="text-[10px] text-gray-500 text-right">Admin</span>
                 </div>
-                {/*<Image src="/avatar.png" alt="" width={36} height={36} className="rounded-full" />*/}
-                <UserButton />
+                <Image src="/avatar.png" alt="" width={36} height={36} className="rounded-full" />
+                {/*<UserButton />*/}
             </div>
         </div>
     )

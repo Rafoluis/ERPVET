@@ -8,13 +8,17 @@ type CurrentState = { success: boolean; error: boolean }
 
 export const createAppointment = async (currentState: CurrentState, data: AppointmentSchema) => {
     try {
+
         await prisma.cita.create({
             data: {
-                fecha_cita: new Date(data.date),
-                hora_cita_inicial: new Date(data.date),
-                hora_cita_final: new Date(data.date),
-                estado: "AGENDADO"
-            },
+                id_paciente: data.id_paciente,
+                fecha_cita: data.fecha_cita,
+                hora_cita_inicial: data.hora_cita_inicial,
+                hora_cita_final: data.hora_cita_final,
+                id_servicio: data.id_servicio,
+                id_empleado: data.id_empleado,
+                estado: data.estado,
+            }
         });
 
         //revalidatePath("/list/appointments");
@@ -36,10 +40,13 @@ export const updateAppointment = async (currentState: CurrentState, data: Appoin
                 id_cita: data.id
             },
             data: {
-                fecha_cita: new Date(data.date),
-                hora_cita_inicial: new Date(data.date),
-                hora_cita_final: new Date(data.date),
-                estado: "AGENDADO"
+                id_paciente: data.id_paciente,
+                fecha_cita: data.fecha_cita,
+                hora_cita_inicial: data.hora_cita_inicial,
+                hora_cita_final: data.hora_cita_final,
+                id_servicio: data.id_servicio,
+                id_empleado: data.id_empleado,
+                estado: data.estado,
             },
         });
 

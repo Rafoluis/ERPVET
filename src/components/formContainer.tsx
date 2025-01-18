@@ -18,10 +18,17 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
     if (type !== "delete") {
         switch (table) {
             case "cita":
+                const appointmentPatient = await prisma.paciente.findMany({
+                    select: { id_paciente: true, nombre: true, apellido: true },
+                });
                 const appointmentDoctor = await prisma.empleado.findMany({
                     select: { id_empleado: true, nombre: true, apellido: true },
                 });
-                relatedData = { empleado: appointmentDoctor };
+                const appointmentService = await prisma.servicio.findMany({
+                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                });
+
+                relatedData = { pacientes: appointmentPatient, empleados: appointmentDoctor, servicios: appointmentService };
                 break;
             default:
                 break;

@@ -1,8 +1,7 @@
 "use client";
 import Image from "next/image"
-import { Dispatch, JSX, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, JSX, SetStateAction, useActionState, useEffect, useState } from "react";
 import AppointmentForm from "@/components/forms/appointmentForm";
-import { useActionState } from "react";
 import { deleteAppointment } from "@/lib/serverActions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
@@ -11,7 +10,8 @@ import { FormContainerProps } from "./formContainer";
 const forms: {
     [key: string]: (setOpen: Dispatch<SetStateAction<boolean>>, type: "create" | "update", data?: any, relatedData?: any) => JSX.Element;
 } = {
-    cita: (setOpen, type, data, relatedData) => <AppointmentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
+    cita: (setOpen, type, data, relatedData) =>
+        <AppointmentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
 };
 
 const deleteActions = {
@@ -37,11 +37,11 @@ const FormModal = ({
 
         useEffect(() => {
             if (state.success) {
-                toast(`La cita a sido eliminada`);
+                toast(`La ${table} a sido eliminada`);
                 setOpen(false);
                 router.refresh();
             }
-        }, [state]);
+        }, [state, router]);
 
 
         return type === "delete" && id ? (

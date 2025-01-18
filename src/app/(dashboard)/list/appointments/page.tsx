@@ -42,7 +42,7 @@ const columns = [
 ];
 
 const renderRow = (item: AppointmentList) => (
-    <tr key={item.id_cita} className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-sky-50">
+    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-gray-200 text-sm hover:bg-sky-100">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.paciente.nombre} ${item.paciente.apellido}`}</h3>
@@ -153,7 +153,7 @@ const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: st
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                         <TableSearch />
                         <div className="flex items-center gap-4 self-end">
-                            <FormModal table="cita" type="create" />
+                            <FormContainer table="cita" type="create" />
                         </div>
                     </div>
                 </div>

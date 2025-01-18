@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../inputField";
-import { createAppointment } from "@/lib/serverActions";
+import { createAppointment, updateAppointment } from "@/lib/serverActions";
 import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect } from "react";
@@ -29,13 +29,13 @@ const AppointmentForm = ({
         resolver: zodResolver(appointmentSchema),
     });
 
-    const [state, formAction] = useActionState(createAppointment,
-        //type === "create" ? createAppointment : createAppointment,
+    const [state, formAction] = useActionState(
+        type === "create" ? createAppointment : updateAppointment,
         { success: false, error: false }
     );
 
     const onSubmit = handleSubmit((data) => {
-        console.log(data);
+        console.log("Formulario enviado", data);
         startTransition(() => {
             formAction(data);
         });
@@ -45,85 +45,125 @@ const AppointmentForm = ({
 
     useEffect(() => {
         if (state.success) {
-            toast(`La cita a sido ${type === "create" ? "creada" : "actualizada"}!`);
+            toast(`La cita a sido ${type === "create" ? "creada" : "actualizada"}`);
             setOpen(false);
             router.refresh();
         }
     }, [state]);
 
+    const { pacientes, empleados, servicios } = relatedData;
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
             <h1 className="text-xl font-semibold">
                 {type === "create" ? "Registrar nueva cita" : "Actualizar cita"}
             </h1>
+            {data && (
+                <InputField
+                    label="Id"
+                    name="id"
+                    defaultValue={data?.id}
+                    register={register}
+                    error={errors.id}
+                    hidden
+                />
+            )}
             <div className="flex flex-col gap-2 w-full">
                 <label className="text-xs text-gray-500">Paciente</label>
-                <input type={type}
-                    {...register("patient")}
+                <select
                     className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                    {...register("patient")}
-                    defaultValue={data?.paciente.nombre}
-                />
-                {errors.patient?.message && <p className="text-xs text-red-500">{errors.patient?.message.toString()}</p>}
+                    {...register("id_paciente")}
+                    defaultValue={data?.id_paciente}
+                >
+                    {pacientes.map((paciente: { id_paciente: number; nombre: string; apellido: string }) => (
+                        <option value={paciente.id_paciente} key={paciente.id_paciente}>
+                            {paciente.nombre + " " + paciente.apellido}
+                        </option>
+                    ))}
+                </select>
+                {errors.id_paciente?.message && (
+                    <p className="text-xs text-red-400">
+                        {errors.id_paciente.message.toString()}
+                    </p>
+                )}
             </div>
 
             <div className="flex justify-between flex-wrap gap-4">
                 <InputField
                     label="Fecha de cita"
-                    name="date"
-                    defaultValue={data?.fecha_cita}
+                    name="fecha_cita"
+                    defaultValue={data?.fecha_cita ? data.fecha_cita.toISOString().split('T')[0] : ''}
                     register={register}
-                    error={errors.date}
+                    error={errors.fecha_cita}
                     type="date"
                 />
+
                 <InputField
                     label="Hora Inicial"
-                    name="startTime"
+                    name="hora_cita_inicial"
                     defaultValue={data?.horaInicio}
                     register={register}
-                    error={errors.startTime}
+                    error={errors.hora_cita_final}
                 />
                 <InputField
                     label="Hora Final"
-                    name="endTime"
+                    name="hora_cita_final"
                     defaultValue={data?.horaFinal}
                     register={register}
-                    error={errors.endTime}
+                    error={errors.hora_cita_final}
                 />
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Servicio</label>
-                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("service")} defaultValue={data?.servicio || ""}>
-                        <option value="" disabled>Seleccionar</option>
-                        <option value="Limpieza dental">Limpieza dental</option>
-                        <option value="Consulta">Consulta</option>
-                        <option value="Extracción">Extracción</option>
+                    <select
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("id_servicio")}
+                        defaultValue={data?.id_servicio}
+                    >
+                        {servicios.map((servicio: { id_servicio: number; nombre_servicio: string; tarifa: number }) => (
+                            <option value={servicio.id_servicio} key={servicio.id_servicio}>
+                                {servicio.nombre_servicio + " " + servicio.tarifa}
+                            </option>
+                        ))}
                     </select>
-                    {errors.service?.message && <p className="text-xs text-red-500">{errors.service?.message.toString()}</p>}
+                    {errors.id_servicio?.message && (
+                        <p className="text-xs text-red-400">
+                            {errors.id_servicio.message.toString()}
+                        </p>
+                    )}
                 </div>
-                <InputField
+                {<InputField
                     label="Tarifa"
                     name="serviceFee"
                     defaultValue={data?.servicio.tarifa}
                     register={register}
-                    error={errors.serviceFee}
-                />
+
+                />}
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
-                    <label className="text-xs text-gray-500">Doctor Asignado</label>
-                    <select className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full" {...register("assignedDoctor")} defaultValue={data?.doctorAsignado || ""}>
-                        <option value="" disabled>Seleccionar</option>
-                        <option value="Jose Luis">Jose Luis</option>
-                        <option value="Pedro Paramo">Pedro Paramo</option>
+                    <label className="text-xs text-gray-500">Odontólogo</label>
+                    <select
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("id_empleado")}
+                        defaultValue={data?.id_empleado}
+                    >
+                        {empleados.map((empleado: { id_empleado: number; nombre: string; apellido: string }) => (
+                            <option value={empleado.id_empleado} key={empleado.id_empleado}>
+                                {empleado.nombre + " " + empleado.apellido}
+                            </option>
+                        ))}
                     </select>
-                    {errors.assignedDoctor?.message && <p className="text-xs text-red-500">{errors.assignedDoctor?.message.toString()}</p>}
+                    {errors.id_empleado?.message && (
+                        <p className="text-xs text-red-400">
+                            {errors.id_empleado.message.toString()}
+                        </p>
+                    )}
                 </div>
-                <InputField
-                    label="Descripcion"
-                    name="descripcion"
+                {<InputField
+                    label="Nota"
+                    name="nota"
                     defaultValue={data?.descripcion}
                     register={register}
-                    error={errors.note}
-                />
+
+                />}
             </div>
             {state.error && <span className="text-red-400"> Algo paso mal </span>}
             <button className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>

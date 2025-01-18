@@ -10,7 +10,7 @@ export default function DashboardLayout({
 }>) {
     return (
         <div className="h-screen flex">
-            <div className="flex-1 bg-slate-100 overflow-scroll flex flex-col">
+            <div className="flex-1 bg-slate-200 overflow-scroll flex flex-col">
                 <div className="flex items-center justify-start p-4 gap-4">
                     <Link
                         href="/"
