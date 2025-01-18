@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
 import TableItem from "./TableItem";
 
-interface Props<T,> {
-  columns: ColumnHeader<T>[];
+interface Props<T> {
+  columns: ColumnHeader[];
   rows: T[];
   customRenderers?: {
     [K in keyof T]?: (row: T) => ReactNode;

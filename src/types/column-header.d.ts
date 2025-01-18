@@ -1,5 +1,5 @@
-interface ColumnHeader<T> {
-  id: keyof T;
+interface ColumnHeader {
+  id: string;
   label: string;
   className?: string;
 }

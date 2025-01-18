@@ -2,17 +2,7 @@ import FormContainer from '@/components/formContainer';
 import Table from '@/components/table/Table';
 import Link from 'next/link';
 
-interface Patient {
-  id_paciente: string;
-  nombre: string;
-  apellido: string;
-  dni: string;
-  telefono: string;
-  direccion: string;
-  estado: string;
-}
-
-const columns: ColumnHeader<Patient>[] = [
+const columns = [
   { id: 'nombre', label: 'Nombre', className: 'p-2' },
   { id: 'apellido', label: 'Apellido', className: 'p-2' },
   { id: 'dni', label: 'DNI', className: 'p-2' },
