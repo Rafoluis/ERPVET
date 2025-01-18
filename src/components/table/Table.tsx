@@ -5,7 +5,7 @@ interface Props<T> {
   columns: ColumnHeader[];
   rows: T[];
   customRenderers?: {
-    [K in keyof T]?: (row: T) => ReactNode;
+    [key: string]: (row: T) => ReactNode;
   };
   customActions?: (row: T) => ReactNode; 
 }
