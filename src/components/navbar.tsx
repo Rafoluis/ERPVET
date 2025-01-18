@@ -1,7 +1,7 @@
 import { signOut, useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Dropdown from './Dropdown/Dropdown';
+import Dropdown from './dropdown/Dropdown';
 
 const menuItems = [
   {

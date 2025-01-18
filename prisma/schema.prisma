@@ -17,11 +17,29 @@ model Usuario {
   telefono        String?   @unique
   direccion       String?
   fecha_creacion  DateTime  @default(now())
-  tipo_usuario    TipoUsuario
   password        String
 
   empleado        Empleado?
   paciente        Paciente?
+  roles           UsuarioRol[] 
+}
+
+model Rol {
+  id_rol   Int     @id @default(autoincrement())
+  nombre   TipoRol @unique
+  usuarios UsuarioRol[]
+}
+
+model UsuarioRol {
+  id               Int      @id @default(autoincrement())
+  id_usuario       Int
+  id_rol           Int
+  fecha_asignacion DateTime @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  rol     Rol     @relation(fields: [id_rol], references: [id_rol])
+
+  @@unique([id_usuario, id_rol]) 
 }
 
 model Paciente {
@@ -40,7 +58,6 @@ model Empleado {
   id_empleado    Int          @id @default(autoincrement())
   id_usuario     Int          @unique
   especialidad   String
-  tipo_empleado  TipoEmpleado
   citas          Cita[]
   fecha_creacion DateTime     @default(now())
 
@@ -118,13 +135,9 @@ enum EstadoCita {
   CANCELADO
 }
 
-enum TipoUsuario {
+enum TipoRol {
   ADMIN
-  PACIENTE
-  EMPLEADO
-}
-
-enum TipoEmpleado {
-  RECEPCIONISTA
   ODONTOLOGO
+  PACIENTE
+  RECEPCIONISTA
 }

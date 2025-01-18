@@ -1,71 +1,42 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TipoRol } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const admin = await prisma.usuario.create({
-    data: {
-      nombre: 'Admin',
-      apellido: 'User',
-      dni: '12345678',
-      sexo: 'MASCULINO',
-      email: 'admin@example.com',
-      telefono: '123456789',
-      direccion: 'Admin Street 123',
-      tipo_usuario: 'ADMIN',
-      password: 'securepassword',
-    },
+  const roles = Object.values(TipoRol);
+  await prisma.rol.createMany({
+    data: roles.map((rol) => ({ nombre: rol })),
+    skipDuplicates: true,
   });
+  console.log("Roles creados:", roles);
 
-  console.log('Administrador creado:', admin);
-
-  const empleadoUsuario = await prisma.usuario.create({
-    data: {
-      nombre: 'Empleado',
-      apellido: 'User',
-      dni: '87654321',
-      sexo: 'FEMENINO',
-      email: 'empleado@example.com',
-      telefono: '987654321',
-      direccion: 'Empleado Avenue 456',
-      tipo_usuario: 'EMPLEADO',
-      password: 'securepassword',
-      empleado: {
-        create: {
-          especialidad: 'Odontología',
-          tipo_empleado: 'ODONTOLOGO',
+  for (const rol of roles) {
+    const usuario = await prisma.usuario.create({
+      data: {
+        nombre: `${rol} Nombre`,
+        apellido: `${rol} Apellido`,
+        dni: `${Math.floor(10000000 + Math.random() * 90000000)}`, 
+        sexo: "MASCULINO",
+        email: `${rol.toLowerCase()}@example.com`,
+        telefono: `9${Math.floor(100000000 + Math.random() * 900000000)}`,
+        direccion: `${rol} Street 123`,
+        password: "12345",
+        roles: {
+          create: {
+            rol: {
+              connect: { nombre: rol },
+            },
+          },
         },
       },
-    },
-  });
-
-  console.log('Empleado creado:', empleadoUsuario);
-
-  const pacienteUsuario = await prisma.usuario.create({
-    data: {
-      nombre: 'Paciente',
-      apellido: 'User',
-      dni: '11223344',
-      sexo: 'MASCULINO',
-      email: 'paciente@example.com',
-      telefono: '1122334455',
-      direccion: 'Paciente Boulevard 789',
-      tipo_usuario: 'PACIENTE',
-      password: 'securepassword',
-      paciente: {
-        create: {
-          fecha_nacimiento: new Date('1990-01-01'),
-        },
-      },
-    },
-  });
-
-  console.log('Paciente creado:', pacienteUsuario);
+    });
+    console.log(`Usuario con rol ${rol} creado:`, usuario);
+  }
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Error al crear datos iniciales:", e);
     process.exit(1);
   })
   .finally(async () => {
