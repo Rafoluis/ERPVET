@@ -1,1 +1,1 @@
-export const numPage = 7;
+export const numPage = 5;
