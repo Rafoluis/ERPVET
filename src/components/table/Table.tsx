@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import TableItem from "./TableItem";
+import { cn } from "@/lib/classNames";
 
 interface Props<T> {
   columns: ColumnHeader[];
@@ -20,9 +21,9 @@ const Table = <T,>({
     <table className="w-full mt-4">
       <thead>
         <tr className="text-left text-gray-500 text-sm">
-          {columns.map((col) => (
-            <th key={String(col.id)} className={col.className}>
-              {col.label}
+          {columns.map((column) => (
+            <th key={String(column.id)} className={cn(column.className, "p-2")}>
+              {column.label}
             </th>
           ))}
           {customActions && <th>Acciones</th>}
