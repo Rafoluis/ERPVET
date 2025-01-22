@@ -60,7 +60,7 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   return data
 }
 
-export const createEmployee = async (
+export const createOrUpdateEmployee  = async (
   employee: Employee
 ): Promise<ApiResponse<Employee>> => {
   return tryCatch(async () => {
@@ -116,3 +116,34 @@ export const createEmployee = async (
   });
 };
 
+export const deleteEmployee = async (dni: string): Promise<ApiResponse<null>> => {
+  return tryCatch(async () => {
+    const usuario = await prisma.usuario.findUnique({
+      where: { dni },
+    });
+
+    if (!usuario) {
+      return { data: null, message: 'Usuario no encontrado', error: 'NOT_FOUND' };
+    }
+
+    const empleado = await prisma.empleado.findUnique({
+      where: { id_usuario: usuario.id_usuario },
+    });
+
+    if (!empleado) {
+      return { data: null, message: 'Empleado no encontrado', error: 'NOT_FOUND' };
+    }
+
+    await prisma.empleado.delete({
+      where: { id_empleado: empleado.id_empleado },
+    });
+
+    await prisma.usuario.delete({
+      where: { dni },
+    });
+
+    revalidatePath('/admin');
+
+    return { data: null, message: 'Empleado eliminado exitosamente', error: '' };
+  });
+};

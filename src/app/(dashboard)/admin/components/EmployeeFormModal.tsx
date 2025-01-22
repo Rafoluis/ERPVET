@@ -1,6 +1,6 @@
 'use client'
 
-import { createEmployee } from '@/actions/admin.actions'
+import { createOrUpdateEmployee } from '@/actions/admin.actions'
 import Modal from '@/components/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
@@ -23,10 +23,22 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
     formState: { errors },
   } = useForm<Employee>({
     resolver: zodResolver(EmployeeSchema),
+    defaultValues: {
+      nombre: employee?.nombre ?? '',
+      apellido: employee?.apellido ?? '',
+      dni: employee?.dni ?? '',
+      password: employee?.password ?? '',
+      sexo: employee?.sexo ?? 'MASCULINO',
+      email: employee?.email ?? '',
+      telefono: employee?.telefono ?? '',
+      direccion: employee?.direccion ?? '',
+      especialidad: employee?.especialidad ?? '',
+      roles: employee?.roles ?? [],
+    },
   })
 
   const onSubmit = async (data: Employee) => {
-    const response = await createEmployee(data)
+    const response = await createOrUpdateEmployee(data)
 
     if (!response.success) {
       showToast('error', response.error)
