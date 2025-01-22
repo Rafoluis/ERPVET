@@ -2,10 +2,10 @@
 
 import { createEmployee } from '@/actions/admin.actions'
 import Modal from '@/components/modal/Modal'
+import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { toast } from 'react-toastify'
 
 interface Props {
   isOpen: boolean
@@ -31,12 +31,12 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
     console.log(response)
 
     if (!response.success) {
-      toast.error(response.error)
+      showToast('error', response.error)
       return
     }
 
-    if (!isEditMode) toast.success(response.message)
-    else toast.success(response.message)
+    if (!isEditMode) showToast('success', response.message)
+    else showToast('success', response.message)
     onClose()
   }
 
