@@ -27,7 +27,7 @@ const Modal = ({
       aria-labelledby='modal-title'
       className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center'
     >
-      <section className='bg-white p-6 rounded shadow-lg w-[550px] h-[480px] overflow-y-auto'>
+      <section className='bg-white p-6 rounded shadow-lg w-[550px] max-h-[480px] overflow-y-auto'>
         <div className='flex justify-between items-center mb-4'>
           <h2 id='modal-title' className='text-xl font-semibold'>
             {title}
