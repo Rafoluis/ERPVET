@@ -1,5 +1,7 @@
 import Table from '@/components/table/Table'
+import TableAction from '@/components/table/TableAction'
 import { Employee } from '@/schemas/employee.schema'
+import { EditIcon, TrashIcon } from 'lucide-react'
 import { use } from 'react'
 
 interface Props {
@@ -22,11 +24,18 @@ const EmployeesTable = ({ getAllEmployees, columns }: Props) => {
         dni: (row) => <span className='text-gray-500'>{row.dni}</span>,
         roles: (row) => <span className='lowercase'>{row.roles.join(', ')}</span>,
       }}
-      // customActions={(row) => (
-      //   <div className='flex items-center gap-2'>
-
-      //   </div>
-      // )}
+      customActions={(row) => (
+        <>
+          <TableAction
+            icon={<EditIcon />}
+            onClick={() => console.log('Edit', row)}
+          />
+          <TableAction
+            icon={<TrashIcon className='text-black' />}
+            onClick={() => console.log('Delete', row)}
+          />
+        </>
+      )}
     />
   )
 }

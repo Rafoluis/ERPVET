@@ -28,7 +28,7 @@ const TableItem = <T,>({
           </td>
         );
       })}
-      {customActions && <td>{customActions(row)}</td>}
+      {customActions && <td className='flex gap-3'>{customActions(row)}</td>}
     </tr>
   );
 };
