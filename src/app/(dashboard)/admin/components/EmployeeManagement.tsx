@@ -13,26 +13,25 @@ interface Props {
 }
 
 const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    null
-  )
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean
+    mode: 'create' | 'edit' | 'delete' | null
+    selectedEmployee: Employee | null
+  }>({
+    isOpen: false,
+    mode: null,
+    selectedEmployee: null,
+  })
 
-  const handleOpenModal = () => setIsModalOpen(true)
+  const handleOpenModal = (
+    mode: 'create' | 'edit' | 'delete',
+    employee: Employee | null = null
+  ) => {
+    setModalState({ isOpen: true, mode, selectedEmployee: employee })
+  }
+
   const handleCloseModal = () => {
-    setIsModalOpen(false)
-    setSelectedEmployee(null)
-  }
-
-  const handleEditEmployee = (employee: Employee) => {
-    setSelectedEmployee(employee)
-    setIsModalOpen(true)
-  }
-
-  const handleDeleteEmployee = (employee: Employee) => {
-    setSelectedEmployee(employee)
-    setIsDeleteModalOpen(true)
+    setModalState({ isOpen: false, mode: null, selectedEmployee: null })
   }
 
   return (
@@ -41,38 +40,43 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
         <h2 className='font-bold text-lg uppercase'>Usuarios</h2>
         <button
           className='bg-gray-300 text-white py-2 px-4 rounded hover:bg-gray-400'
-          onClick={handleOpenModal}
+          onClick={() => handleOpenModal('create')}
         >
           Agregar nuevo usuario
         </button>
       </div>
 
       <ErrorBoundary fallback={<div>Ha ocurrido un error</div>}>
-        <Suspense fallback={<div>Cargando...</div>}>
+        <Suspense fallback={<div>Cargando usuarios, por favor espera...</div>}>
           <EmployeesTable
             columns={columns}
             getAllEmployees={getAllEmployees}
-            onEditEmployee={handleEditEmployee}
-            onDeleteEmployee={handleDeleteEmployee}
+            onEditEmployee={(employee) => handleOpenModal('edit', employee)}
+            onDeleteEmployee={(employee) => handleOpenModal('delete', employee)}
           />
         </Suspense>
       </ErrorBoundary>
 
-      {isModalOpen && (
-        <EmployeeFormModal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          employee={selectedEmployee ?? null}
-        />
-      )}
+      {modalState.isOpen &&
+        (modalState.mode === 'create' || modalState.mode === 'edit') && (
+          <EmployeeFormModal
+            isOpen={modalState.isOpen}
+            onClose={handleCloseModal}
+            employee={
+              modalState.mode === 'edit' ? modalState.selectedEmployee : null
+            }
+          />
+        )}
 
-      {isDeleteModalOpen && selectedEmployee && (
-        <EmployeeDelFormModal
-          employee={selectedEmployee}
-          isOpen={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
-      )}
+      {modalState.isOpen &&
+        modalState.mode === 'delete' &&
+        modalState.selectedEmployee && (
+          <EmployeeDelFormModal
+            employee={modalState.selectedEmployee}
+            isOpen={modalState.isOpen}
+            onClose={handleCloseModal}
+          />
+        )}
     </>
   )
 }
