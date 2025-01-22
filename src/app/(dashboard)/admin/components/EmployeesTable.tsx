@@ -19,6 +19,8 @@ const EmployeesTable = ({
 }: Props) => {
   const data = use(getAllEmployees)
 
+  console.log(data)
+
   return (
     <Table
       columns={columns}

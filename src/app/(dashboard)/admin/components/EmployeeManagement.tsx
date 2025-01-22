@@ -20,7 +20,10 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
   )
 
   const handleOpenModal = () => setIsModalOpen(true)
-  const handleCloseModal = () => setIsModalOpen(false)
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedEmployee(null)
+  }
 
   const handleEditEmployee = (employee: Employee) => {
     setSelectedEmployee(employee)
@@ -63,15 +66,13 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
         />
       )}
 
-      {
-        isDeleteModalOpen && selectedEmployee && (
-          <EmployeeDelFormModal
-            employee={selectedEmployee}
-            isOpen={isDeleteModalOpen}
-            onClose={() => setIsDeleteModalOpen(false)}
-          />
-        )
-      }
+      {isDeleteModalOpen && selectedEmployee && (
+        <EmployeeDelFormModal
+          employee={selectedEmployee}
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
+      )}
     </>
   )
 }

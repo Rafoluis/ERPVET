@@ -60,12 +60,37 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   return data
 }
 
-export const createOrUpdateEmployee  = async (
+export const createOrUpdateEmployee = async (
   employee: Employee
 ): Promise<ApiResponse<Employee>> => {
   return tryCatch(async () => {
-    const newUser = await prisma.usuario.create({
-      data: {
+    const existEmployee = await prisma.usuario.findUnique({
+      where: { dni: employee.dni },
+    });
+
+    const newUser = await prisma.usuario.upsert({
+      where: { dni: employee.dni }, 
+      update: {
+        nombre: employee.nombre,
+        apellido: employee.apellido,
+        sexo: employee.sexo,
+        email: employee.email,
+        telefono: employee.telefono ?? undefined,
+        direccion: employee.direccion ?? null,
+        password: employee.password,
+        roles: {
+          deleteMany: {}, 
+          create: employee.roles.map((rolNombre) => ({
+            rol: {
+              connectOrCreate: {
+                where: { nombre: rolNombre as TipoRol },
+                create: { nombre: rolNombre as TipoRol },
+              },
+            },
+          })),
+        },
+      },
+      create: {
         nombre: employee.nombre,
         apellido: employee.apellido,
         dni: employee.dni,
@@ -94,8 +119,12 @@ export const createOrUpdateEmployee  = async (
       },
     });
 
-    const newEmployee = await prisma.empleado.create({
-      data: {
+    const newEmployee = await prisma.empleado.upsert({
+      where: { id_usuario: newUser.id_usuario }, 
+      update: {
+        especialidad: employee.especialidad,
+      },
+      create: {
         especialidad: employee.especialidad,
         fecha_creacion: new Date(),
         usuario: {
@@ -111,8 +140,9 @@ export const createOrUpdateEmployee  = async (
     };
 
     revalidatePath('/admin');
+    const message = existEmployee ? 'Empleado actualizado exitosamente' : 'Empleado creado exitosamente';
 
-    return { data: completedData, message: 'Empleado creado exitosamente' };
+    return { data: completedData, message, error: '' };
   });
 };
 
@@ -133,6 +163,10 @@ export const deleteEmployee = async (dni: string): Promise<ApiResponse<null>> =>
     if (!empleado) {
       return { data: null, message: 'Empleado no encontrado', error: 'NOT_FOUND' };
     }
+
+    await prisma.usuarioRol.deleteMany({
+      where: { id_usuario: usuario.id_usuario },
+    })
 
     await prisma.empleado.delete({
       where: { id_empleado: empleado.id_empleado },
