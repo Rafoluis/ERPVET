@@ -13,6 +13,7 @@ interface Props {
 
 const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null
   )
@@ -20,9 +21,14 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
 
-  const handleSelectEmployee = (employee: Employee) => {
+  const handleEditEmployee = (employee: Employee) => {
     setSelectedEmployee(employee)
     setIsModalOpen(true)
+  }
+
+  const handleDeleteEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee)
+    setIsDeleteModalOpen(true)
   }
 
   return (
@@ -42,7 +48,8 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
           <EmployeesTable
             columns={columns}
             getAllEmployees={getAllEmployees}
-            onSelectedEmployee={handleSelectEmployee}
+            onEditEmployee={handleEditEmployee}
+            onDeleteEmployee={handleDeleteEmployee}
           />
         </Suspense>
       </ErrorBoundary>

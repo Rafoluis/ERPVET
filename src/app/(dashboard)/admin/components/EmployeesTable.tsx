@@ -6,13 +6,19 @@ import { use } from 'react'
 
 interface Props {
   getAllEmployees: Promise<Employee[]>
-  onSelectedEmployee: (employee: Employee) => void
   columns: { id: string; label: string }[]
+  onDeleteEmployee: (employee: Employee) => void
+  onEditEmployee: (employee: Employee) => void
 }
 
-const EmployeesTable = ({ getAllEmployees, columns, onSelectedEmployee }: Props) => {
+const EmployeesTable = ({
+  getAllEmployees,
+  columns,
+  onDeleteEmployee,
+  onEditEmployee,
+}: Props) => {
   const data = use(getAllEmployees)
-  
+
   return (
     <Table
       columns={columns}
@@ -23,17 +29,19 @@ const EmployeesTable = ({ getAllEmployees, columns, onSelectedEmployee }: Props)
             ? new Date(row.fecha_creacion).toLocaleDateString()
             : '',
         dni: (row) => <span className='text-gray-500'>{row.dni}</span>,
-        roles: (row) => <span className='lowercase'>{row.roles.join(', ')}</span>,
+        roles: (row) => (
+          <span className='lowercase'>{row.roles.join(', ')}</span>
+        ),
       }}
       customActions={(row) => (
         <>
           <TableAction
             icon={<EditIcon />}
-            onClick={() => onSelectedEmployee(row)}
+            onClick={() => onEditEmployee(row)}
           />
           <TableAction
             icon={<TrashIcon className='text-black' />}
-            onClick={() => console.log('Delete', row)}
+            onClick={() => onDeleteEmployee(row)}
           />
         </>
       )}
