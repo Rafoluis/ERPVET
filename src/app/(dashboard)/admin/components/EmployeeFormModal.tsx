@@ -28,6 +28,8 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
   const onSubmit = async (data: Employee) => {
     const response = await createEmployee(data)
 
+    console.log(response)
+
     if (!response.success) {
       toast.error(response.error)
       return
@@ -38,13 +40,9 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
     onClose()
   }
 
-  const onError = (errors: Record<string, unknown>) => {
-    console.error('Validation Errors:', errors)
-  }
-
   return (
     <Modal title={title} isOpen={isOpen} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit, onError)} className='space-y-4'>
+      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
         <div>
           <label
             htmlFor='nombre'

@@ -2,8 +2,10 @@
 
 import prisma from '@/lib/prisma'
 import { sleep } from '@/lib/sleep'
+import { tryCatch } from '@/lib/try-catch'
 import { Employee } from '@/schemas/employee.schema'
-import { Prisma, TipoRol } from '@prisma/client'
+import { ApiResponse } from '@/types/api-response.type'
+import { TipoRol } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 export const getAllEmployees = async (): Promise<Employee[]> => {
@@ -58,17 +60,10 @@ export const getAllEmployees = async (): Promise<Employee[]> => {
   return data
 }
 
-type CreateEmployeeResponse = {
-  success: boolean
-  data?: Employee
-  error?: string
-  message?: string
-}
-
 export const createEmployee = async (
   employee: Employee
-): Promise<CreateEmployeeResponse> => {
-  try {
+): Promise<ApiResponse<Employee>> => {
+  return tryCatch(async () => {
     const newUser = await prisma.usuario.create({
       data: {
         nombre: employee.nombre,
@@ -97,7 +92,7 @@ export const createEmployee = async (
           },
         },
       },
-    })
+    });
 
     const newEmployee = await prisma.empleado.create({
       data: {
@@ -107,69 +102,17 @@ export const createEmployee = async (
           connect: { id_usuario: newUser.id_usuario },
         },
       },
-    })
+    });
 
-    const completedData = {
+    const completedData: Employee = {
       ...newEmployee,
       ...newUser,
       roles: newUser.roles.map((role) => role.rol.nombre),
-    }
+    };
 
-    revalidatePath('/admin')
+    revalidatePath('/admin');
 
-    return {
-      success: true,
-      data: completedData,
-      message: `Empleado ${employee.nombre} ${employee.apellido} creado exitosamente`,
-    }
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        const field = (error.meta?.target as string[])?.[0] || 'campo'
-        if (field === 'email') {
-          return {
-            success: false,
-            error: 'El email ya está registrado',
-          }
-        }
-        if (field === 'dni') {
-          return {
-            success: false,
-            error: 'El DNI ya está registrado',
-          }
-        }
-        return {
-          success: false,
-          error: `El ${field} ya está en uso`,
-        }
-      }
+    return { data: completedData, message: 'Empleado creado exitosamente' };
+  });
+};
 
-      if (error.code === 'P2003') {
-        return {
-          success: false,
-          error: 'Error en la relación de datos',
-        }
-      }
-
-      if (error.code === 'P2000') {
-        return {
-          success: false,
-          error: 'Los datos proporcionados no son válidos',
-        }
-      }
-    }
-
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: error.message,
-      }
-    }
-
-    console.error('Error inesperado:', error)
-    return {
-      success: false,
-      error: 'Ocurrió un error inesperado',
-    }
-  }
-}
