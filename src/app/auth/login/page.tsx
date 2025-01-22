@@ -28,12 +28,11 @@ const LoginPage = () => {
     });
 
     if (!response || !response.ok) {
-      // setError(response?.error || 'Error al iniciar sesión');
-      setError('Error al iniciar sesión');
+      setError(response?.error || 'Error al iniciar sesión');
       return;
     }
-
-    router.push('/doctor');
+    
+    router.push('/admin');
   };
 
   return (

@@ -1,9 +1,8 @@
-'use client'
+'use server'
 
-import { getAllEmployees } from '@/actions/admin/admin.actions'
-import { Suspense } from 'react'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
-import EmployeesTable from './components/EmployeesTable'
+import { useMemo } from 'react'
+import { getAllEmployees } from '@/actions/admin.actions'
+import EmployeeManagement from './components/EmployeeManagement'
 
 const columns = [
   { id: 'dni', label: 'DNI' },
@@ -15,23 +14,14 @@ const columns = [
 ]
 
 const AdminPage = () => {
+  const employeesPromise = useMemo(() => getAllEmployees(), [])
+
   return (
     <section className='p-4'>
-      <div className='flex justify-between items-center mb-4'>
-        <h2 className='text-xl font-semibold uppercase'>Usuarios</h2>
-        <button className='bg-gray-300 text-white py-2 px-4 rounded hover:bg-gray-400'>
-          Agregar nuevo usuario
-        </button>
-      </div>
-
-      <ErrorBoundary fallback={<div>Ha ocurrido un error</div>}>
-        <Suspense fallback={<div>Cargando...</div>}>
-          <EmployeesTable
-            columns={columns}
-            getAllEmployees={getAllEmployees()}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      <EmployeeManagement
+        columns={columns}
+        getAllEmployees={employeesPromise}
+      />
     </section>
   )
 }

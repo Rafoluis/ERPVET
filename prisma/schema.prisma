@@ -14,7 +14,7 @@ model Usuario {
   dni             String    @unique
   sexo            Sexo
   email           String?   @unique
-  telefono        String?   @unique
+  telefono        String    @default("")   
   direccion       String?
   fecha_creacion  DateTime  @default(now())
   password        String

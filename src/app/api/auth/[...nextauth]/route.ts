@@ -23,7 +23,15 @@ export const authOptions: NextAuthOptions = {
           where: {
             dni: credentials.dni,
           },
+          include: {
+            roles: {
+              include: {
+                rol: true,
+              },
+            },
+          },
         });
+
 
         if (user && user.password === credentials.password) {
           return {
@@ -31,7 +39,7 @@ export const authOptions: NextAuthOptions = {
             dni: user.dni,
             firstName: user.nombre,
             lastName: user.apellido,
-            role: user.tipo_usuario,
+            role: user.roles[0].rol.nombre,
             email: user.email,
           };
         }
