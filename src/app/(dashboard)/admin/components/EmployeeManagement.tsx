@@ -5,6 +5,7 @@ import EmployeesTable from './EmployeesTable'
 import EmployeeFormModal from './EmployeeFormModal'
 import { Employee } from '@/schemas/employee.schema'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import EmployeeDelFormModal from './EmployeeDelFormModal'
 
 interface Props {
   getAllEmployees: Promise<Employee[]>
@@ -61,6 +62,16 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
           employee={selectedEmployee ?? null}
         />
       )}
+
+      {
+        isDeleteModalOpen && selectedEmployee && (
+          <EmployeeDelFormModal
+            employee={selectedEmployee}
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+          />
+        )
+      }
     </>
   )
 }
