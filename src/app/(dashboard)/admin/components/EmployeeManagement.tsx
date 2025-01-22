@@ -19,6 +19,7 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
+
   const handleSelectEmployee = (employee: Employee) => {
     setSelectedEmployee(employee)
     setIsModalOpen(true)
