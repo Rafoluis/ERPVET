@@ -9,7 +9,7 @@ import { useForm } from 'react-hook-form'
 
 interface Props {
   isOpen: boolean
-  employee?: Employee
+  employee?: Employee | null
   onClose: () => void
 }
 
@@ -39,8 +39,14 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
   }
 
   return (
-    <Modal title={title} isOpen={isOpen} onClose={onClose}>
-      <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+    <Modal
+      title={title}
+      isOpen={isOpen}
+      onClose={onClose}
+      onSubmit={handleSubmit(onSubmit)}
+      primaryButtonTitle= {isEditMode ? 'Actualizar' : 'Agregar'}
+    >
+      <form className='space-y-4'>
         <div>
           <label
             htmlFor='nombre'
@@ -235,22 +241,6 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
             <option value='ODONTOLOGO'>ODONTOLOGO</option>
             <option value='RECEPCIONISTA'>RECEPCIONISTA</option>
           </select>
-        </div>
-
-        <div className='flex justify-end gap-4'>
-          <button
-            className='bg-slate-200 py-2 px-4 rounded hover:bg-slate-300 text-gray-400'
-            onClick={onClose}
-          >
-            Cancelar
-          </button>
-
-          <button
-            type='submit'
-            className='bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-700'
-          >
-            {isEditMode ? 'Actualizar' : 'Agregar'}
-          </button>
         </div>
       </form>
     </Modal>

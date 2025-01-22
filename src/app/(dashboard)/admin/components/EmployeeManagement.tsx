@@ -13,9 +13,16 @@ interface Props {
 
 const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
+    null
+  )
 
   const handleOpenModal = () => setIsModalOpen(true)
   const handleCloseModal = () => setIsModalOpen(false)
+  const handleSelectEmployee = (employee: Employee) => {
+    setSelectedEmployee(employee)
+    setIsModalOpen(true)
+  }
 
   return (
     <>
@@ -31,12 +38,20 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
 
       <ErrorBoundary fallback={<div>Ha ocurrido un error</div>}>
         <Suspense fallback={<div>Cargando...</div>}>
-          <EmployeesTable columns={columns} getAllEmployees={getAllEmployees} />
+          <EmployeesTable
+            columns={columns}
+            getAllEmployees={getAllEmployees}
+            onSelectedEmployee={handleSelectEmployee}
+          />
         </Suspense>
       </ErrorBoundary>
 
       {isModalOpen && (
-        <EmployeeFormModal isOpen={isModalOpen} onClose={handleCloseModal} />
+        <EmployeeFormModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          employee={selectedEmployee ?? null}
+        />
       )}
     </>
   )

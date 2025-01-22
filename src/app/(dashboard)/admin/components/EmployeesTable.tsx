@@ -6,10 +6,11 @@ import { use } from 'react'
 
 interface Props {
   getAllEmployees: Promise<Employee[]>
+  onSelectedEmployee: (employee: Employee) => void
   columns: { id: string; label: string }[]
 }
 
-const EmployeesTable = ({ getAllEmployees, columns }: Props) => {
+const EmployeesTable = ({ getAllEmployees, columns, onSelectedEmployee }: Props) => {
   const data = use(getAllEmployees)
   
   return (
@@ -28,7 +29,7 @@ const EmployeesTable = ({ getAllEmployees, columns }: Props) => {
         <>
           <TableAction
             icon={<EditIcon />}
-            onClick={() => console.log('Edit', row)}
+            onClick={() => onSelectedEmployee(row)}
           />
           <TableAction
             icon={<TrashIcon className='text-black' />}
