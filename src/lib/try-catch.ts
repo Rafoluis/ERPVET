@@ -9,7 +9,6 @@ export async function tryCatch<T>(
 ): Promise<ApiResponse<T>> {
   try {
     const result = await fn()
-
     return handleSuccess(result.data, result.message || "Operación exitosa")
   } catch (error) {
     return handleError(error)

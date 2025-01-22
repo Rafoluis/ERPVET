@@ -20,7 +20,7 @@ const EmployeesTable = ({ getAllEmployees, columns }: Props) => {
             ? new Date(row.fecha_creacion).toLocaleDateString()
             : '',
         dni: (row) => <span className='text-gray-500'>{row.dni}</span>,
-        roles: (row) => <span>{row.roles.join(', ')}</span>,
+        roles: (row) => <span className='lowercase'>{row.roles.join(', ')}</span>,
       }}
       // customActions={(row) => (
       //   <div className='flex items-center gap-2'>

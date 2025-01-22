@@ -28,8 +28,6 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
   const onSubmit = async (data: Employee) => {
     const response = await createEmployee(data)
 
-    console.log(response)
-
     if (!response.success) {
       showToast('error', response.error)
       return
