@@ -1,6 +1,6 @@
 const AppointmentCard = ({ type }: { type: string }) => {
     return (
-        <div className="rounded-2xl bg-gray-200 p-4 flex-1 min-w-[130px]">
+        <div className="rounded-2xl bg-slate-300 p-4 flex-1 min-w-[130px]">
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-semibold my-2">100</h1>
                 <span className="text-[10px] bg-white px-2 py-1 rounded-full self-start">2025/12/01</span>

@@ -35,19 +35,49 @@ const AppointmentForm = ({
     );
 
     const onSubmit = handleSubmit((data) => {
-        console.log("Formulario enviado", data);
+        const { fecha_cita, hora_cita_inicial, hora_cita_final } = data;
+
+        // Verifica que la fecha y las horas sean válidas
+        if (!fecha_cita || !hora_cita_inicial || !hora_cita_final) {
+            console.error("Fecha o horas inválidas");
+            return;
+        }
+        console.log('Fecha de cita:', fecha_cita);
+
+        // Combina la fecha con la hora inicial y final
+        const fechaHoraInicial = new Date(`${fecha_cita}T${hora_cita_inicial}:000`);
+        const fechaHoraFinal = new Date(`${fecha_cita}T${hora_cita_final}:000`);
+
+        // Verifica que las fechas combinadas sean válidas
+        if (isNaN(fechaHoraInicial.getTime()) || isNaN(fechaHoraFinal.getTime())) {
+            console.error("Fecha y hora combinadas inválidas");
+            return;
+        }
+
+        // Continúa con el envío del formulario
+        const finalData = {
+            ...data,
+            hora_cita_inicial: fechaHoraInicial.toISOString(),
+            hora_cita_final: fechaHoraFinal.toISOString(),
+        };
+
+        console.log("Datos finales enviados:", finalData); // DEBUG
+
         startTransition(() => {
-            formAction(data);
+            formAction(finalData);
         });
     });
+
 
     const router = useRouter()
 
     useEffect(() => {
         if (state.success) {
-            toast(`La cita a sido ${type === "create" ? "creada" : "actualizada"}`);
+            toast(`La cita ha sido ${type === "create" ? "creada" : "actualizada"}`);
             setOpen(false);
             router.refresh();
+        } else if (state.error) {
+            console.error("Error en la acción:", state.error);
         }
     }, [state]);
 
@@ -58,18 +88,9 @@ const AppointmentForm = ({
             <h1 className="text-xl font-semibold">
                 {type === "create" ? "Registrar nueva cita" : "Actualizar cita"}
             </h1>
-            {data && (
-                <InputField
-                    label="Id"
-                    name="id"
-                    defaultValue={data?.id}
-                    register={register}
-                    error={errors.id}
-                    hidden
-                />
-            )}
             <div className="flex flex-col gap-2 w-full">
                 <label className="text-xs text-gray-500">Paciente</label>
+
                 <select
                     className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                     {...register("id_paciente")}
@@ -87,12 +108,21 @@ const AppointmentForm = ({
                     </p>
                 )}
             </div>
-
+            {data && (
+                <InputField
+                    label="Id"
+                    name="id_cita"
+                    defaultValue={data?.id_cita}
+                    register={register}
+                    error={errors?.id_cita}
+                    hidden
+                />
+            )}
             <div className="flex justify-between flex-wrap gap-4">
                 <InputField
                     label="Fecha de cita"
                     name="fecha_cita"
-                    defaultValue={data?.fecha_cita ? data.fecha_cita.toISOString().split('T')[0] : ''}
+                    defaultValue={data?.fecha_cita && new Date(data.fecha_cita).toLocaleDateString('en-CA')}
                     register={register}
                     error={errors.fecha_cita}
                     type="date"
@@ -101,17 +131,21 @@ const AppointmentForm = ({
                 <InputField
                     label="Hora Inicial"
                     name="hora_cita_inicial"
-                    defaultValue={data?.horaInicio}
+                    defaultValue={data?.hora_cita_inicial && new Date(data.hora_cita_inicial).toLocaleTimeString('en-GB', { hour12: false })}
                     register={register}
-                    error={errors.hora_cita_final}
+                    error={errors.hora_cita_inicial}
+                    type="time"
                 />
+
                 <InputField
                     label="Hora Final"
                     name="hora_cita_final"
-                    defaultValue={data?.horaFinal}
+                    defaultValue={data?.hora_cita_final && new Date(data.hora_cita_final).toLocaleTimeString('en-GB', { hour12: false })}
                     register={register}
                     error={errors.hora_cita_final}
+                    type="time"
                 />
+
                 <div className="flex flex-col gap-2 w-full md:w-1/4">
                     <label className="text-xs text-gray-500">Servicio</label>
                     <select
@@ -157,16 +191,28 @@ const AppointmentForm = ({
                         </p>
                     )}
                 </div>
-                {<InputField
-                    label="Nota"
-                    name="nota"
-                    defaultValue={data?.descripcion}
-                    register={register}
-
-                />}
+                <div className="flex flex-col gap-2 w-full md:w-1/4">
+                    <label className="text-xs text-gray-500">Estad0</label>
+                    <select
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("estado")}
+                        defaultValue={data?.estado}
+                    >
+                        <option value="AGENDADO">Agendado</option>
+                        <option value="COMPLETADO">Completado</option>
+                        <option value="EN_PROCESO">En proceso</option>
+                        <option value="FINALIZADO">Finalizado</option>
+                        <option value="CANCELADO">Cancelado</option>
+                    </select>
+                    {errors.estado?.message && (
+                        <p className="text-xs text-red-400">
+                            {errors.estado.message.toString()}
+                        </p>
+                    )}
+                </div>
             </div>
             {state.error && <span className="text-red-400"> Algo paso mal </span>}
-            <button className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
+            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
         </form>
     );
 };

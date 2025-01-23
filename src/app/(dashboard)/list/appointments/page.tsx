@@ -42,7 +42,7 @@ const columns = [
 ];
 
 const renderRow = (item: AppointmentList) => (
-    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-gray-200 text-sm hover:bg-sky-100">
+    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-gray-300 text-sm hover:bg-sky-100">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.paciente.nombre} ${item.paciente.apellido}`}</h3>
@@ -50,7 +50,8 @@ const renderRow = (item: AppointmentList) => (
             </div>
         </td>
         <td className="hidden md:table-cell">
-            {new Intl.DateTimeFormat("es-PE").format(item.fecha_cita)}</td>
+            {new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(item.fecha_cita))}
+        </td>
         <td className="table-cell">
             {item.hora_cita_inicial.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.nombre} ${item.empleado.apellido}`}</td>

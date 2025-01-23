@@ -17,10 +17,16 @@ const menuItems = [
                 visible: ["admin", "recepcionista"]
             },
             {
+                label: "Pacientes",
+                href: "/list/patients",
+                visible: ["admin", "recepcionista"]
+            },
+            {
                 label: "Historias Clinicas ",
                 href: "/HistoriasClinicasR",
                 visible: ["admin", "recepcionista"]
             },
+
             {
                 label: "Historias Clinicas ",
                 href: "/HistoriasClinicasD",

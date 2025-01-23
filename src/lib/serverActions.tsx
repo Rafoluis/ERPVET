@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache";
-import { AppointmentSchema } from "./formSchema"
+import { AppointmentSchema, PatientSchema } from "./formSchema"
 import prisma from "./prisma";
 
 type CurrentState = { success: boolean; error: boolean }
@@ -37,7 +37,7 @@ export const updateAppointment = async (currentState: CurrentState, data: Appoin
     try {
         await prisma.cita.update({
             where: {
-                id_cita: data.id
+                id_cita: data.id_cita
             },
             data: {
                 id_paciente: data.id_paciente,
@@ -68,6 +68,87 @@ export const deleteAppointment = async (currentState: CurrentState, data: FormDa
         await prisma.cita.delete({
             where: {
                 id_cita: parseInt(id),
+            },
+        });
+
+        //revalidatePath("/list/appointments");
+        return { success: true, error: false };
+    } catch (err) {
+        if (err instanceof Error) {
+            console.error(err.stack);
+        } else {
+            console.error('Se produjo un error desconocido:', err);
+        }
+        return { success: false, error: true };
+    }
+}
+
+export const createPatient = async (currentState: CurrentState, data: PatientSchema) => {
+    try {
+
+        await prisma.paciente.create({
+            data: {
+                id_paciente: data.id_paciente,
+                nombre: data.nombre,
+                apellido: data.apellido,
+                dni: data.dni,
+                sexo: data.sexo,
+                fecha_nacimiento: data.fecha_nacimiento,
+                direccion: data.direccion,
+                telefono: data.telefono,
+            }
+        });
+
+        //revalidatePath("/list/appointments");
+        return { success: true, error: false };
+    } catch (err) {
+        if (err instanceof Error) {
+            console.error(err.stack);
+        } else {
+            console.error('Se produjo un error desconocido:', err);
+        }
+        return { success: false, error: true };
+    }
+}
+
+export const updatePatient = async (currentState: CurrentState, data: PatientSchema) => {
+    try {
+
+
+        await prisma.paciente.update({
+            where: {
+                id_paciente: data.id_paciente
+            },
+            data: {
+                id_paciente: data.id_paciente,
+                nombre: data.nombre,
+                apellido: data.apellido,
+                dni: data.dni,
+                sexo: data.sexo,
+                fecha_nacimiento: data.fecha_nacimiento,
+                direccion: data.direccion,
+                telefono: data.telefono,
+            }
+        });
+
+        //revalidatePath("/list/appointments");
+        return { success: true, error: false };
+    } catch (err) {
+        if (err instanceof Error) {
+            console.error(err.stack);
+        } else {
+            console.error('Se produjo un error desconocido:', err);
+        }
+        return { success: false, error: true };
+    }
+}
+
+export const deletePatient = async (currentState: CurrentState, data: FormData) => {
+    const id = data.get("id") as string;
+    try {
+        await prisma.paciente.delete({
+            where: {
+                id_paciente: parseInt(id),
             },
         });
 
