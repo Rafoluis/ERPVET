@@ -35,8 +35,9 @@ const PatientForm = ({
     );
 
     const onSubmit = handleSubmit((data) => {
-        console.log("onSubmit invocado"); // DEBUG
-        console.log("Formulario enviado", data);
+
+        console.log("Fecha UTC enviada:", data);
+
         startTransition(() => {
             formAction(data);
         });
@@ -55,6 +56,13 @@ const PatientForm = ({
     }, [state]);
 
     //const {} = relatedData;
+
+    const formatDateToLocalString = (date: Date) => {
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Meses van de 0 a 11
+        const day = String(date.getUTCDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>

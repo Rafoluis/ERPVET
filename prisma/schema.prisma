@@ -55,8 +55,8 @@ model Cita {
   id_empleado       Int
   id_servicio       Int
   fecha_cita        DateTime
-  hora_cita_inicial DateTime
-  hora_cita_final   DateTime
+  hora_cita_inicial DateTime?
+  hora_cita_final   DateTime?
   estado            EstadoCita
 
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])

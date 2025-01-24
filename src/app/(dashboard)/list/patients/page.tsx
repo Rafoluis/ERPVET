@@ -1,16 +1,22 @@
-import AppointmentCard from "@/components/appointmentCard"
 import FormContainer from "@/components/formContainer"
-import FormModal from "@/components/formModal"
 import Pagination from "@/components/pagination"
 import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
-import { clientesData } from "@/lib/data"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Historia_Clinica, Paciente, Prisma, Servicio } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from 'next/navigation';
+import { format } from "date-fns";
+
+// export const formatDateToLocal = (date: Date): string => {
+//     const localDate = new Date(date);
+//     return localDate.toLocaleDateString("es-PE", {
+//         year: "numeric",
+//         month: "2-digit",
+//         day: "2-digit",
+//     });
+// };
 
 type PatientList = Paciente & { citas: Cita[], historiaClinica: Historia_Clinica[] }
 
@@ -39,7 +45,6 @@ const renderRow = (item: PatientList) => (
         </td>
         <td className="hidden md:table-cell">{item.telefono}</td>
         <td className="hidden md:table-cell">{new Intl.DateTimeFormat("es-PE").format(item.fecha_nacimiento)}</td>
-
         <td>
             <div className="flex items-center gap-2">
                 <Link href={`/list/patients/${item.id_paciente}`}>

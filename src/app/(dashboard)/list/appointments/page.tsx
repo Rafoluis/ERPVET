@@ -1,16 +1,13 @@
 import AppointmentCard from "@/components/appointmentCard"
 import FormContainer from "@/components/formContainer"
-import FormModal from "@/components/formModal"
 import Pagination from "@/components/pagination"
 import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
-import { clientesData } from "@/lib/data"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from 'next/navigation';
 
 type AppointmentList = Cita & { paciente: Paciente, empleado: Empleado, servicio: Servicio }
 
@@ -22,7 +19,7 @@ const columns = [
         header: "Fecha de cita", accessor: "fechaCita"
     },
     {
-        header: "Hora de cita", accessor: "horaCita"
+        header: "Hora de cita", accessor: "horaCita", className: "hidden md:table-cell"
     },
     {
         header: "Doctor asignado", accessor: "doctorAsignado", className: "hidden md:table-cell"
@@ -49,11 +46,11 @@ const renderRow = (item: AppointmentList) => (
                 <p className="text-xs text-gray-500">{item.paciente.dni}</p>
             </div>
         </td>
-        <td className="hidden md:table-cell">
+        <td className="table-cell">
             {new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(item.fecha_cita))}
         </td>
-        <td className="table-cell">
-            {item.hora_cita_inicial.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
+        <td className="hidden md:table-cell">
+            {item.hora_cita_inicial?.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.nombre} ${item.empleado.apellido}`}</td>
         <td className="hidden md:table-cell">{item.servicio.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.servicio.tarifa}</td>

@@ -35,36 +35,9 @@ const AppointmentForm = ({
     );
 
     const onSubmit = handleSubmit((data) => {
-        const { fecha_cita, hora_cita_inicial, hora_cita_final } = data;
-
-        // Verifica que la fecha y las horas sean válidas
-        if (!fecha_cita || !hora_cita_inicial || !hora_cita_final) {
-            console.error("Fecha o horas inválidas");
-            return;
-        }
-        console.log('Fecha de cita:', fecha_cita);
-
-        // Combina la fecha con la hora inicial y final
-        const fechaHoraInicial = new Date(`${fecha_cita}T${hora_cita_inicial}:000`);
-        const fechaHoraFinal = new Date(`${fecha_cita}T${hora_cita_final}:000`);
-
-        // Verifica que las fechas combinadas sean válidas
-        if (isNaN(fechaHoraInicial.getTime()) || isNaN(fechaHoraFinal.getTime())) {
-            console.error("Fecha y hora combinadas inválidas");
-            return;
-        }
-
-        // Continúa con el envío del formulario
-        const finalData = {
-            ...data,
-            hora_cita_inicial: fechaHoraInicial.toISOString(),
-            hora_cita_final: fechaHoraFinal.toISOString(),
-        };
-
-        console.log("Datos finales enviados:", finalData); // DEBUG
-
+        console.log("Formulario enviado", data);
         startTransition(() => {
-            formAction(finalData);
+            formAction(data);
         });
     });
 
@@ -120,33 +93,34 @@ const AppointmentForm = ({
             )}
             <div className="flex justify-between flex-wrap gap-4">
                 <InputField
-                    label="Fecha de cita"
+                    label="Fecha y hora de cita"
                     name="fecha_cita"
-                    defaultValue={data?.fecha_cita && new Date(data.fecha_cita).toLocaleDateString('en-CA')}
+                    defaultValue={
+                        data?.fecha_cita
+                            ? new Date(new Date(data.fecha_cita).toLocaleString("en-US", { timeZone: "America/Lima" }))
+                                .toISOString()
+                                .slice(0, 16)
+                            : ""
+                    }
+                    //defaultValue={data?.fecha_cita ? new Date(data.fecha_cita).toISOString().slice(0, 16) : ""}
+                    //defaultValue={data?.fecha_cita.toISOString().split("T")[0]}
+                    //defaultValue={data?.fecha_cita}
+                    //defaultValue={data?.fecha_cita && new Date(data.fecha_cita).toLocaleDateString('en-CA')}
                     register={register}
                     error={errors.fecha_cita}
-                    type="date"
-                />
-
-                <InputField
-                    label="Hora Inicial"
-                    name="hora_cita_inicial"
-                    defaultValue={data?.hora_cita_inicial && new Date(data.hora_cita_inicial).toLocaleTimeString('en-GB', { hour12: false })}
-                    register={register}
-                    error={errors.hora_cita_inicial}
-                    type="time"
+                    type="datetime-local"
                 />
 
                 <InputField
                     label="Hora Final"
                     name="hora_cita_final"
-                    defaultValue={data?.hora_cita_final && new Date(data.hora_cita_final).toLocaleTimeString('en-GB', { hour12: false })}
+                    defaultValue={data?.hora_cita_final}
                     register={register}
                     error={errors.hora_cita_final}
-                    type="time"
+                    type="datetime-local"
                 />
 
-                <div className="flex flex-col gap-2 w-full md:w-1/4">
+                <div className="flex flex-col gap-2 w-full md:w-1/2">
                     <label className="text-xs text-gray-500">Servicio</label>
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -164,15 +138,16 @@ const AppointmentForm = ({
                             {errors.id_servicio.message.toString()}
                         </p>
                     )}
-                </div>
-                {<InputField
-                    label="Tarifa"
-                    name="serviceFee"
-                    defaultValue={data?.servicio.tarifa}
-                    register={register}
+                    {<InputField
+                        label="Tarifa"
+                        name="serviceFee"
+                        defaultValue={data?.servicio.tarifa}
+                        register={register}
 
-                />}
-                <div className="flex flex-col gap-2 w-full md:w-1/4">
+                    />}
+                </div>
+
+                <div className="flex flex-col gap-2 w-full md:w-1/2">
                     <label className="text-xs text-gray-500">Odontólogo</label>
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -191,8 +166,8 @@ const AppointmentForm = ({
                         </p>
                     )}
                 </div>
-                <div className="flex flex-col gap-2 w-full md:w-1/4">
-                    <label className="text-xs text-gray-500">Estad0</label>
+                <div className="flex flex-col gap-2 w-full md:w-1/2">
+                    <label className="text-xs text-gray-500">Estado</label>
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                         {...register("estado")}

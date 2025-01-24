@@ -13,7 +13,6 @@ export const createAppointment = async (currentState: CurrentState, data: Appoin
             data: {
                 id_paciente: data.id_paciente,
                 fecha_cita: data.fecha_cita,
-                hora_cita_inicial: data.hora_cita_inicial,
                 hora_cita_final: data.hora_cita_final,
                 id_servicio: data.id_servicio,
                 id_empleado: data.id_empleado,
@@ -42,7 +41,6 @@ export const updateAppointment = async (currentState: CurrentState, data: Appoin
             data: {
                 id_paciente: data.id_paciente,
                 fecha_cita: data.fecha_cita,
-                hora_cita_inicial: data.hora_cita_inicial,
                 hora_cita_final: data.hora_cita_final,
                 id_servicio: data.id_servicio,
                 id_empleado: data.id_empleado,
@@ -88,7 +86,6 @@ export const createPatient = async (currentState: CurrentState, data: PatientSch
 
         await prisma.paciente.create({
             data: {
-                id_paciente: data.id_paciente,
                 nombre: data.nombre,
                 apellido: data.apellido,
                 dni: data.dni,
@@ -113,7 +110,6 @@ export const createPatient = async (currentState: CurrentState, data: PatientSch
 
 export const updatePatient = async (currentState: CurrentState, data: PatientSchema) => {
     try {
-
 
         await prisma.paciente.update({
             where: {
