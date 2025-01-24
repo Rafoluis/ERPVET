@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  postgress:
+  postgres:
     image: postgres:15
     container_name: postgres_db
     environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: erpcd
+      POSTGRES_USER: dev_clinic_user
+      POSTGRES_PASSWORD: dev_clinic_password
+      POSTGRES_DB: dev_clinic_db
     ports:
-      - '5432:5432'
+      - '5441:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -19,9 +19,10 @@ services:
     ports:
       - '3000:3000'
     environment:
-      - DATABASE_URL: postgresql://myuser:mypassword@[YOUR_SERVER_IP]:5432/erpcd
+      - DATABASE_URL=postgresql://dev_clinic_user:dev_clinic_password@postgres:5432/dev_clinic_db
     depends_on:
       - postgres
 
 volumes:
   postgres_data:
+

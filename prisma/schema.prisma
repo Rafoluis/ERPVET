@@ -7,24 +7,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Admin {
-  id        String @id
-  usernames String @unique
+model Usuario {
+  id_usuario      Int       @id @default(autoincrement())
+  nombre          String
+  apellido        String
+  dni             String    @unique
+  sexo            Sexo
+  email           String?   @unique
+  telefono        String    @default("")   
+  direccion       String?
+  fecha_creacion  DateTime  @default(now())
+  password        String
+
+  empleado        Empleado?
+  paciente        Paciente?
+  roles           UsuarioRol[] 
+}
+
+model Rol {
+  id_rol   Int     @id @default(autoincrement())
+  nombre   TipoRol @unique
+  usuarios UsuarioRol[]
+}
+
+model UsuarioRol {
+  id               Int      @id @default(autoincrement())
+  id_usuario       Int
+  id_rol           Int
+  fecha_asignacion DateTime @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  rol     Rol     @relation(fields: [id_rol], references: [id_rol])
+
+  @@unique([id_usuario, id_rol]) 
 }
 
 model Paciente {
   id_paciente      Int               @id @default(autoincrement())
-  nombre           String
-  apellido         String
-  dni              String            @unique
-  sexo             Sexo
+  id_usuario       Int               @unique
   fecha_nacimiento DateTime
-  direccion        String?
-  telefono         String            @unique
   citas            Cita[]
   tickets          Ticket[]
   historiaClinica  Historia_Clinica?
   fecha_creacion   DateTime          @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Empleado {
+  id_empleado    Int          @id @default(autoincrement())
+  id_usuario     Int          @unique
+  especialidad   String
+  citas          Cita[]
+  fecha_creacion DateTime     @default(now())
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model Servicio {
@@ -33,20 +70,6 @@ model Servicio {
   descripcion     String?
   tarifa          Float
   citas           Cita[]
-}
-
-model Empleado {
-  id_empleado    Int          @id @default(autoincrement())
-  nombre         String
-  apellido       String
-  dni            String       @unique
-  sexo           Sexo
-  especialidad   String
-  telefono       String       @unique
-  email          String?      @unique
-  tipo_empleado  TipoEmpleado
-  citas          Cita[]
-  fecha_creacion DateTime     @default(now())
 }
 
 model Cita {
@@ -112,7 +135,9 @@ enum EstadoCita {
   CANCELADO
 }
 
-enum TipoEmpleado {
-  RECEPCIONISTA
+enum TipoRol {
+  ADMIN
   ODONTOLOGO
+  PACIENTE
+  RECEPCIONISTA
 }

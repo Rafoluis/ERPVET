@@ -8,6 +8,8 @@ import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio } from "@prisma/client"
 import Image from "next/image"
 import Link from "next/link"
+import { useSearchParams } from 'next/navigation';
+import { useState } from "react"
 
 type AppointmentList = Cita & { paciente: Paciente, empleado: Empleado, servicio: Servicio }
 
@@ -72,13 +74,15 @@ const renderRow = (item: AppointmentList) => (
     </tr>
 );
 
-const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: string]: string | undefined } }) => {
+const AppointmentListPage = ({ searchParams, }: { searchParams: { [key: string]: string | undefined } }) => {
+    const [data, setData] = useState([]);
+    const [count, setCount] = useState(0);
 
-    const params = await searchParams;
+    // const params = await searchParams;
 
-    const { page, ...queryParams } = params;
+    // const { page, ...queryParams } = params;
 
-    const p = page ? parseInt(page) : 1;
+    // const p = page ? parseInt(page) : 1;
 
     const query: Prisma.CitaWhereInput = {}
 
@@ -131,7 +135,7 @@ const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: st
     //console.log(count);
 
     return (
-        <div className='bg-white p-4 rounded-md flex-1 m-4 mt-0'>
+        <div className=''>
             {/* CARTAS CITAS */}
             <div className=''>
                 <div className="flex items-center justify-between p-4">
@@ -159,7 +163,7 @@ const AppointmentListPage = async ({ searchParams, }: { searchParams: { [key: st
                 <Table columns={columns} renderRow={renderRow} data={data} />
             </div>
             {/*PAGINACION*/}
-            <Pagination page={p} count={count} />
+            {/* <Pagination page={p} count={count} /> */}
         </div>
     )
 }
