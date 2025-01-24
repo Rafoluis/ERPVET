@@ -21,7 +21,8 @@ export function handleError<T>(error: unknown): ApiResponse<T> {
     if (prismaError) {
       return {
         success: false,
-        error: prismaError.message
+        error: prismaError.message,
+        message: prismaError.message
       }
     }
   }
@@ -29,20 +30,23 @@ export function handleError<T>(error: unknown): ApiResponse<T> {
   if (error instanceof AppError) {
     return {
       success: false,
-      error: error.message
+      error: error.message,
+      message: error.message
     }
   }
 
   if (error instanceof Error) {
     return {
       success: false,
-      error: error.message
+      error: error.message,
+      message: error.message
     }
   }
 
   console.error('Error inesperado:', error)
   return {
     success: false,
-    error: 'Ocurrió un error inesperado'
+    error: 'Ocurrió un error inesperado',
+    message: 'Ocurrió un error inesperado'
   }
 }
