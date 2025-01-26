@@ -3,43 +3,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Dropdown from './dropdown/Dropdown';
 
-const menuItems = [
-  {
-    title: 'MENU',
-    items: [
-      {
-        label: 'Inicio',
-        href: '/',
-        visible: ['admin', 'recepcionista', 'doctor'],
-      },
-      {
-        label: 'Gestion de citas',
-        href: '/list/appointments',
-        visible: ['admin', 'recepcionista'],
-      },
-      {
-        label: 'Historias Clinicas ',
-        href: '/HistoriasClinicasR',
-        visible: ['admin', 'recepcionista'],
-      },
-      {
-        label: 'Historias Clinicas ',
-        href: '/HistoriasClinicasD',
-        visible: ['doctor'],
-      },
-      {
-        label: 'Boleteria',
-        href: '/ticketing',
-        visible: ['admin', 'recepcionista'],
-      },
-      {
-        label: 'Doctores',
-        href: '/doctores',
-        visible: ['admin'],
-      },
-    ],
-  },
-];
 const Navbar = () => {
   const { data: session } = useSession();
   const nameComplete = session?.user?.firstName.concat(
@@ -54,29 +17,6 @@ const Navbar = () => {
 
   return (
     <div className='flex items-center justify-between p-4'>
-      {/* MENU */}
-      <div className='flex flex-row gap-5 whitespace-nowrap'>
-        {menuItems.map((i) => (
-          <div
-            className='hidden md:flex flex-row items-center gap-5 text-sm px-2'
-            key={i.title}
-          >
-            {i.items.map((item) => {
-              if (item.visible.includes('admin')) {
-                return (
-                  <Link
-                    href={item.href}
-                    key={item.label}
-                    className='flex items-center justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-gray-200 '
-                  >
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              }
-            })}
-          </div>
-        ))}
-      </div>
       {/* USER */}
       <div className='flex items-center gap-6 justify-end w-full'>
         <div className='flex flex-col'>

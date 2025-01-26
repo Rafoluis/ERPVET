@@ -1,4 +1,4 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 export const loginSchema = z.object({
   dni: z.string().length(8, 'El DNI debe tener 8 caracteres'),

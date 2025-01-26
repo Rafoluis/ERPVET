@@ -11,6 +11,16 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        textdefault: "var(--default-white)",
+        textgray: "var(--default-gray)",
+        backgrounddefault: "var(--default-white)",
+        backgroundgray: "var(--default-gray)",
+        backhoverbutton: "var(--button-hover)",
+        backmenu: "var(--menu-vertical-bg)",
+        backpage: "var(--page-bg)",
+        backbuttondefault: "var(--button-default-bg)",
+        backbuttonsecondary: "var(--button-secondary-bg)",
+
       },
     },
   },

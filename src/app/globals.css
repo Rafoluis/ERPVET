@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --default-gray: #6B7280;
+        --default-white: #d3d3d3;
+        --button-hover: #c3ebfa;
+        --menu-vertical-bg: #375582;
+        --page-bg: #b0cde8;
+        --button-default-bg: #0077b6;
+        --button-secondary-bg: #77a8ec;
+    }
+}

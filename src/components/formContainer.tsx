@@ -19,16 +19,48 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         switch (table) {
             case "cita":
                 const appointmentPatient = await prisma.paciente.findMany({
-                    select: { id_paciente: true, nombre: true, apellido: true },
-                });
-                const appointmentDoctor = await prisma.empleado.findMany({
-                    select: { id_empleado: true, nombre: true, apellido: true },
-                });
-                const appointmentService = await prisma.servicio.findMany({
-                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                    include: {
+                        usuario: {
+                            select: {
+                                id_usuario: true,
+                                nombre: true,
+                                apellido: true,
+                            },
+                        },
+                    },
                 });
 
-                relatedData = { pacientes: appointmentPatient, empleados: appointmentDoctor, servicios: appointmentService };
+                const appointmentDoctor = await prisma.empleado.findMany({
+                    include: {
+                        usuario: {
+                            select: {
+                                id_usuario: true,
+                                nombre: true,
+                                apellido: true,
+                            },
+                        },
+                    },
+                });
+
+                const appointmentService = await prisma.servicio.findMany({
+                    select: {
+                        id_servicio: true,
+                        nombre_servicio: true,
+                        tarifa: true,
+                    },
+                });
+
+                relatedData = {
+                    pacientes: appointmentPatient.map((p) => ({
+                        id: p.id_paciente,
+                        nombre: `${p.usuario.nombre} ${p.usuario.apellido}`,
+                    })),
+                    empleados: appointmentDoctor.map((d) => ({
+                        id: d.id_empleado,
+                        nombre: `${d.usuario.nombre} ${d.usuario.apellido}`,
+                    })),
+                    servicios: appointmentService,
+                };
                 break;
             default:
                 break;
