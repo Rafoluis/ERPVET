@@ -6,10 +6,7 @@ import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio, Usuario } from "@prisma/client"
-import Image from "next/image"
 import Link from "next/link"
-import { useSearchParams } from 'next/navigation';
-import { useState } from "react"
 
 type AppointmentList = Cita & { paciente: Paciente & { usuario: Usuario }, empleado: Empleado & { usuario: Usuario }, servicio: Servicio }
 
@@ -24,7 +21,7 @@ const columns = [
         header: "Hora de cita", accessor: "horaCita", className: "hidden md:table-cell"
     },
     {
-        header: "Doctor asignado", accessor: "doctorAsignado", className: "hidden md:table-cell"
+        header: "Odontólogo asignado", accessor: "doctorAsignado", className: "hidden md:table-cell"
     },
     {
         header: "Servicio", accessor: "servicio", className: "hidden md:table-cell"
@@ -41,7 +38,7 @@ const columns = [
 ];
 
 const renderRow = (item: AppointmentList) => (
-    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-gray-300 text-sm hover:bg-sky-100">
+    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.paciente.usuario.nombre} ${item.paciente.usuario.apellido}`}</h3>
@@ -52,7 +49,7 @@ const renderRow = (item: AppointmentList) => (
             {new Intl.DateTimeFormat("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(item.fecha_cita))}
         </td>
         <td className="hidden md:table-cell">
-            {item.hora_cita_inicial?.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
+            {new Date(item.fecha_cita).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.usuario.nombre} ${item.empleado.usuario.apellido}`}</td>
         <td className="hidden md:table-cell">{item.servicio.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.servicio.tarifa}</td>
@@ -80,12 +77,11 @@ const AppointmentListPage = async ({
 }: {
     searchParams: { [key: string]: string | undefined };
 }) => {
-    const params = searchParams;
 
+    const params = await searchParams;
     const { page, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
-    const numPage = 10; // Número de registros por página
 
     const query: Prisma.CitaWhereInput = {};
 
@@ -93,43 +89,40 @@ const AppointmentListPage = async ({
         for (const [key, value] of Object.entries(queryParams)) {
             if (value !== undefined) {
                 switch (key) {
-                    case "doctorId":
+                    case "id_empleado":
                         query.empleado = {
                             id_empleado: parseInt(value),
                         };
                         break;
 
                     case "search":
-                        const searchTerms = value.split(" ");
-                        query.AND = searchTerms.map((term) => ({
-                            OR: [
-                                {
-                                    paciente: {
-                                        usuario: { nombre: { contains: term, mode: "insensitive" }, },
-                                    },
+                        query.OR = [
+                            {
+                                paciente: {
+                                    usuario: { nombre: { contains: value, mode: "insensitive" }, },
                                 },
-                                {
-                                    paciente: {
-                                        usuario: { apellido: { contains: term, mode: "insensitive" }, },
-                                    },
+                            },
+                            {
+                                paciente: {
+                                    usuario: { apellido: { contains: value, mode: "insensitive" }, },
                                 },
-                                {
-                                    paciente: {
-                                        usuario: { dni: { contains: term, mode: "insensitive" }, },
-                                    },
+                            },
+                            {
+                                paciente: {
+                                    usuario: { dni: { contains: value, mode: "insensitive" }, },
                                 },
-                                {
-                                    empleado: {
-                                        usuario: { nombre: { contains: term, mode: "insensitive" }, },
-                                    },
+                            },
+                            {
+                                empleado: {
+                                    usuario: { nombre: { contains: value, mode: "insensitive" }, },
                                 },
-                                {
-                                    empleado: {
-                                        usuario: { apellido: { contains: term, mode: "insensitive" }, },
-                                    },
+                            },
+                            {
+                                empleado: {
+                                    usuario: { apellido: { contains: value, mode: "insensitive" }, },
                                 },
-                            ],
-                        }));
+                            },
+                        ];
                         break;
 
                     default:
@@ -178,21 +171,22 @@ const AppointmentListPage = async ({
     ]);
 
     return (
-        <div className='bg-white p-4 rounded-md flex-1 m-4 mt-0'>
-            {/* CARTAS CITAS */}
-            <div className=''>
-                <div className="flex items-center justify-between p-4">
+        <div>
+            <div className=' rounded-md flex-1 m-4 mt-0'>
+                {/* CARTAS CITAS */}
+                <div className="flex items-center justify-between p-2">
                     <h1 className="hidden md:block text-lg font-semibold">Gestión de citas</h1>
                 </div>
 
                 <div className='flex gap-4 justify-between flex-wrap'>
-                    <AppointmentCard type='Citas totales' />
-                    <AppointmentCard type='Pacientes totales' />
-                    <AppointmentCard type='Próximas citas' />
+                    <AppointmentCard type='appountmentTotal' />
+                    <AppointmentCard type='patientsTotal' />
+                    <AppointmentCard type='appountmentNext' />
                 </div>
             </div>
+
             {/* BUSQUEDA Y AGREGAR CITA */}
-            <div className='p-4 rounded-md flex-1 m-4 mt-0'>
+            <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
                 <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Citas</h2>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
@@ -204,9 +198,10 @@ const AppointmentListPage = async ({
                 </div>
                 {/*LISTA*/}
                 <Table columns={columns} renderRow={renderRow} data={data} />
+
+                {/*PAGINACION*/}
+                <Pagination page={p} count={count} />
             </div>
-            {/*PAGINACION*/}
-            <Pagination page={p} count={count} />
         </div>
     )
 }

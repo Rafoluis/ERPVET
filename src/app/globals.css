@@ -4,9 +4,10 @@
 
 @layer base {
     :root {
-        --default-gray: #6B7280;
-        --default-white: #d3d3d3;
-        --button-hover: #c3ebfa;
+        --default-gray: #d7dbe1;
+        --default-white: #f0f0f0;
+        --default-text-dark: #3b3b3b;
+        --button-hover: #d6f4ff;
         --menu-vertical-bg: #375582;
         --page-bg: #b0cde8;
         --button-default-bg: #0077b6;

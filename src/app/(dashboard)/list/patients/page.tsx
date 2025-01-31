@@ -4,21 +4,10 @@ import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
-import { Cita, Empleado, Historia_Clinica, Paciente, Prisma, Servicio } from "@prisma/client"
-import Image from "next/image"
+import { Cita, Historia_Clinica, Paciente, Prisma, Usuario } from "@prisma/client"
 import Link from "next/link"
-import { format } from "date-fns";
 
-// export const formatDateToLocal = (date: Date): string => {
-//     const localDate = new Date(date);
-//     return localDate.toLocaleDateString("es-PE", {
-//         year: "numeric",
-//         month: "2-digit",
-//         day: "2-digit",
-//     });
-// };
-
-type PatientList = Paciente & { citas: Cita[], historiaClinica: Historia_Clinica[] }
+type PatientList = Paciente & { usuario: Usuario, citas: Cita[], historiaClinica: Historia_Clinica[] }
 
 const columns = [
     {
@@ -36,14 +25,14 @@ const columns = [
 ];
 
 const renderRow = (item: PatientList) => (
-    <tr key={item.id_paciente} className="border-b border-gray-300 even:bg-slate-300 text-sm hover:bg-sky-100">
+    <tr key={item.id_paciente} className="border-b border-gray-300 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
-                <h3 className="font-semibold">{`${item.nombre} ${item.apellido}`}</h3>
-                <p className="text-xs text-gray-500">{item.dni}</p>
+                <h3 className="font-semibold">{`${item.usuario.nombre} ${item.usuario.apellido}`}</h3>
+                <p className="text-xs text-gray-500">{item.usuario.dni}</p>
             </div>
         </td>
-        <td className="hidden md:table-cell">{item.telefono}</td>
+        <td className="hidden md:table-cell">{item.usuario.telefono}</td>
         <td className="hidden md:table-cell">{new Intl.DateTimeFormat("es-PE").format(item.fecha_nacimiento)}</td>
         <td>
             <div className="flex items-center gap-2">
@@ -62,7 +51,11 @@ const renderRow = (item: PatientList) => (
     </tr>
 );
 
-const PatientListPage = async ({ searchParams }: { searchParams: { [key: string]: string | undefined } }) => {
+const PatientListPage = async ({
+    searchParams
+}: {
+    searchParams: { [key: string]: string | undefined }
+}) => {
     const params = await searchParams;
     const { page, ...queryParams } = params;
 
@@ -78,13 +71,11 @@ const PatientListPage = async ({ searchParams }: { searchParams: { [key: string]
                         query.id_paciente = parseInt(value);
                         break;
                     case "search":
-                        const searchTerms = value.split(" ");
-                        query.AND = searchTerms.map((term) => ({
-                            OR: [
-                                { nombre: { contains: term, mode: "insensitive" } },
-                                { apellido: { contains: term, mode: "insensitive" } },
-                            ],
-                        }));
+                        query.OR = [
+                            { usuario: { nombre: { contains: value, mode: "insensitive" } } },
+                            { usuario: { apellido: { contains: value, mode: "insensitive" } } },
+                            { usuario: { dni: { contains: value, mode: "insensitive" } } },
+                        ];
                         break;
                     default:
                         break;
@@ -97,6 +88,7 @@ const PatientListPage = async ({ searchParams }: { searchParams: { [key: string]
         prisma.paciente.findMany({
             where: query,
             include: {
+                usuario: true,
                 citas: { select: { id_cita: true } },
                 historiaClinica: { select: { id_historia: true } },
             },
@@ -106,19 +98,16 @@ const PatientListPage = async ({ searchParams }: { searchParams: { [key: string]
         prisma.paciente.count({ where: query }),
     ]);
 
-    //console.log("searchParams:", params)
-    //console.log(data);
-    //console.log(count);
-
     return (
-        <div className='bg-white p-4 rounded-md flex-1 m-4 mt-0'>
-            <div className=''>
-                <div className="flex items-center justify-between p-4">
+        <div>
+            <div className=' rounded-md flex-1 m-4 mt-0'>
+                <div className="flex items-center justify-between p-2">
                     <h1 className="hidden md:block text-lg font-semibold">Gestión de pacientes</h1>
                 </div>
             </div>
+
             {/* BUSQUEDA Y AGREGAR CITA */}
-            <div className='p-4 rounded-md flex-1 m-4 mt-0'>
+            <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
                 <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Pacientes</h2>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
@@ -130,9 +119,10 @@ const PatientListPage = async ({ searchParams }: { searchParams: { [key: string]
                 </div>
                 {/*LISTA*/}
                 <Table columns={columns} renderRow={renderRow} data={data} />
+
+                {/*PAGINACION*/}
+                <Pagination page={p} count={count} />
             </div>
-            {/*PAGINACION*/}
-            <Pagination page={p} count={count} />
         </div>
     )
 }

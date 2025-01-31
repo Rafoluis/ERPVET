@@ -15,6 +15,11 @@ const menuItems = [
                 visible: ['admin', 'recepcionista'],
             },
             {
+                label: 'Pacientes',
+                href: '/list/patients',
+                visible: ['admin', 'recepcionista'],
+            },
+            {
                 label: 'Historias Clinicas ',
                 href: '/HistoriasClinicasR',
                 visible: ['admin', 'recepcionista'],
@@ -64,7 +69,7 @@ const Menu = () => {
                                 <Link
                                     href={item.href}
                                     key={item.label}
-                                    className="flex items-center justify-center lg:justify-start gap-4 text-textdefault py-2 md:px-2 rounded-md hover:bg-backhoverbutton hover:text-textgray ">
+                                    className="flex items-center justify-center lg:justify-start gap-4 text-textdefault py-2 md:px-2 rounded-md hover:bg-backhoverbutton hover:text-textdark ">
                                     <span>{item.label}</span>
                                 </Link>
                             );

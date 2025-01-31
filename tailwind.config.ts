@@ -12,7 +12,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         textdefault: "var(--default-white)",
-        textgray: "var(--default-gray)",
+        textdark: "var(--default-text-dark)",
         backgrounddefault: "var(--default-white)",
         backgroundgray: "var(--default-gray)",
         backhoverbutton: "var(--button-hover)",

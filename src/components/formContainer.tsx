@@ -2,27 +2,23 @@ import prisma from "@/lib/prisma";
 import FormModal from "./formModal";
 
 export type FormContainerProps = {
-    table:
-    | "cita"
-    | "paciente"
-    | "empleado";
+    table: "cita" | "paciente" | "empleado";
     type: "create" | "update" | "delete" | "view";
     data?: any;
     id?: number | string;
 };
 
-
 const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
-    let relatedData = {}
+    let relatedData = {};
 
     if (type !== "delete") {
         switch (table) {
             case "cita":
                 const appointmentPatient = await prisma.paciente.findMany({
-                    include: {
+                    select: {
+                        id_paciente: true,
                         usuario: {
                             select: {
-                                id_usuario: true,
                                 nombre: true,
                                 apellido: true,
                             },
@@ -31,10 +27,10 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 });
 
                 const appointmentDoctor = await prisma.empleado.findMany({
-                    include: {
+                    select: {
+                        id_empleado: true,
                         usuario: {
                             select: {
-                                id_usuario: true,
                                 nombre: true,
                                 apellido: true,
                             },
@@ -52,14 +48,53 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
 
                 relatedData = {
                     pacientes: appointmentPatient.map((p) => ({
-                        id: p.id_paciente,
-                        nombre: `${p.usuario.nombre} ${p.usuario.apellido}`,
+                        id_paciente: p.id_paciente,
+                        nombre: p.usuario.nombre,
+                        apellido: p.usuario.apellido,
                     })),
                     empleados: appointmentDoctor.map((d) => ({
-                        id: d.id_empleado,
-                        nombre: `${d.usuario.nombre} ${d.usuario.apellido}`,
+                        id_empleado: d.id_empleado,
+                        nombre: d.usuario.nombre,
+                        apellido: d.usuario.apellido,
                     })),
-                    servicios: appointmentService,
+                    servicios: appointmentService.map((s) => ({
+                        id_servicio: s.id_servicio,
+                        nombre_servicio: s.nombre_servicio,
+                        tarifa: s.tarifa,
+                    })),
+                };
+                //console.log(relatedData);
+                break;
+            case "paciente":
+                const usuariosPacientes = await prisma.usuario.findMany({
+                    where: { paciente: { isNot: null } },
+                    select: {
+                        id_usuario: true,
+                        nombre: true,
+                        apellido: true,
+                    },
+                });
+                relatedData = {
+                    usuarios: usuariosPacientes.map((u) => ({
+                        id_usuario: u.id_usuario,
+                        nombre: `${u.nombre} ${u.apellido}`,
+                    })),
+                };
+                break;
+            case "empleado":
+                const usuariosEmpleados = await prisma.usuario.findMany({
+                    where: { empleado: { isNot: null } },
+                    select: {
+                        id_usuario: true,
+                        nombre: true,
+                        apellido: true,
+                    },
+                });
+                relatedData = {
+                    usuarios: usuariosEmpleados.map((u) => ({
+                        id: u.id_usuario,
+                        nombre: `${u.nombre} ${u.apellido}`,
+                    })),
                 };
                 break;
             default:
@@ -68,7 +103,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
     }
 
     return (
-        <div className=''>
+        <div>
             <FormModal table={table} type={type} data={data} id={id} relatedData={relatedData} />
         </div>
     );

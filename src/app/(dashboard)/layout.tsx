@@ -15,7 +15,7 @@ export default function DashboardLayout({
     <SessionProvider>
       <div className='h-screen flex'>
         <div className='w-[12%] md:w-[8%] lg:w-[14%] xl:w-[12%] p-4 bg-backmenu'>
-          <Link href='/' className='flex items-center justify-center lg:justify-start gap-2 bg-backgrounddefault '>
+          <Link href='/' className='flex items-center justify-center lg:justify-start gap-2 bg-backgrounddefault'>
             <Image src='/logodental.png' alt='logo' width={62} height={62} />
             <span className='hidden lg:block font-bold'>ERPCD</span>
           </Link>

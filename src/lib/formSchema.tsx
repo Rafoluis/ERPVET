@@ -4,10 +4,12 @@ export const appointmentSchema = z.object({
     id_cita: z.coerce.number().optional(),
     id_paciente: z.coerce.number().min(1, { message: "Paciente requerido" }),
     fecha_cita: z.coerce.date({ message: "Fecha y hora requerida" }),
-    hora_cita_final: z.coerce.date().optional(),
-    //fecha_cita: z.coerce.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Fecha requerida" }),
-    //hora_cita_inicial: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {message: "Hora inicial inválida",}),
-    //hora_cita_final: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, {message: "Hora final inválida",}),
+    hora_cita_final: z
+        .string()
+        .refine(value => value === "" || /^([01]\d|2[0-3]):([0-5]\d)$/.test(value), {
+            message: "Formato de hora inválido (HH:MM)"
+        })
+        .optional(),
     id_servicio: z.coerce.number().min(1, { message: "Servicio requerido" }),
     id_empleado: z.coerce.number().min(1, { message: "Doctor requerido" }),
     estado: z.enum(
@@ -28,8 +30,8 @@ export const patientSchema = z.object({
     //fecha_cita: z.coerce.date({ message: "Fecha requerida" }),
     sexo: z.enum(["MASCULINO", "FEMENINO"]),
     fecha_nacimiento: z.coerce.date({ message: "Fecha nacimiento requerida" }),
-    direccion: z.string().optional(),
     telefono: z.string().min(1, { message: "Telefono requerido" }),
+    password: z.string().optional(),
 });
 
 export type PatientSchema = z.infer<typeof patientSchema>;

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../inputField";
-import { createAppointment, createPatient, updateAppointment, updatePatient } from "@/lib/serverActions";
+import { createPatient, updatePatient } from "@/actions/serverActions";
 import { patientSchema, PatientSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect } from "react";
@@ -14,7 +14,6 @@ const PatientForm = ({
     type,
     data,
     setOpen,
-    relatedData,
 }: {
     type: "create" | "update";
     data?: any;
@@ -31,7 +30,7 @@ const PatientForm = ({
 
     const [state, formAction] = useActionState(
         type === "create" ? createPatient : updatePatient,
-        { success: false, error: false }
+        { success: false, error: null }
     );
 
     const onSubmit = handleSubmit((data) => {
@@ -51,7 +50,8 @@ const PatientForm = ({
             setOpen(false);
             router.refresh();
         } else if (state.error) {
-            console.error("Error en la acción:", state.error);
+            toast("Error en la acción: " + state.error);
+            console.error("Error en la acción: ", state.error);
         }
     }, [state]);
 
@@ -96,16 +96,22 @@ const PatientForm = ({
                     error={errors?.apellido}
                 />
 
-                <InputField
-                    label="DNI"
-                    name="dni"
-                    defaultValue={data?.dni}
-                    register={register}
-                    error={errors.dni}
-                />
-
-                <div className="flex flex-col gap-2 w-full md:w-1/4">
-                    <label className="text-xs text-gray-500">Servicio</label>
+                <div className="flex flex-col gap-2 w-full md:w-1/2">
+                    <InputField
+                        label="DNI"
+                        name="dni"
+                        defaultValue={data?.dni}
+                        register={register}
+                        error={errors.dni}
+                    />
+                    <InputField
+                        label="Teléfono"
+                        name="telefono"
+                        defaultValue={data?.telefono}
+                        register={register}
+                        error={errors?.telefono}
+                    />
+                    <label className="text-xs text-gray-500">Sexo</label>
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                         {...register("sexo")}
@@ -120,31 +126,22 @@ const PatientForm = ({
                             {errors.sexo.message.toString()}
                         </p>
                     )}
-                </div>
-                <InputField
-                    label="Fecha de nacimiento"
-                    name="fecha_nacimiento"
-                    defaultValue={data?.fecha_nacimiento.toISOString().split("T")[0]}
-                    register={register}
-                    error={errors.fecha_nacimiento}
-                    type="date"
-                />
-                <InputField
-                    label="Dirección"
-                    name="direccion"
-                    defaultValue={data?.direccion}
-                    register={register}
-                    error={errors?.direccion}
-                />
-                <InputField
-                    label="Teléfono"
-                    name="telefono"
-                    defaultValue={data?.telefono}
-                    register={register}
-                    error={errors?.telefono}
-                />
-            </div>
+                    <InputField
+                        label="Fecha de nacimiento"
+                        name="fecha_nacimiento"
+                        defaultValue={
+                            data?.fecha_cita
+                                ? new Date(data.fecha_cita).toLocaleString("sv-SE", { timeZone: "America/Lima" }).replace(" ", "T")
+                                : ""
+                        }
+                        register={register}
+                        error={errors.fecha_nacimiento}
+                        type="date"
+                    />
 
+                </div>
+            </div>
+            {state.error && <span className="text-red-400"> Algo paso mal </span>}
             <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
         </form>
     );
