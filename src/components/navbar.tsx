@@ -16,7 +16,7 @@ const Navbar = () => {
   };
 
   return (
-    <div className='flex items-center justify-between p-4'>
+    <div className='flex items-center justify-between py-2 p-4 bg-backnavbar rounded-lg m-4'>
       {/* USER */}
       <div className='flex items-center gap-6 justify-end w-full'>
         <div className='flex flex-col'>
@@ -25,7 +25,6 @@ const Navbar = () => {
             {session?.user?.role}
           </span>
         </div>
-
         <Dropdown>
           <Dropdown.Toggle>
             <Image

@@ -1,10 +1,10 @@
 "use server"
 
-import { revalidatePath } from "next/cache";
-import { AppointmentSchema, PatientSchema } from "../lib/formSchema"
+import { AppointmentSchema } from "../lib/formSchema"
 import prisma from "../lib/prisma";
 
-type CurrentState = { success: boolean; error: string | null }
+type CurrentState = { success: boolean; error: string | null };
+type Response = { success: boolean; error: string | null };
 
 const processAppointment = async (currentState: CurrentState, data: AppointmentSchema, isUpdate = false) => {
     try {
@@ -18,10 +18,14 @@ const processAppointment = async (currentState: CurrentState, data: AppointmentS
             return { success: false, error: "La hora final debe ser después de la hora de inicio" };
         }
 
+        // Excluir la cita actual en modo actualización
+        const exclusionCondition = isUpdate && data.id_cita ? { NOT: { id_cita: data.id_cita } } : {};
+
         const overlappingCitas = await prisma.cita.findMany({
             where: {
                 id_empleado: data.id_empleado,
                 estado: { in: ["AGENDADO", "EN_PROCESO"] },
+                ...exclusionCondition,
                 AND: [
                     {
                         OR: [
@@ -101,10 +105,7 @@ export const deleteAppointment = async (currentState: CurrentState, data: FormDa
                 id_cita: parseInt(id),
             },
         });
-
-        //revalidatePath("/list/appointments");
         return { success: true, error: null };
-        //return { success: true, error: false };
     } catch (err) {
         if (err instanceof Error) {
             console.error(err.stack);
@@ -112,91 +113,5 @@ export const deleteAppointment = async (currentState: CurrentState, data: FormDa
             console.error('Se produjo un error desconocido:', err);
         }
         return { success: false, error: null };
-        //return { success: false, error: true };
-    }
-}
-
-export const createPatient = async (currentState: CurrentState, data: PatientSchema) => {
-    try {
-
-        await prisma.paciente.create({
-            data: {
-                usuario: {
-                    create: {
-                        nombre: data.nombre,
-                        apellido: data.apellido,
-                        dni: data.dni,
-                        sexo: data.sexo,
-                        telefono: data.telefono,
-                        password: data.password || "123456789"
-                    }
-                },
-                fecha_nacimiento: data.fecha_nacimiento,
-            }
-        });
-
-        //revalidatePath("/list/appointments");
-        return { success: true, error: null };
-    } catch (err) {
-        if (err instanceof Error) {
-            console.error(err.stack);
-        } else {
-            console.error('Se produjo un error desconocido:', err);
-        }
-        return { success: false, error: "Error al crear un paciente" };
-    }
-}
-
-export const updatePatient = async (currentState: CurrentState, data: PatientSchema) => {
-    try {
-        await prisma.paciente.update({
-            where: {
-                id_paciente: data.id_paciente
-            },
-            data: {
-                usuario: {
-                    update: {
-                        nombre: data.nombre,
-                        apellido: data.apellido,
-                        dni: data.dni,
-                        sexo: data.sexo,
-                        telefono: data.telefono,
-                        password: data.password || "123456789"
-                    }
-                },
-                fecha_nacimiento: data.fecha_nacimiento,
-            }
-        });
-
-        //revalidatePath("/list/appointments");
-        return { success: true, error: null };
-    } catch (err) {
-        if (err instanceof Error) {
-            console.error(err.stack);
-        } else {
-            console.error('Se produjo un error desconocido:', err);
-        }
-        return { success: false, error: "Error al actualizar un paciente" };
-    }
-}
-
-export const deletePatient = async (currentState: CurrentState, data: FormData) => {
-    const id = data.get("id") as string;
-    try {
-        await prisma.paciente.delete({
-            where: {
-                id_paciente: parseInt(id),
-            },
-        });
-
-        //revalidatePath("/list/appointments");
-        return { success: true, error: null };
-    } catch (err) {
-        if (err instanceof Error) {
-            console.error(err.stack);
-        } else {
-            console.error('Se produjo un error desconocido:', err);
-        }
-        return { success: false, error: "Error al eliminar un paciente" };
     }
 }

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../inputField";
-import { createAppointment, updateAppointment } from "@/actions/serverActions";
+import { createAppointment, updateAppointment } from "@/actions/appointment.actions";
 import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect } from "react";
@@ -76,6 +76,8 @@ const AppointmentForm = ({
             <h1 className="text-xl font-semibold">
                 {type === "create" ? "Registrar nueva cita" : "Actualizar cita"}
             </h1>
+
+            {/* Input oculto para Id */}
             {data && (
                 <InputField
                     label="Id"
@@ -86,83 +88,90 @@ const AppointmentForm = ({
                     hidden
                 />
             )}
-            <div className="flex flex-col gap-2 w-full">
-                <label className="text-xs text-gray-500">Paciente</label>
 
-                <select
-                    className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                    {...register("id_paciente")}
-                    defaultValue={type === "create" ? "" : data?.id_paciente}
-                >
-                    <option value="" disabled className="text-textdark">
-                        Seleccione
-                    </option>
-
-                    {pacientes.map((paciente: { id_paciente: number; nombre: string; apellido: string }) => (
-                        <option value={paciente.id_paciente} key={JSON.stringify(paciente)}>
-                            {paciente.nombre} {paciente.apellido}
+            {/* Selección de Paciente y Odontólogo */}
+            <div className="grid grid-cols-1  gap-4">
+                <div className="flex flex-col gap-2">
+                    <label className="text-xs text-gray-500">Paciente</label>
+                    <select
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("id_paciente")}
+                        defaultValue={type === "create" ? "" : data?.id_paciente}
+                    >
+                        <option value="" disabled className="text-textdark">
+                            Seleccione
                         </option>
-                    ))}
-                </select>
-                {errors.id_paciente?.message && (
-                    <p className="text-xs text-red-400">
-                        {errors.id_paciente.message.toString()}
-                    </p>
-                )}
-            </div>
-            <div className="flex flex-col gap-2 w-full">
-                <label className="text-xs text-gray-500">Odontólogo</label>
-                <select
-                    className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                    {...register("id_empleado")}
-                    defaultValue={type === "create" ? "" : data?.id_empleado}
-                >
-                    <option value="" disabled className="text-textdark">
-                        Seleccione
-                    </option>
-                    {empleados.map((empleado: { id_empleado: number; nombre: string; apellido: string }) => (
-                        <option value={empleado.id_empleado} key={JSON.stringify(empleado)}>
-                            {empleado.nombre} {empleado.apellido}
+                        {pacientes.map((paciente: { id_paciente: number; nombre: string; apellido: string }) => (
+                            <option value={paciente.id_paciente} key={JSON.stringify(paciente)}>
+                                {paciente.nombre} {paciente.apellido}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.id_paciente?.message && (
+                        <p className="text-xs text-red-400">{errors.id_paciente.message.toString()}</p>
+                    )}
+                </div>
+
+                <div className="flex flex-col gap-2">
+                    <label className="text-xs text-gray-500">Odontólogo</label>
+                    <select
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                        {...register("id_empleado")}
+                        defaultValue={type === "create" ? "" : data?.id_empleado}
+                    >
+                        <option value="" disabled className="text-textdark">
+                            Seleccione
                         </option>
-                    ))}
-                </select>
-                {errors.id_empleado?.message && (
-                    <p className="text-xs text-red-400">
-                        {errors.id_empleado.message.toString()}
-                    </p>
-                )}
+                        {empleados.map((empleado: { id_empleado: number; nombre: string; apellido: string }) => (
+                            <option value={empleado.id_empleado} key={JSON.stringify(empleado)}>
+                                {empleado.nombre} {empleado.apellido}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.id_empleado?.message && (
+                        <p className="text-xs text-red-400">{errors.id_empleado.message.toString()}</p>
+                    )}
+                </div>
             </div>
 
-            <div className="flex gap-4 w-full">
-                <InputField
-                    label="Fecha y hora de cita"
-                    name="fecha_cita"
-                    defaultValue={
-                        data?.fecha_cita
-                            ? new Date(data.fecha_cita).toLocaleString("sv-SE", { timeZone: "America/Lima" }).replace(" ", "T")
-                            : ""
-                    }
-                    register={register}
-                    error={errors.fecha_cita}
-                    type="datetime-local"
-                />
+            {/* Fecha y Hora */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
+                    <InputField
+                        label="Fecha y hora de cita"
+                        name="fecha_cita"
+                        defaultValue={
+                            data?.fecha_cita
+                                ? new Date(data.fecha_cita)
+                                    .toLocaleString("sv-SE", { timeZone: "America/Lima" })
+                                    .replace(" ", "T")
+                                : ""
+                        }
+                        register={register}
+                        error={errors.fecha_cita}
+                        type="datetime-local"
+                    />
+                </div>
 
-                <InputField
-                    label="Hora Final"
-                    name="hora_cita_final"
-                    defaultValue={
-                        data?.hora_cita_final
-                            ? new Date(data.hora_cita_final).toISOString().slice(11, 16)
-                            : ""
-                    }
-                    register={register}
-                    error={errors.hora_cita_final}
-                    type="time"
-                />
+                <div className="flex flex-col gap-2 w-1/3">
+                    <InputField
+                        label="Hora Final"
+                        name="hora_cita_final"
+                        defaultValue={
+                            data?.hora_cita_final
+                                ? new Date(data.hora_cita_final).toISOString().slice(11, 16)
+                                : ""
+                        }
+                        register={register}
+                        error={errors.hora_cita_final}
+                        type="time"
+                    />
+                </div>
             </div>
 
-            <div className="flex gap-4 w-full">
-                <div className="flex flex-col gap-2 w-full md:w-1/2">
+            {/* Servicio y Tarifa */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-2">
                     <label className="text-xs text-gray-500">Servicio</label>
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
@@ -179,21 +188,22 @@ const AppointmentForm = ({
                         ))}
                     </select>
                     {errors.id_servicio?.message && (
-                        <p className="text-xs text-red-400">
-                            {errors.id_servicio.message.toString()}
-                        </p>
+                        <p className="text-xs text-red-400">{errors.id_servicio.message.toString()}</p>
                     )}
                 </div>
-                <div className="flex flex-col gap-2 w-full md:w-1/2">
+
+                <div className="flex flex-col gap-2 w-1/3">
                     <InputField
                         label="Tarifa"
                         name="serviceFee"
                         defaultValue={data?.servicio.tarifa}
                         register={register}
+                    // error={errors.id_servicio}
                     />
                 </div>
             </div>
 
+            {/* Estado */}
             <div className="flex flex-col gap-2 w-full md:w-1/2">
                 <label className="text-xs text-gray-500">Estado</label>
                 <select
@@ -208,14 +218,16 @@ const AppointmentForm = ({
                     <option value="CANCELADO">Cancelado</option>
                 </select>
                 {errors.estado?.message && (
-                    <p className="text-xs text-red-400">
-                        {errors.estado.message.toString()}
-                    </p>
+                    <p className="text-xs text-red-400">{errors.estado.message.toString()}</p>
                 )}
             </div>
-            {state.error && <span className="text-red-400"> Algo paso mal </span>}
-            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
+
+            {state.error && <span className="text-red-400">Algo pasó mal</span>}
+            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">
+                {type === "create" ? "Crear" : "Actualizar"}
+            </button>
         </form>
+
     );
 };
 

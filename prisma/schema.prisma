@@ -8,25 +8,25 @@ datasource db {
 }
 
 model Usuario {
-  id_usuario      Int       @id @default(autoincrement())
-  nombre          String
-  apellido        String
-  dni             String    @unique
-  sexo            Sexo
-  email           String?   @unique
-  telefono        String    @default("")   
-  direccion       String?
-  fecha_creacion  DateTime  @default(now())
-  password        String
+  id_usuario     Int      @id @default(autoincrement())
+  nombre         String
+  apellido       String
+  dni            String   @unique
+  sexo           Sexo
+  email          String?  @unique
+  telefono       String   @default("")
+  direccion      String?
+  fecha_creacion DateTime @default(now())
+  password       String
 
-  empleado        Empleado?
-  paciente        Paciente?
-  roles           UsuarioRol[] 
+  empleado Empleado?
+  paciente Paciente?
+  roles    UsuarioRol[]
 }
 
 model Rol {
-  id_rol   Int     @id @default(autoincrement())
-  nombre   TipoRol @unique
+  id_rol   Int          @id @default(autoincrement())
+  nombre   TipoRol      @unique
   usuarios UsuarioRol[]
 }
 
@@ -39,7 +39,7 @@ model UsuarioRol {
   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
   rol     Rol     @relation(fields: [id_rol], references: [id_rol])
 
-  @@unique([id_usuario, id_rol]) 
+  @@unique([id_usuario, id_rol])
 }
 
 model Paciente {
@@ -55,11 +55,11 @@ model Paciente {
 }
 
 model Empleado {
-  id_empleado    Int          @id @default(autoincrement())
-  id_usuario     Int          @unique
+  id_empleado    Int      @id @default(autoincrement())
+  id_usuario     Int      @unique
   especialidad   String
   citas          Cita[]
-  fecha_creacion DateTime     @default(now())
+  fecha_creacion DateTime @default(now())
 
   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }

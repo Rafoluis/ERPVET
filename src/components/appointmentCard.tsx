@@ -31,11 +31,11 @@ const AppointmentCard = async ({ type }: { type: "appountmentTotal" | "patientsT
     return (
         <div className="rounded-2xl bg-backgrounddefault p-4 flex-1 min-w-[130px]">
             <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-semibold my-2">{data}</h1>
+                <h1 className="text-2xl font-semibold my-2 text-textblue">{data}</h1>
                 <span className="text-[10px] bg-white px-2 py-1 rounded-full self-start">2025/12/01</span>
             </div>
 
-            <h2 className="text-sm font-medium text-gray-500">{nameCards(type)}</h2>
+            <h2 className="font-bold text-textred">{nameCards(type)}</h2>
 
         </div>
     )
