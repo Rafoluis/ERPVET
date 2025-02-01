@@ -25,7 +25,7 @@ const columns = [
 ];
 
 const renderRow = (item: PatientList) => (
-    <tr key={item.id_paciente} className="border-b border-gray-300 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_paciente} className="border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.usuario.nombre} ${item.usuario.apellido}`}</h3>
@@ -33,7 +33,11 @@ const renderRow = (item: PatientList) => (
             </div>
         </td>
         <td className="hidden md:table-cell">{item.usuario.telefono}</td>
-        <td className="hidden md:table-cell">{new Intl.DateTimeFormat("es-PE").format(item.fecha_nacimiento)}</td>
+        <td className="table-cell">
+            {item.fecha_nacimiento
+                ? new Date(item.fecha_nacimiento).toLocaleDateString("es-PE", { timeZone: "UTC" })
+                : ""}
+        </td>
         <td>
             <div className="flex items-center gap-2">
                 <Link href={`/list/patients/${item.id_paciente}`}>

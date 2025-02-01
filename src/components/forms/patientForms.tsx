@@ -3,12 +3,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../inputField";
-import { createPatient, updatePatient } from "@/actions/serverActions";
 import { patientSchema, PatientSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { createPatient, updatePatient } from "@/actions/patient.actions";
 
 const PatientForm = ({
     type,
@@ -56,13 +56,6 @@ const PatientForm = ({
     }, [state]);
 
     //const {} = relatedData;
-
-    const formatDateToLocalString = (date: Date) => {
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, "0"); // Meses van de 0 a 11
-        const day = String(date.getUTCDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -130,8 +123,8 @@ const PatientForm = ({
                         label="Fecha de nacimiento"
                         name="fecha_nacimiento"
                         defaultValue={
-                            data?.fecha_cita
-                                ? new Date(data.fecha_cita).toLocaleString("sv-SE", { timeZone: "America/Lima" }).replace(" ", "T")
+                            data?.fecha_nacimiento
+                                ? new Date(data.fecha_nacimiento).toISOString().slice(0, 10)
                                 : ""
                         }
                         register={register}

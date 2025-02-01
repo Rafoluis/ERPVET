@@ -1,4 +1,5 @@
 import AppointmentCard from "@/components/appointmentCard"
+import AppointmentCalendar from "@/components/calendar"
 import FormContainer from "@/components/formContainer"
 import Pagination from "@/components/pagination"
 import Table from "@/components/table"
@@ -21,19 +22,10 @@ const columns = [
         header: "Hora de cita", accessor: "horaCita", className: "hidden md:table-cell"
     },
     {
-        header: "Odontólogo asignado", accessor: "doctorAsignado", className: "hidden md:table-cell"
-    },
-    {
         header: "Servicio", accessor: "servicio", className: "hidden md:table-cell"
     },
     {
-        header: "Tarifa", accessor: "tarifa", className: "hidden md:table-cell"
-    },
-    {
         header: "Estado", accessor: "estado", className: "hidden md:table-cell"
-    },
-    {
-        header: "Acciones", accessor: "acciones"
     },
 ];
 
@@ -52,7 +44,7 @@ const renderRow = (item: AppointmentList) => (
         </td>
         <td className="hidden md:table-cell">
             {new Date(item.fecha_cita).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
-        <td className="hidden md:table-cell">{`${item.empleado.usuario.nombre} ${item.empleado.usuario.apellido}`}</td>
+
         <td className="hidden md:table-cell">{item.servicio.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.servicio.tarifa}</td>
         <td className="hidden md:table-cell">
@@ -67,20 +59,6 @@ const renderRow = (item: AppointmentList) => (
                     }`}
             >
                 {item.estado === "EN_PROCESO" ? "EN PROCESO" : item.estado}
-            </div>
-        </td>
-        <td>
-            <div className="flex items-center gap-2">
-                <Link href={`/list/clientes/${item.id_cita}`}>
-                    <FormContainer table="cita" type="view" />
-                </Link>
-                {"recepcionista" === "recepcionista" && (
-                    <>
-                        <FormContainer table="cita" type="update" data={item}
-                        />
-                        <FormContainer table="cita" type="delete" id={item.id_cita} />
-                    </>
-                )}
             </div>
         </td>
     </tr>
@@ -186,36 +164,43 @@ const AppointmentListPage = async ({
     ]);
 
     return (
-        <div>
-            <div className=' rounded-md flex-1 m-4 mt-0'>
-                {/* CARTAS CITAS */}
-                <div className="flex items-center justify-between p-2">
-                    <h1 className="hidden md:block text-lg font-semibold">Gestión de citas</h1>
-                </div>
-
-                <div className='flex gap-4 justify-between flex-wrap'>
-                    <AppointmentCard type='appountmentTotal' />
-                    <AppointmentCard type='patientsTotal' />
-                    <AppointmentCard type='appountmentNext' />
-                </div>
-            </div>
-
-            {/* BUSQUEDA Y AGREGAR CITA */}
-            <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
-                <div className='flex items-center justify-between'>
-                    <h2 className="hidden md:block text-ls font-semibold">Citas</h2>
-                    <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
-                        <TableSearch />
-                        <div className="flex items-center gap-4 self-end">
-                            <FormContainer table="cita" type="create" />
-                        </div>
+        <div className="p-4 flex flex-col lg:flex-row gap-4">
+            <div className="w-full lg:w-2/3 flex flex-col gap-4">
+                {/* CARTAS */}
+                <div className="rounded-md">
+                    <div className="flex items-center justify-between p-2">
+                        <h1 className="hidden md:block text-lg font-semibold">
+                            Agenda de citas
+                        </h1>
+                    </div>
+                    <div className="flex flex-wrap gap-4 justify-between">
+                        <AppointmentCard type="appountmentTotal" />
+                        <AppointmentCard type="patientsTotal" />
+                        <AppointmentCard type="appountmentNext" />
                     </div>
                 </div>
-                {/*LISTA*/}
-                <Table columns={columns} renderRow={renderRow} data={data} />
 
-                {/*PAGINACION*/}
-                <Pagination page={p} count={count} />
+                <div className="bg-backgrounddefault rounded-md p-4">
+                    <AppointmentCalendar />
+                </div>
+
+
+            </div>
+
+            <div className="w-full lg:w-1/3 mt-0">
+                {/* TABLE */}
+                <div className="bg-backgrounddefault rounded-md p-4 flex flex-col gap-4">
+                    <div className="flex flex-col md:flex-row items-center justify-between">
+                        <h2 className="hidden md:block text-lg font-semibold">Citas</h2>
+                        <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+                            <TableSearch />
+                        </div>
+                    </div>
+                    {/* LISTA */}
+                    <Table columns={columns} renderRow={renderRow} data={data} />
+                    {/* PAGINACIÓN */}
+                    <Pagination page={p} count={count} />
+                </div>
             </div>
         </div>
     )

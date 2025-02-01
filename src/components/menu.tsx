@@ -1,5 +1,7 @@
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
 const menuItems = [
     {
@@ -21,28 +23,32 @@ const menuItems = [
 ];
 
 const Menu = () => {
-    const { data: session } = useSession(); 
+    const { data: session } = useSession();
+    const pathname = usePathname();
     const userRole = session?.user?.role?.toLowerCase() || ''; 
 
     return (
-        <div className='mt-4 text-sm'>
+        <div className="mt-4 text-sm">
             {menuItems.map((section, index) => (
-                <div className={`flex flex-col gap-2 ${index === 0 ? 'mb-6' : ''}`} key={section.title}>
-                    <span className="hidden lg:block text-textdefault font-semibold my-2">
-                        {section.title}
-                    </span>
+                <div className={`flex flex-col gap-2 ${index === 0 ? "mb-6" : ""}`} key={section.title}>
+                    <span className="hidden lg:block text-textdefault font-semibold my-2">{section.title}</span>
+                    {section.items.map((item) => {
+                        if (item.visible.includes("admin")) { // rol
+                            const isActive = pathname === item.href;
 
-                    {section.items
-                        .filter(item => item.visible.includes(userRole as string)) 
-                        .map(item => (
-                            <Link
-                                href={item.href}
-                                key={item.label}
-                                className="flex items-center justify-center lg:justify-start gap-4 text-textdefault py-2 md:px-2 rounded-md hover:bg-backhoverbutton hover:text-textdark">
-                                <span>{item.label}</span>
-                            </Link>
-                        ))
-                    }
+                            return (
+                                <Link
+                                    href={item.href}
+                                    key={item.label}
+                                    className={`flex items-center justify-between py-2 px-4 rounded-md 
+                                        ${isActive ? "bg-backselectbutton text-textdefault font-semibold" : "text-textdefault hover:bg-backhoverbutton hover:text-textdark"}`}
+                                >
+                                    <span>{item.label}</span>
+                                    {isActive && <ChevronRight size={14} className="text-textdark" color="white" />}
+                                </Link>
+                            );
+                        }
+                    })}
                 </div>
             ))}
         </div>

@@ -2,11 +2,14 @@
 import Image from "next/image"
 import { Dispatch, JSX, SetStateAction, useActionState, useEffect, useState } from "react";
 import AppointmentForm from "@/components/forms/appointmentForm";
-import { deleteAppointment, deletePatient } from "@/actions/serverActions";
+import { deleteAppointment } from "@/actions/appointment.actions";
+import { deletePatient } from "@/actions/patient.actions";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { FormContainerProps } from "./formContainer";
 import PatientForm from "./forms/patientForms";
+import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+
 
 const forms: {
     [key: string]: (
@@ -28,18 +31,29 @@ const deleteActions = {
     empleado: deleteAppointment,
 };
 
+const IconComponent = ({ type }: { type: "create" | "view" | "update" | "delete" }) => {
+    const icons = {
+        create: <Plus size={20} color="white" />,
+        view: <Eye size={18} />,
+        update: <Pencil size={18} />,
+        delete: <Trash2 size={18} />,
+    };
+
+    return icons[type] || null;
+};
+
 const FormModal = ({
     table, type, data, id, relatedData,
 }: FormContainerProps & { relatedData?: any }) => {
 
     const size = type === "create" ? "w-auto px-4 py-2" : "w-7 h-7";
-    const bgColor = type === "create" ? "bg-sky-200" : type === "update" ? "bg-cyan-100" : type === "view" ? "bg-indigo-200" : "bg-red-100";
+    const bgColor = type === "create" ? "bg-backbuttondefault" : type === "update" ? "bg-cyan-100" : type === "view" ? "bg-indigo-200" : "bg-red-100";
 
     const [open, setOpen] = useState(false);
 
     const Form = () => {
 
-        const [state, formAction] = useActionState(deleteActions[table], { success: false, error: false });
+        const [state, formAction] = useActionState(deleteActions[table], { success: false, error: null });
 
         const router = useRouter();
 
@@ -75,8 +89,8 @@ const FormModal = ({
                 className={`${size} flex items-center justify-center rounded-full ${bgColor}`}
                 onClick={() => setOpen(true)}
             >
-                <Image src={`/${type}.png`} alt="" width={type === "create" ? 14 : 18} height={type === "create" ? 14 : 18} />
-                {type === "create" && <span className="ml-2 text-sm font-medium">Agregar</span>}
+                <IconComponent type={type} />
+                {type === "create" && <span className="ml-2 text-sm font-medium text-textdefault">Agregar</span>}
             </button>
 
             {open && (
