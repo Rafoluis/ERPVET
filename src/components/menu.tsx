@@ -33,7 +33,7 @@ const Menu = () => {
                 <div className={`flex flex-col gap-2 ${index === 0 ? "mb-6" : ""}`} key={section.title}>
                     <span className="hidden lg:block text-textdefault font-semibold my-2">{section.title}</span>
                     {section.items.map((item) => {
-                        if (item.visible.includes("admin")) { // rol
+                        if (item.visible.includes(userRole as string)) { // rol
                             const isActive = pathname === item.href;
 
                             return (
