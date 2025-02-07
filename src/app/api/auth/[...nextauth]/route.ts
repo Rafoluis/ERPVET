@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
+        if (user?.roles[0].rol.nombre !== 'ADMIN') return null
 
         if (user && user.password === credentials.password) {
           return {

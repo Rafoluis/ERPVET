@@ -17,7 +17,7 @@ const AdminPage = () => {
   const employeesPromise = useMemo(() => getAllEmployees(), [])
 
   return (
-    <section className='p-4'>
+    <section className='p-4 bg-backgrounddefault rounded-md flex-1 m-4 mt-0'>
       <EmployeeManagement
         columns={columns}
         getAllEmployees={employeesPromise}

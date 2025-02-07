@@ -7,22 +7,32 @@ interface AuthLayoutProps {
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
   return (
-    <section className='flex h-screen items-center justify-center bg-backmenu'>
-      <Image
-        className='absolute left-4 top-4'
-        src='/logodental.png'
-        width={60}
-        height={60}
-        alt='Logo'
-      />
-      <div className='w-3/5 h-[650px] bg-gray-200 rounded-3xl shadow-md'>
-        <div className='grid grid-cols-2 h-full'>
-          <div className='relative rounded-l-3xl overflow-hidden'>
-            <Image src='/dentista.avif' alt='' className='w-full h-full object-cover rounded-l-md' width={100} height={100} />
-            <p className='absolute text-white uppercase text-4xl font-black bottom-20 left-10 w-28'>Tranformamos sonrisas, mejoramos vidas.</p>
-          </div>
+    <section className='flex min-h-screen items-center justify-center bg-gray-100 p-4 md:p-8'>
+      <div className='relative flex w-full max-w-6xl bg-white rounded-3xl shadow-lg overflow-hidden'>
+        <div className='hidden md:flex md:w-1/2 relative'>
+          <Image
+            src='/dentista.avif'
+            alt='Dentista'
+            className='w-full h-full object-cover'
+            width={1200}
+            height={1200}
+          />
 
-          <div className='m-4 rounded-3xl px-20 py-16 bg-white'>{children}</div>
+          <p className='absolute text-white uppercase text-2xl md:text-3xl font-bold bottom-10 left-6 md:left-8 w-3/4 drop-shadow-lg'>
+            Transformamos sonrisas, mejoramos vidas.
+          </p>
+        </div>
+
+        <div className='w-full md:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 py-12 sm:py-16'>
+          <Image
+            className='mb-6'
+            src='/logodental.png'
+            width={80}
+            height={80}
+            alt='Logo'
+          />
+          
+          {children}
         </div>
       </div>
     </section>

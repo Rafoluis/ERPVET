@@ -19,8 +19,6 @@ const EmployeesTable = ({
 }: Props) => {
   const data = use(getAllEmployees)
 
-  console.log(data)
-
   return (
     <Table
       columns={columns}
@@ -38,10 +36,12 @@ const EmployeesTable = ({
       customActions={(row) => (
         <>
           <TableAction
-            icon={<EditIcon />}
+            className='bg-cyan-100'
+            icon={<EditIcon className='text-black' />}
             onClick={() => onEditEmployee(row)}
           />
           <TableAction
+            className='bg-red-100'
             icon={<TrashIcon className='text-black' />}
             onClick={() => onDeleteEmployee(row)}
           />

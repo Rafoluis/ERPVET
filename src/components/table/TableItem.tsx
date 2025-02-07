@@ -17,13 +17,13 @@ const TableItem = <T,>({
   customActions,
 }: TableItemProps<T>) => {
   return (
-    <tr className='border-b border-gray-300 even:bg-gray-50 text-sm hover:bg-sky-100'>
+    <tr className='border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton'>
       {columns.map((column) => {
         const customRenderer = customRenderers[column.id];
         const value = (row as Record<string, unknown>)[column.id];
 
         return (
-          <td key={`cell-${String(column.id)}`} className={'p-2'}>
+          <td key={`cell-${String(column.id)}`} className={'p-2 items-center gap-4'}>
             {customRenderer ? customRenderer(row) : String(value ?? '')}
           </td>
         );
