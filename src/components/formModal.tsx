@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import { FormContainerProps } from "./formContainer";
 import PatientForm from "./forms/patientForms";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { deleteTicket } from "@/actions/ticket.actions";
+import TicketForm from "./forms/ticketForm";
 
 
 const forms: {
@@ -22,13 +24,16 @@ const forms: {
     cita: (setOpen, type, data, relatedData) => (
         <AppointmentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />),
     paciente: (setOpen, type, data, relatedData) => (
-        <PatientForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />)
+        <PatientForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />),
+    boleta: (setOpen, type, data, relatedData) => (
+        <TicketForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />)
 };
 
 const deleteActions = {
     cita: deleteAppointment,
     paciente: deletePatient,
-    empleado: deleteAppointment,
+    boleta: deleteTicket,
+    empleado: deleteTicket,
 };
 
 const IconComponent = ({ type }: { type: "create" | "view" | "update" | "delete" }) => {

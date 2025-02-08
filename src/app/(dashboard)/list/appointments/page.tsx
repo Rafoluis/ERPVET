@@ -8,7 +8,14 @@ import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio, Usuario } from "@prisma/client"
 import Link from "next/link"
 
-type AppointmentList = Cita & { paciente: Paciente & { usuario: Usuario }, empleado: Empleado & { usuario: Usuario }, servicio: Servicio }
+type AppointmentList = Cita & {
+    paciente: Paciente & { usuario: Usuario },
+    empleado: Empleado & { usuario: Usuario },
+    servicios: {
+        servicio: Servicio,
+        cantidad: number,
+    }[]
+};
 
 const columns = [
     {
@@ -27,7 +34,7 @@ const columns = [
         header: "Servicio", accessor: "servicio", className: "hidden md:table-cell"
     },
     {
-        header: "Tarifa", accessor: "tarifa", className: "hidden md:table-cell"
+        header: "Tarifa total", accessor: "tarifa", className: "hidden md:table-cell"
     },
     {
         header: "Estado", accessor: "estado", className: "hidden md:table-cell"
@@ -53,8 +60,18 @@ const renderRow = (item: AppointmentList) => (
         <td className="hidden md:table-cell">
             {new Date(item.fecha_cita).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.usuario.nombre} ${item.empleado.usuario.apellido}`}</td>
-        <td className="hidden md:table-cell">{item.servicio.nombre_servicio}</td>
-        <td className="hidden md:table-cell">{item.servicio.tarifa}</td>
+        <td className="hidden md:table-cell">
+            {item.servicios && Array.isArray(item.servicios) && item.servicios.length > 0
+                ? item.servicios.map((s) => s.servicio.nombre_servicio).join(", ")
+                : "-"}
+        </td>
+        <td className="hidden md:table-cell">
+            {item.servicios && Array.isArray(item.servicios) && item.servicios.length > 0
+                ? `S/ ${item.servicios
+                    .reduce((total, s) => total + s.servicio.tarifa * s.cantidad, 0)
+                    .toFixed(2)}`
+                : "0.00"}
+        </td>
         <td className="hidden md:table-cell">
             <div
                 className={`inline-block py-1 px-3 rounded-lg text-textdark ${item.estado === "AGENDADO"
@@ -172,10 +189,14 @@ const AppointmentListPage = async ({
                         },
                     },
                 },
-                servicio: {
-                    select: {
-                        nombre_servicio: true,
-                        tarifa: true,
+                servicios: {
+                    include: {
+                        servicio: {
+                            select: {
+                                nombre_servicio: true,
+                                tarifa: true,
+                            },
+                        },
                     },
                 },
             },

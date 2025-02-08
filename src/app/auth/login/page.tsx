@@ -33,7 +33,7 @@ const LoginPage = () => {
       return
     }
 
-    router.push('/admin')
+    router.push('/list/appointments')
   }
 
   return (
@@ -46,6 +46,7 @@ const LoginPage = () => {
           width={16}
           height={16}
         />
+
       </div>
 
       <h2 className='text-2xl font-bold text-center'>¡Bienvenido!</h2>

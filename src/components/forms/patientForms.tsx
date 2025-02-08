@@ -76,7 +76,7 @@ const PatientForm = ({
                 <InputField
                     label="Nombre del paciente"
                     name="nombre"
-                    defaultValue={data?.nombre}
+                    defaultValue={data?.usuario.nombre}
                     register={register}
                     error={errors.nombre}
                 />
@@ -84,7 +84,7 @@ const PatientForm = ({
                 <InputField
                     label="Apellido del paciente"
                     name="apellido"
-                    defaultValue={data?.apellido}
+                    defaultValue={data?.usuario.apellido}
                     register={register}
                     error={errors?.apellido}
                 />
@@ -93,14 +93,14 @@ const PatientForm = ({
                     <InputField
                         label="DNI"
                         name="dni"
-                        defaultValue={data?.dni}
+                        defaultValue={data?.usuario.dni}
                         register={register}
                         error={errors.dni}
                     />
                     <InputField
                         label="Teléfono"
                         name="telefono"
-                        defaultValue={data?.telefono}
+                        defaultValue={data?.usuario.telefono}
                         register={register}
                         error={errors?.telefono}
                     />
@@ -108,7 +108,7 @@ const PatientForm = ({
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                         {...register("sexo")}
-                        defaultValue={data?.sexo}
+                        defaultValue={data?.usuario.sexo}
                     >
                         <option value="MASCULINO">Masculino</option>
                         <option value="FEMENINO">Femenino</option>
@@ -135,7 +135,7 @@ const PatientForm = ({
                 </div>
             </div>
             {state.error && <span className="text-red-400"> Algo paso mal </span>}
-            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
+            <button type="submit" className="bg-backbuttondefault text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
         </form>
     );
 };

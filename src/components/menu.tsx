@@ -12,7 +12,7 @@ const menuItems = [
             { label: 'Pacientes', href: '/list/patients', visible: ['admin', 'recepcionista'] },
             { label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
             { label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['doctor'] },
-            { label: 'Boletería', href: '/ticketing', visible: ['admin', 'recepcionista'] },
+            { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
             { label: 'Doctores', href: '/doctores', visible: ['admin'] },
         ],
     },
@@ -25,7 +25,7 @@ const menuItems = [
 const Menu = () => {
     const { data: session } = useSession();
     const pathname = usePathname();
-    const userRole = session?.user?.role?.toLowerCase() || ''; 
+    const userRole = session?.user?.role?.toLowerCase() || '';
 
     return (
         <div className="mt-4 text-sm">
@@ -33,7 +33,7 @@ const Menu = () => {
                 <div className={`flex flex-col gap-2 ${index === 0 ? "mb-6" : ""}`} key={section.title}>
                     <span className="hidden lg:block text-textdefault font-semibold my-2">{section.title}</span>
                     {section.items.map((item) => {
-                        if (item.visible.includes(userRole as string)) { // rol
+                        if (item.visible.includes("admin")) { // userRole as string
                             const isActive = pathname === item.href;
 
                             return (

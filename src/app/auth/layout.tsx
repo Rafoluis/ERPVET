@@ -18,7 +18,12 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
       <div className='w-3/5 h-[650px] bg-gray-200 rounded-3xl shadow-md'>
         <div className='grid grid-cols-2 h-full'>
           <div className='relative rounded-l-3xl overflow-hidden'>
-            <Image src='/dentista.avif' alt='' className='w-full h-full object-cover rounded-l-md' width={100} height={100} />
+            <Image src='/dentista.avif'
+              alt=''
+              className='w-full h-full object-cover rounded-l-md'
+              width={640}
+              height={650}
+            />
             <p className='absolute text-white uppercase text-4xl font-black bottom-20 left-10 w-28'>Tranformamos sonrisas, mejoramos vidas.</p>
           </div>
 
