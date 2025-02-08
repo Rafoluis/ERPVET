@@ -6,9 +6,12 @@ type InputFieldProps = {
     register: any;
     name: string;
     defaultValue?: string;
+    value?: string;
     error?: FieldError;
     inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
     hidden?: boolean;
+    onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    min?: number;
 }
 const InputField = ({
     label,
@@ -19,6 +22,9 @@ const InputField = ({
     error,
     inputProps,
     hidden,
+    value,
+    min,
+    onChange,
 }: InputFieldProps) => {
     return (
         <div className={hidden ? "hidden" : "flex flex-col gap-2 w-full"}>
@@ -27,7 +33,9 @@ const InputField = ({
                 {...register(name)}
                 className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                 {...inputProps}
-                defaultValue={defaultValue}
+                {...(value !== undefined ? { value } : { defaultValue })}
+                {...(onChange ? { onChange } : {})}
+                {...(min !== undefined ? { min } : {})}
             />
             {error?.message && <p className="text-xs text-red-500">{error.message.toString()}</p>}
         </div>

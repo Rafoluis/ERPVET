@@ -88,10 +88,13 @@ export const updatePatient = async (
 export const deletePatient = async (currentState: CurrentState, data: FormData) => {
     const id = data.get("id") as string;
     try {
-        await prisma.paciente.delete({
-            where: {
-                id_paciente: parseInt(id),
-            },
+        await prisma.$transaction(async (tx) => {
+            const pacienteEliminado = await tx.paciente.delete({
+                where: { id_paciente: parseInt(id) },
+            });
+            await tx.usuario.delete({
+                where: { id_usuario: pacienteEliminado.id_usuario },
+            });
         });
         return { success: true, error: null };
     } catch (err) {

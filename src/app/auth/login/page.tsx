@@ -33,7 +33,7 @@ const LoginPage = () => {
       return
     }
 
-    router.push('/admin')
+    router.push('/list/appointments')
   }
 
   return (

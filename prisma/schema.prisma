@@ -65,26 +65,36 @@ model Empleado {
 }
 
 model Servicio {
-  id_servicio     Int     @id @default(autoincrement())
+  id_servicio     Int            @id @default(autoincrement())
   nombre_servicio String
   descripcion     String?
   tarifa          Float
-  citas           Cita[]
+  citas           ServicioCita[]
+}
+
+model ServicioCita {
+  id_cita     Int
+  id_servicio Int
+  cantidad    Int @default(1)
+
+  cita     Cita     @relation(fields: [id_cita], references: [id_cita])
+  servicio Servicio @relation(fields: [id_servicio], references: [id_servicio])
+
+  @@id([id_cita, id_servicio])
 }
 
 model Cita {
-  id_cita           Int        @id @default(autoincrement())
+  id_cita           Int            @id @default(autoincrement())
   id_paciente       Int
   id_empleado       Int
-  id_servicio       Int
   fecha_cita        DateTime
   hora_cita_inicial DateTime?
   hora_cita_final   DateTime?
   estado            EstadoCita
+  servicios         ServicioCita[]
 
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
   empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
-  servicio Servicio @relation(fields: [id_servicio], references: [id_servicio])
 }
 
 model Ticket {
