@@ -169,7 +169,6 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     },
                 });
 
-                // Consulta de tickets (si se requiere)
                 const tickets = await prisma.ticket.findMany({
                     select: {
                         id_ticket: true,

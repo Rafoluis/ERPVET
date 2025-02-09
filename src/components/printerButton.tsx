@@ -25,7 +25,6 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
   const generatePDF = () => {
     const doc = new jsPDF();
 
-    // Logo (Opcional: agregar una imagen)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
     doc.text("Nombre de la empresa", 20, 20);
@@ -33,14 +32,11 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
     doc.text("RUC", 20, 26);
     doc.text("Dirección", 20, 32);
     doc.text("Teléfono", 20, 38);
-
-    // Título
     doc.setFontSize(14);
     doc.text("COMPROBANTE DE PAGO", 70, 50);
     doc.setFontSize(10);
     doc.text("CÓDIGO DE COMPROBANTE", 85, 56);
 
-    // Datos del paciente
     const paciente = ticket?.paciente || {
       nombre: "Maria Perez",
       direccion: "Arequipa",
@@ -58,7 +54,6 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
       styles: { fontSize: 10, cellPadding: 2 }
     });
 
-    // Datos del ticket
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 5,
       head: [["FECHA DE EMISIÓN", "ESTADO DE PAGO", "MÉTODO DE PAGO", "MONEDA"]],
@@ -71,7 +66,6 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
       styles: { fontSize: 10, cellPadding: 2 }
     });
 
-    // Tabla de servicios
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 5,
       head: [["ITEM", "SERVICIO", "DESCRIPCIÓN", "CANT.", "P. UNID."]],
@@ -85,10 +79,8 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
       styles: { fontSize: 10, cellPadding: 2 }
     });
 
-    // Monto en letras
     doc.text("SON: VEINTE SOLES CON CERO CÉNTIMOS", 14, doc.lastAutoTable.finalY + 10);
 
-    // Observaciones y totales
     doc.autoTable({
       startY: doc.lastAutoTable.finalY + 15,
       head: [["OBSERVACIONES", "", "", ""]],
@@ -104,7 +96,6 @@ const PrintButton = ({ ticketId }: { ticketId: number }) => {
       styles: { fontSize: 10, cellPadding: 2 }
     });
 
-    // Mensaje final
     doc.setFontSize(8);
     doc.text(
       "Esta es una representación impresa de la Boleta electrónica, puede verificarlo utilizando ...",

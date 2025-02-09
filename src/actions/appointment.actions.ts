@@ -11,7 +11,6 @@ const processAppointment = async (
     isUpdate = false
 ) => {
     try {
-        // Convertir fechas y horas a UTC y ajustar zona horaria
         const horaFinalUTC = data.hora_cita_final ? new Date(data.hora_cita_final) : undefined;
         const fechaCitaUTC = new Date(data.fecha_cita);
         const options = { timeZone: "America/Lima", hour12: false };
@@ -48,7 +47,6 @@ const processAppointment = async (
             return { success: false, error: "El odontólogo ya tiene una cita en este horario." };
         }
 
-        // Procesar la entrada de servicios (ya sea un string JSON o array)
         let serviciosData: { id_servicio: number; cantidad: number }[] = [];
         if (typeof data.servicios === "string") {
             try {
@@ -69,7 +67,6 @@ const processAppointment = async (
             }
         }
 
-        // Si hay servicios, obtener las tarifas para calcular el total de la cita.
         let totalCost = 0;
         if (serviciosData.length > 0) {
             const serviceIds = serviciosData.map((s) => s.id_servicio);
@@ -77,7 +74,7 @@ const processAppointment = async (
                 where: { id_servicio: { in: serviceIds } },
                 select: { id_servicio: true, tarifa: true },
             });
-            // Crear un mapa: id_servicio -> tarifa
+
             const tarifaMap = new Map<number, number>();
             for (const service of services) {
                 tarifaMap.set(service.id_servicio, service.tarifa);
@@ -92,13 +89,13 @@ const processAppointment = async (
             if (!data.id_cita) {
                 return { success: false, error: "ID Obligatorio" };
             }
-            // Obtener la cita actual para conocer el monto pagado
+
             const currentCita = await prisma.cita.findUnique({
                 where: { id_cita: data.id_cita },
                 select: { monto_pagado: true },
             });
             const currentMontoPagado = currentCita?.monto_pagado || 0;
-            // Nuevo valor de deuda = total de servicios - monto ya pagado
+
             let newDebt = totalCost - currentMontoPagado;
             if (newDebt < 0) newDebt = 0;
 
@@ -110,7 +107,6 @@ const processAppointment = async (
                 id_empleado: data.id_empleado,
                 estado: data.estado,
                 deuda_restante: newDebt,
-                // No modificamos monto_pagado aquí, ya que puede tener pagos registrados
             };
 
             console.log("Update payload:", updatePayload);
@@ -160,7 +156,7 @@ const processAppointment = async (
                     id_empleado: data.id_empleado,
                     estado: data.estado,
                     monto_pagado: 0,
-                    deuda_restante: totalCost, // Inicialmente la deuda es igual al total de la cita
+                    deuda_restante: totalCost,
                     servicios:
                         serviciosData.length > 0
                             ? {

@@ -172,11 +172,8 @@ export const deleteTicket = async (
     }
     try {
         await prisma.$transaction([
-            // Eliminar los pagos asociados
             prisma.pago.deleteMany({ where: { id_ticket: ticketId } }),
-            // Eliminar las relaciones en TicketCita que referencian este ticket
             prisma.ticketCita.deleteMany({ where: { id_ticket: ticketId } }),
-            // Finalmente, eliminar el ticket
             prisma.ticket.delete({ where: { id_ticket: ticketId } }),
         ]);
         return { success: true, error: "" };

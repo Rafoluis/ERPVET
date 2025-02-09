@@ -87,7 +87,6 @@ export const ticketSchema = z
     })
     .superRefine((data, ctx) => {
         if (data.fraccionar_pago) {
-            // Si se fracciona, se exige un monto_parcial válido (mayor que 0)
             if (!data.monto_parcial || data.monto_parcial <= 0) {
                 ctx.addIssue({
                     path: ["monto_parcial"],
@@ -96,7 +95,6 @@ export const ticketSchema = z
                         "Ingrese un monto parcial válido si está fraccionando el pago",
                 });
             }
-            // Opcional: Verificar que el monto parcial sea menor que el total
             if (data.monto_parcial !== undefined && data.monto_parcial >= data.monto_total) {
                 ctx.addIssue({
                     path: ["monto_parcial"],
@@ -105,7 +103,6 @@ export const ticketSchema = z
                 });
             }
         } else {
-            // Si no se fracciona, no se debe ingresar un monto parcial positivo.
             if (data.monto_parcial && data.monto_parcial > 0) {
                 ctx.addIssue({
                     path: ["monto_parcial"],

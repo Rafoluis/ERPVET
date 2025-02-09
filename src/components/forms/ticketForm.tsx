@@ -42,12 +42,11 @@ const TicketForm = ({
     const [citas, setCitas] = useState<any[]>([]);
     const router = useRouter();
 
-    // Función actualizada para determinar si una cita ya está pagada.
     const isCitaFullyPaid = (cita: any) => {
         if (cita.deuda_restante !== undefined) {
             return Number(cita.deuda_restante) === 0;
         }
-        // Fallback: calcular total de servicios y sumar pagos.
+
         const totalCost = cita.servicios.reduce(
             (acc: number, serv: any) => acc + serv.tarifa * serv.cantidad,
             0
@@ -73,12 +72,11 @@ const TicketForm = ({
             (p: { id_paciente: number; citas: any[] }) => p.id_paciente === pacienteId
         );
         if (selectedPaciente) {
-            // Filtra solo las citas que aún tengan deuda pendiente.
             const filteredCitas = selectedPaciente.citas.filter((cita: any) => {
                 return !isCitaFullyPaid(cita);
             });
             setCitas(filteredCitas);
-            setValue("citas", []); // Reiniciamos la selección de citas
+            setValue("citas", []);
         }
     };
 
@@ -122,12 +120,10 @@ const TicketForm = ({
         setValue("citas", newSelected);
     };
 
-    // Se calcula el total pendiente a pagar de las citas seleccionadas.
     const computedTotal = useMemo(() => {
         return selectedCitas.reduce((sum: number, citaId: number) => {
             const cita = citas.find((c: any) => c.id_cita === citaId);
             if (!cita) return sum;
-            // Si existe deuda_restante, se usa ese valor; de lo contrario se calcula el costo total.
             const totalFee = cita.servicios.reduce(
                 (acc: number, s: any) => acc + s.tarifa * s.cantidad,
                 0
@@ -212,7 +208,7 @@ const TicketForm = ({
                                         acc + s.tarifa * s.cantidad,
                                     0
                                 );
-                                // Se muestra la deuda pendiente si está definida; de lo contrario, el total.
+
                                 const remaining =
                                     cita.deuda_restante !== undefined
                                         ? Number(cita.deuda_restante)
