@@ -90,8 +90,11 @@ model Cita {
   fecha_cita        DateTime
   hora_cita_inicial DateTime?
   hora_cita_final   DateTime?
+  monto_pagado      Float          @default(0)
+  deuda_restante    Float          @default(0)
   estado            EstadoCita
   servicios         ServicioCita[]
+  ticketCitas       TicketCita[]
 
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
   empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
@@ -104,18 +107,32 @@ model Ticket {
   tipo_comprobante String
   medio_pago       String
   monto_total      Float
+  monto_pagado     Float    @default(0)
+  deuda_restante   Float    @default(0)
 
-  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
-  pagos    Pago[]
+  paciente    Paciente     @relation(fields: [id_paciente], references: [id_paciente])
+  pagos       Pago[]
+  ticketCitas TicketCita[]
+}
+
+model TicketCita {
+  id_ticket Int
+  id_cita   Int
+
+  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
+  cita   Cita   @relation(fields: [id_cita], references: [id_cita])
+
+  @@id([id_ticket, id_cita])
 }
 
 model Pago {
-  id_pago        Int      @id @default(autoincrement())
+  id_pago        Int        @id @default(autoincrement())
   id_ticket      Int
   monto          Float
   fecha_pago     DateTime
   medio_pago     String
   fecha_creacion DateTime
+  estado_pago    EstadoPago @default(PENDIENTE)
 
   ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
 }
@@ -132,6 +149,12 @@ model Historia_Clinica {
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
 }
 
+enum EstadoPago {
+  PENDIENTE
+  COMPLETADO
+  FRACCIONADO
+}
+
 enum Sexo {
   MASCULINO
   FEMENINO
@@ -143,6 +166,7 @@ enum EstadoCita {
   EN_PROCESO
   FINALIZADO
   CANCELADO
+  PAGADA
 }
 
 enum TipoRol {

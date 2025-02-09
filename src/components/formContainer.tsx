@@ -132,31 +132,36 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 };
                 break;
 
-            case "boleta":
-                const ticketPatient = await prisma.paciente.findMany({
+            case "boleta": {
+                // Consulta de pacientes con sus citas y relaciones
+                const patients = await prisma.paciente.findMany({
                     select: {
                         id_paciente: true,
-                        usuario: {
-                            select: {
-                                nombre: true,
-                                apellido: true,
-                            },
-                        },
+                        usuario: { select: { nombre: true, apellido: true } },
                         citas: {
                             select: {
                                 id_cita: true,
                                 fecha_cita: true,
                                 estado: true,
+                                monto_pagado: true,
+                                deuda_restante: true,
                                 servicios: {
                                     select: {
                                         servicio: {
-                                            select: {
-                                                id_servicio: true,
-                                                nombre_servicio: true,
-                                                tarifa: true,
-                                            },
+                                            select: { id_servicio: true, nombre_servicio: true, tarifa: true },
                                         },
                                         cantidad: true,
+                                    },
+                                },
+                                ticketCitas: {
+                                    select: {
+                                        ticket: {
+                                            select: {
+                                                pagos: { select: { monto: true, fecha_pago: true, medio_pago: true } },
+                                                monto_pagado: true,
+                                                deuda_restante: true,
+                                            },
+                                        },
                                     },
                                 },
                             },
@@ -164,6 +169,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     },
                 });
 
+                // Consulta de tickets (si se requiere)
                 const tickets = await prisma.ticket.findMany({
                     select: {
                         id_ticket: true,
@@ -171,28 +177,23 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         tipo_comprobante: true,
                         medio_pago: true,
                         monto_total: true,
+                        monto_pagado: true,
+                        deuda_restante: true,
                         paciente: {
                             select: {
                                 id_paciente: true,
-                                usuario: {
-                                    select: {
-                                        nombre: true,
-                                        apellido: true,
-                                    },
-                                },
+                                usuario: { select: { nombre: true, apellido: true } },
                                 citas: {
                                     select: {
                                         id_cita: true,
                                         fecha_cita: true,
                                         estado: true,
+                                        monto_pagado: true,
+                                        deuda_restante: true,
                                         servicios: {
                                             select: {
                                                 servicio: {
-                                                    select: {
-                                                        id_servicio: true,
-                                                        nombre_servicio: true,
-                                                        tarifa: true,
-                                                    },
+                                                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
                                                 },
                                                 cantidad: true,
                                             },
@@ -201,16 +202,50 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                 },
                             },
                         },
-                        pagos: {
+                        pagos: { select: { id_pago: true, monto: true, fecha_pago: true, medio_pago: true } },
+                        ticketCitas: {
                             select: {
-                                id_pago: true,
-                                monto: true,
-                                fecha_pago: true,
-                                medio_pago: true,
+                                cita: {
+                                    select: {
+                                        id_cita: true,
+                                        fecha_cita: true,
+                                        estado: true,
+                                        monto_pagado: true,
+                                        deuda_restante: true,
+                                        servicios: {
+                                            select: {
+                                                servicio: {
+                                                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                                                },
+                                                cantidad: true,
+                                            },
+                                        },
+                                    },
+                                },
                             },
                         },
                     },
                 });
+
+                // Función auxiliar para mapear servicios
+                const mapServicios = (servicios: any[]) =>
+                    servicios.map((s) => ({
+                        id_servicio: s.servicio.id_servicio,
+                        nombre_servicio: s.servicio.nombre_servicio,
+                        tarifa: s.servicio.tarifa,
+                        cantidad: s.cantidad,
+                    }));
+
+                const mapCitas = (citas: any[]) =>
+                    citas.map((c) => ({
+                        id_cita: c.id_cita,
+                        fecha_cita: c.fecha_cita,
+                        estado: c.estado,
+                        monto_pagado: c.monto_pagado,
+                        deuda_restante: c.deuda_restante,
+                        servicios: mapServicios(c.servicios),
+                        ticketCitas: c.ticketCitas,
+                    }));
 
                 relatedData = {
                     tickets: tickets.map((t) => ({
@@ -219,38 +254,34 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         tipo_comprobante: t.tipo_comprobante,
                         medio_pago: t.medio_pago,
                         monto_total: t.monto_total,
+                        monto_pagado: t.monto_pagado,
+                        deuda_restante: t.deuda_restante,
                         paciente: {
                             id_paciente: t.paciente.id_paciente,
                             nombre: t.paciente.usuario.nombre,
                             apellido: t.paciente.usuario.apellido,
                         },
-                        pagos: t.pagos.map((p) => ({
-                            id_pago: p.id_pago,
-                            monto: p.monto,
-                            fecha_pago: p.fecha_pago,
-                            medio_pago: p.medio_pago,
+                        pagos: t.pagos,
+                        citas: t.ticketCitas.map((tc) => ({
+                            id_cita: tc.cita.id_cita,
+                            fecha_cita: tc.cita.fecha_cita,
+                            estado: tc.cita.estado,
+                            monto_pagado: tc.cita.monto_pagado,
+                            deuda_restante: tc.cita.deuda_restante,
+                            servicios: mapServicios(tc.cita.servicios),
                         })),
                     })),
-                    pacientes: ticketPatient.map((p) => ({
+                    pacientes: patients.map((p) => ({
                         id_paciente: p.id_paciente,
                         nombre: p.usuario.nombre,
                         apellido: p.usuario.apellido,
-                        citas: p.citas.map((c) => ({
-                            id_cita: c.id_cita,
-                            fecha: c.fecha_cita,
-                            estado: c.estado,
-                            servicios: c.servicios.map((s) => ({
-                                id_servicio: s.servicio.id_servicio,
-                                nombre_servicio: s.servicio.nombre_servicio,
-                                tarifa: s.servicio.tarifa,
-                                cantidad: s.cantidad,
-                            })),
-                        })),
+                        citas: mapCitas(p.citas),
                     })),
-                };
-                //console.log(relatedData);
-                break;
 
+                };
+
+                break;
+            }
             default:
                 break;
         }

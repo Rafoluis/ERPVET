@@ -10,24 +10,107 @@ export const createTicket = async (
     data: TicketSchema
 ): Promise<CurrentState> => {
     try {
-        await prisma.ticket.create({
-            data: {
-                id_paciente: data.id_paciente,
-                fecha_emision: new Date(),
-                tipo_comprobante: data.tipo_comprobante,
-                medio_pago: data.medio_pago,
-                monto_total: data.monto_total,
-                pagos: data.pagos
-                    ? {
-                        create: data.pagos.map((pago) => ({
-                            ...pago,
-                            fecha_pago: new Date(),
-                            fecha_creacion: new Date(),
-                        })),
-                    }
-                    : undefined,
+        const citaIds: number[] = data.citas || [];
+        const citasSeleccionadas = await prisma.cita.findMany({
+            where: { id_cita: { in: citaIds } },
+            include: {
+                servicios: {
+                    include: {
+                        servicio: true,
+                    },
+                },
             },
         });
+
+        const citasOrdenadas = citasSeleccionadas.sort(
+            (a, b) => new Date(a.fecha_cita).getTime() - new Date(b.fecha_cita).getTime()
+        );
+
+        const totalCitasCost = citasOrdenadas.reduce((sum, cita) => {
+            const costoCita = cita.servicios.reduce(
+                (acc, s) => acc + s.cantidad * s.servicio.tarifa,
+                0
+            );
+            return sum + costoCita;
+        }, 0);
+
+        const paymentAmount = data.fraccionar_pago ? (data.monto_parcial || 0) : totalCitasCost;
+
+        let remainingPayment = paymentAmount;
+        const citaUpdates = [];
+
+        for (const cita of citasOrdenadas) {
+
+            const costoCita = cita.servicios.reduce(
+                (acc, s) => acc + s.cantidad * s.servicio.tarifa,
+                0
+            );
+
+            if (remainingPayment >= costoCita) {
+
+                citaUpdates.push(
+                    prisma.cita.update({
+                        where: { id_cita: cita.id_cita },
+                        data: {
+                            monto_pagado: costoCita,
+                            deuda_restante: 0,
+                            estado: "PAGADA",
+                        },
+                    })
+                );
+                remainingPayment -= costoCita;
+            } else if (remainingPayment > 0) {
+
+                citaUpdates.push(
+                    prisma.cita.update({
+                        where: { id_cita: cita.id_cita },
+                        data: {
+                            monto_pagado: remainingPayment,
+                            deuda_restante: costoCita - remainingPayment,
+
+                        },
+                    })
+                );
+                remainingPayment = 0;
+            }
+
+        }
+
+        const ticketMontoPagado = paymentAmount;
+        const ticketDeudaRestante = totalCitasCost - paymentAmount;
+
+        await prisma.$transaction([
+            prisma.ticket.create({
+                data: {
+                    id_paciente: data.id_paciente,
+                    fecha_emision: new Date(),
+                    tipo_comprobante: data.tipo_comprobante,
+                    medio_pago: data.medio_pago,
+                    monto_total: totalCitasCost,
+                    monto_pagado: ticketMontoPagado,
+                    deuda_restante: ticketDeudaRestante,
+                    pagos: data.pagos
+                        ? {
+                            create: data.pagos.map((pago) => ({
+                                ...pago,
+                                fecha_pago: new Date(),
+                                fecha_creacion: new Date(),
+                            })),
+                        }
+                        : undefined,
+                    ticketCitas:
+                        data.citas && data.citas.length > 0
+                            ? {
+                                create: data.citas.map((id_cita: number) => ({
+                                    id_cita,
+                                })),
+                            }
+                            : undefined,
+                },
+            }),
+            ...citaUpdates,
+        ]);
+
         return { success: true, error: null };
     } catch (err) {
         console.error(err);
@@ -41,9 +124,7 @@ export const updateTicket = async (
 ): Promise<CurrentState> => {
     try {
         await prisma.ticket.update({
-            where: {
-                id_ticket: data.id_ticket as number,
-            },
+            where: { id_ticket: data.id_ticket as number },
             data: {
                 id_paciente: data.id_paciente,
                 fecha_emision: new Date(),
@@ -60,6 +141,14 @@ export const updateTicket = async (
                         })),
                     }
                     : undefined,
+                ticketCitas: data.citas
+                    ? {
+                        deleteMany: {},
+                        create: data.citas.map((id_cita: number) => ({
+                            id_cita,
+                        })),
+                    }
+                    : undefined,
             },
         });
         return { success: true, error: null };
@@ -73,20 +162,26 @@ export const deleteTicket = async (
     currentState: CurrentState,
     data: FormData
 ): Promise<CurrentState> => {
-    const id = data.get("id") as string;
-    const ticketId = parseInt(id);
+    const idValue = data.get("id");
+    if (!idValue) {
+        return { success: false, error: "ID no proporcionado" };
+    }
+    const ticketId = parseInt(idValue as string, 10);
+    if (isNaN(ticketId)) {
+        return { success: false, error: "Ticket ID no válido" };
+    }
     try {
         await prisma.$transaction([
-            prisma.pago.deleteMany({
-                where: { id_ticket: ticketId },
-            }),
-            prisma.ticket.delete({
-                where: { id_ticket: ticketId },
-            }),
+            // Eliminar los pagos asociados
+            prisma.pago.deleteMany({ where: { id_ticket: ticketId } }),
+            // Eliminar las relaciones en TicketCita que referencian este ticket
+            prisma.ticketCita.deleteMany({ where: { id_ticket: ticketId } }),
+            // Finalmente, eliminar el ticket
+            prisma.ticket.delete({ where: { id_ticket: ticketId } }),
         ]);
-        return { success: true, error: null };
-    } catch (err) {
-        console.error(err);
+        return { success: true, error: "" };
+    } catch (err: unknown) {
+        console.error(String(err));
         return { success: false, error: "Error al eliminar el ticket" };
     }
 };
