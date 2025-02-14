@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import InputField from "../inputField";
 import { TicketSchema, ticketSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { createTicket, updateTicket } from "@/actions/ticket.actions";
@@ -26,8 +26,12 @@ const TicketForm = ({
         handleSubmit,
         setValue,
         formState: { errors },
+        watch,
     } = useForm<TicketSchema>({
         resolver: zodResolver(ticketSchema),
+        defaultValues: {
+            monto_total: 0,
+        },
     });
 
     const [state, formAction] = useActionState(
@@ -35,20 +39,64 @@ const TicketForm = ({
         { success: false, error: null }
     );
 
-    const [citas, setCitas] = useState<any[]>([]);  // Estado para las citas del paciente seleccionado
-
-    const onSubmit = handleSubmit((data) => {
-        console.log("Fecha UTC enviada:", data);
-        startTransition(() => {
-            formAction(data);
-        });
-    });
-
+    const [citas, setCitas] = useState<any[]>([]);
     const router = useRouter();
+
+    const isCitaFullyPaid = (cita: any) => {
+        if (cita.deuda_restante !== undefined) {
+            return Number(cita.deuda_restante) === 0;
+        }
+
+        const totalCost = cita.servicios.reduce(
+            (acc: number, serv: any) => acc + serv.tarifa * serv.cantidad,
+            0
+        );
+        let totalPaid = 0;
+        if (cita.ticketCitas && Array.isArray(cita.ticketCitas)) {
+            cita.ticketCitas.forEach((tc: any) => {
+                if (tc.ticket && tc.ticket.pagos) {
+                    totalPaid += tc.ticket.pagos.reduce(
+                        (acc: number, pago: any) => acc + pago.monto,
+                        0
+                    );
+                }
+            });
+        }
+        return totalPaid >= totalCost;
+    };
+
+    const handlePacienteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const pacienteId = parseInt(e.target.value, 10);
+        const { pacientes = [] } = relatedData || {};
+        const selectedPaciente = pacientes.find(
+            (p: { id_paciente: number; citas: any[] }) => p.id_paciente === pacienteId
+        );
+        if (selectedPaciente) {
+            const filteredCitas = selectedPaciente.citas.filter((cita: any) => {
+                return !isCitaFullyPaid(cita);
+            });
+            setCitas(filteredCitas);
+            setValue("citas", []);
+        }
+    };
+
+    const onSubmit = handleSubmit(
+        (data) => {
+            console.log("Datos enviados:", data);
+            startTransition(() => {
+                formAction(data);
+            });
+        },
+        (errors) => {
+            console.error("Errores de validación:", errors);
+        }
+    );
 
     useEffect(() => {
         if (state.success) {
-            toast(`La boleta ha sido ${type === "create" ? "creada" : "actualizada"}`);
+            toast(
+                `La boleta ha sido ${type === "create" ? "creada" : "actualizada"}`
+            );
             setOpen(false);
             router.refresh();
         } else if (state.error) {
@@ -58,17 +106,39 @@ const TicketForm = ({
     }, [state]);
 
     const { pacientes = [] } = relatedData || {};
+    const [selectedCitas, setSelectedCitas] = useState<number[]>([]);
+    const watchFraccionar = watch("fraccionar_pago");
 
-    // Maneja el cambio de paciente para cargar sus citas
-    const handlePacienteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const pacienteId = parseInt(e.target.value);  // Convertimos el valor de string a número
-        const selectedPaciente = pacientes.find((p: { id_paciente: number; citas: any[] }) => p.id_paciente === pacienteId);
-
-        if (selectedPaciente) {
-            setCitas(selectedPaciente.citas || []);
-            setValue("id_cita", undefined); // Reseteamos el valor a null en vez de "" (string vacío)
+    const handleToggleCita = (citaId: number) => {
+        let newSelected: number[];
+        if (selectedCitas.includes(citaId)) {
+            newSelected = selectedCitas.filter((id) => id !== citaId);
+        } else {
+            newSelected = [...selectedCitas, citaId];
         }
+        setSelectedCitas(newSelected);
+        setValue("citas", newSelected);
     };
+
+    const computedTotal = useMemo(() => {
+        return selectedCitas.reduce((sum: number, citaId: number) => {
+            const cita = citas.find((c: any) => c.id_cita === citaId);
+            if (!cita) return sum;
+            const totalFee = cita.servicios.reduce(
+                (acc: number, s: any) => acc + s.tarifa * s.cantidad,
+                0
+            );
+            const remaining =
+                cita.deuda_restante !== undefined
+                    ? Number(cita.deuda_restante)
+                    : totalFee;
+            return sum + remaining;
+        }, 0);
+    }, [selectedCitas, citas]);
+
+    useEffect(() => {
+        setValue("monto_total", computedTotal);
+    }, [computedTotal, setValue]);
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -85,58 +155,227 @@ const TicketForm = ({
                     hidden
                 />
             )}
-            <div className="grid grid-cols-1 gap-4">
-                <div className="flex flex-col gap-2">
-                    <label className="text-xs text-gray-500">Paciente</label>
-                    <select
-                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                        {...register("id_paciente")}
-                        defaultValue={type === "create" ? "" : data?.id_paciente}
-                        onChange={handlePacienteChange}  // Manejar cambios en paciente
-                    >
-                        <option value="" disabled className="text-textdark">
-                            Seleccione
-                        </option>
-                        {pacientes.map((paciente: { id_paciente: number; nombre: string; apellido: string }) => (
-                            <option value={paciente.id_paciente} key={paciente.id_paciente}>
+
+            {/* Selección de Paciente */}
+            <div className="flex flex-col gap-2">
+                <label className="text-xs text-gray-500">Paciente</label>
+                <select
+                    className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                    {...register("id_paciente")}
+                    defaultValue={type === "create" ? "" : data?.id_paciente}
+                    onChange={handlePacienteChange}
+                >
+                    <option value="" disabled>
+                        Seleccione
+                    </option>
+                    {pacientes.map(
+                        (paciente: {
+                            id_paciente: number;
+                            nombre: string;
+                            apellido: string;
+                        }) => (
+                            <option
+                                value={paciente.id_paciente}
+                                key={paciente.id_paciente}
+                            >
                                 {paciente.nombre} {paciente.apellido}
                             </option>
-                        ))}
-                    </select>
-                    {errors.id_paciente?.message && (
-                        <p className="text-xs text-red-400">{errors.id_paciente.message.toString()}</p>
+                        )
                     )}
-                </div>
+                </select>
+                {errors.id_paciente?.message && (
+                    <p className="text-xs text-red-400">
+                        {errors.id_paciente.message.toString()}
+                    </p>
+                )}
+            </div>
 
-                {/* Select para citas del paciente */}
-                <div className="flex flex-col gap-2">
-                    <label className="text-xs text-gray-500">Cita</label>
-                    <select
-                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                        {...register("id_cita")}
-                        defaultValue={type === "create" ? "" : data?.id_cita}
-                    >
-                        <option value="" disabled className="text-textdark">
-                            Seleccione una cita
-                        </option>
-                        {citas.map((cita: { id_cita: number; fecha_cita: string }) => (
-                            <option key={cita.id_cita} value={cita.id_cita}>
-                                {new Date(cita.fecha_cita).toLocaleString()}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.id_cita?.message && (
-                        <p className="text-xs text-red-400">{errors.id_cita.message.toString()}</p>
-                    )}
-                </div>
+            {/* Selección múltiple de Citas (filtradas) */}
+            <div className="flex flex-col gap-2">
+                <label className="text-xs text-gray-500">
+                    Citas disponibles (con deuda pendiente)
+                </label>
+                {citas.length === 0 ? (
+                    <p className="text-sm text-gray-500">
+                        No hay citas pendientes de pago
+                    </p>
+                ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                        {citas.map(
+                            (cita: { id_cita: number; fecha_cita: string; servicios: any[]; deuda_restante?: number }) => {
+                                const totalFee = cita.servicios.reduce(
+                                    (acc: number, s: any) =>
+                                        acc + s.tarifa * s.cantidad,
+                                    0
+                                );
 
-                {/* Campos restantes (tipo_comprobante, medio_pago, monto_total) */}
-                {/* ... */}
+                                const remaining =
+                                    cita.deuda_restante !== undefined
+                                        ? Number(cita.deuda_restante)
+                                        : totalFee;
+                                const isSelected = selectedCitas.includes(cita.id_cita);
+                                return (
+                                    <div
+                                        key={cita.id_cita}
+                                        className={`flex items-start border p-2 rounded-md bg-white ${isSelected
+                                            ? "ring-2 ring-blue-500"
+                                            : "hover:ring-1 hover:ring-gray-300"
+                                            }`}
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            className="mt-1 mr-2"
+                                            checked={isSelected}
+                                            onChange={() => handleToggleCita(cita.id_cita)}
+                                        />
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium">
+                                                {new Date(cita.fecha_cita).toLocaleString("es-PE")}
+                                            </span>
+                                            <div className="text-xs text-gray-600 mt-1">
+                                                {cita.servicios.map((s: any) => (
+                                                    <div key={s.id_servicio}>
+                                                        • {s.nombre_servicio} (x{s.cantidad}) - $
+                                                        {s.tarifa.toFixed(2)}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <span className="text-sm font-semibold mt-1">
+                                                Deuda: ${remaining.toFixed(2)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                        )}
+                    </div>
+                )}
+                {errors.citas?.message && (
+                    <p className="text-xs text-red-400">
+                        {errors.citas.message.toString()}
+                    </p>
+                )}
+
+                {/* Monto total acumulado */}
+                {selectedCitas.length > 0 && (
+                    <div className="mt-4 border-t pt-4">
+                        <label className="text-xs text-gray-500">
+                            Monto total acumulado (deuda pendiente):
+                        </label>
+                        <div className="flex items-center">
+                            <input
+                                type="text"
+                                readOnly
+                                className="p-2 border rounded-md w-full"
+                                value={computedTotal.toFixed(2)}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Fraccionar pago */}
+            <div className="mt-4">
+                <label className="flex items-center gap-2">
+                    <input type="checkbox" {...register("fraccionar_pago")} />
+                    <span className="text-sm">Fraccionar pago</span>
+                </label>
+                {watchFraccionar && (
+                    <div className="mt-2">
+                        <label className="text-xs text-gray-500">
+                            Ingrese monto parcial a pagar:
+                        </label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            {...register("monto_parcial", { valueAsNumber: true })}
+                            className="p-2 border rounded-md w-full"
+                            placeholder="Ingrese monto parcial"
+                        />
+                        {errors.monto_parcial && (
+                            <p className="text-xs text-red-400">
+                                {errors.monto_parcial.message}
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* Fecha de emisión */}
+            <div className="mt-4">
+                <label className="text-sm font-medium">Fecha de emisión</label>
+                <input
+                    type="date"
+                    {...register("fecha_emision")}
+                    className="p-2 border rounded-md w-full"
+                />
+                {errors.fecha_emision && (
+                    <p className="text-xs text-red-400">
+                        {errors.fecha_emision.message}
+                    </p>
+                )}
+            </div>
+
+            {/* Tipo de comprobante */}
+            <div className="mt-4">
+                <label className="text-sm font-medium">Tipo de comprobante</label>
+                <div className="flex gap-4">
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            value="BOLETA"
+                            {...register("tipo_comprobante")}
+                        />
+                        Boleta
+                    </label>
+                    <label className="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            value="FACTURA"
+                            {...register("tipo_comprobante")}
+                        />
+                        Factura
+                    </label>
+                </div>
+                {errors.tipo_comprobante && (
+                    <p className="text-xs text-red-400">
+                        {errors.tipo_comprobante.message}
+                    </p>
+                )}
+            </div>
+
+            {/* Medio de pago */}
+            <div className="mt-4">
+                <label className="text-sm font-medium">Medio de pago</label>
+                <select
+                    {...register("medio_pago")}
+                    className="p-2 border rounded-md w-full"
+                    defaultValue=""
+                >
+                    <option value="" disabled>
+                        Selecciona el medio de pago
+                    </option>
+                    <option value="EFECTIVO">Efectivo</option>
+                    <option value="TARJETA DEBITO">Tarjeta de Débito</option>
+                    <option value="TARJETA CREDITO">Tarjeta de Crédito</option>
+                    <option value="DEPOSITO BANCARIO">Depósito Bancario</option>
+                    <option value="YAPE - PLIN">Yape / Plin</option>
+                </select>
+                {errors.medio_pago && (
+                    <p className="text-xs text-red-400">
+                        {errors.medio_pago.message}
+                    </p>
+                )}
             </div>
 
             {state.error && <span className="text-red-400"> Algo pasó mal </span>}
-            <button type="submit" className="bg-blue-400 text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
-        </form>
+            <button
+                type="submit"
+                className="bg-blue-400 text-white p-2 rounded-md"
+            >
+                {type === "create" ? "Crear" : "Actualizar"}
+            </button>
+        </form >
     );
 };
 

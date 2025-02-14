@@ -25,7 +25,6 @@ export default function EstadoDropdown({ initialEstado, onChange }: EstadoDropdo
         if (onChange) onChange(value);
     };
 
-    // Función para determinar la clase de fondo según el estado
     const getBgColor = (est: string) => {
         switch (est) {
             case "AGENDADO":

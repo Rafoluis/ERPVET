@@ -34,7 +34,7 @@ export const createPatient = async (
                         password: data.password || "123456789",
                     },
                 },
-                // Usamos la fecha formateada
+                // Fecha formateada
                 fecha_nacimiento: fechaNacimientoPeru!,
             },
         });

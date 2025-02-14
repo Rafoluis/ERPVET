@@ -1,0 +1,16 @@
+-- CreateEnum
+CREATE TYPE "EstadoPago" AS ENUM ('PENDIENTE', 'COMPLETADO', 'FRACCIONADO');
+
+-- AlterEnum
+ALTER TYPE "EstadoCita" ADD VALUE 'PAGADA';
+
+-- AlterTable
+ALTER TABLE "Cita" ADD COLUMN     "deuda_restante" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "monto_pagado" DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Pago" ADD COLUMN     "estado_pago" "EstadoPago" NOT NULL DEFAULT 'PENDIENTE';
+
+-- AlterTable
+ALTER TABLE "Ticket" ADD COLUMN     "deuda_restante" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "monto_pagado" DOUBLE PRECISION NOT NULL DEFAULT 0;

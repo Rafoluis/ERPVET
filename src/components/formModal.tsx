@@ -70,10 +70,10 @@ const FormModal = ({
             }
         }, [state, router]);
 
-
+        //<input type="text | number" name="id" defaultValue={id} hidden />
         return type === "delete" && id ? (
             <form action={formAction} className="p-4 flex flex-col gap-4">
-                <input type="text | number" name="id" defaultValue={id} hidden />
+                <input type="hidden" name="id" value={id} />
                 <span className="text-center font-medium">
                     ¿Está seguro de eliminar esta {table}?
                 </span>
