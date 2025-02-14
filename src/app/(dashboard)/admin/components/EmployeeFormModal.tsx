@@ -5,7 +5,7 @@ import Modal from '@/components/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 
 interface Props {
   isOpen: boolean
@@ -20,6 +20,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<Employee>({
     resolver: zodResolver(EmployeeSchema),
@@ -45,8 +46,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
       return
     }
 
-    if (!isEditMode) showToast('success', response.message)
-    else showToast('success', response.message)
+    showToast('success', response.message)
     onClose()
   }
 
@@ -56,203 +56,52 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
       isOpen={isOpen}
       onClose={onClose}
       onSubmit={handleSubmit(onSubmit)}
-      primaryButtonTitle= {isEditMode ? 'Actualizar' : 'Agregar'}
+      primaryButtonTitle={isEditMode ? 'Actualizar' : 'Agregar'}
     >
-      <form className='space-y-4'>
-        <div>
-          <label
-            htmlFor='nombre'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Nombre
-          </label>
-          <input
-            {...register('nombre')}
-            type='text'
-            id='nombre'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+      <form className="space-y-6 py-4">
+        <div className="grid grid-cols-2 gap-4">
+          <InputField label="Nombre" id="nombre" register={register} error={errors.nombre} />
+          <InputField label="Apellido" id="apellido" register={register} error={errors.apellido} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <InputField label="DNI" id="dni" register={register} error={errors.dni} />
+          <InputField label="Contraseña" id="password" register={register} error={errors.password} type="password" />
+        </div>
+
+        <InputField label="Email" id="email" register={register} error={errors.email} type="email" />
+        
+        <div className="grid grid-cols-2 gap-4">
+          <InputField label="Teléfono" id="telefono" register={register} error={errors.telefono} />
+          <InputField label="Dirección" id="direccion" register={register} error={errors.direccion} />
+        </div>
+
+        <InputField label="Especialidad" id="especialidad" register={register} error={errors.especialidad} />
+
+        <div className="grid grid-cols-2 gap-4">
+          <SelectField
+            label="Sexo"
+            id="sexo"
+            register={register}
+            error={errors.sexo}
+            options={[
+              { value: 'MASCULINO', label: 'Masculino' },
+              { value: 'FEMENINO', label: 'Femenino' },
+            ]}
+            control={control}
           />
-          {errors.nombre && (
-            <span className='text-red-500 text-xs'>
-              {errors.nombre.message}
-            </span>
-          )}
-        </div>
 
-        <div>
-          <label
-            htmlFor='apellido'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Apellido
-          </label>
-          <input
-            {...register('apellido')}
-            type='text'
-            id='apellido'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
+          <SelectField
+            label="Rol"
+            id="roles"
+            register={register}
+            error={errors.roles}
+            options={[
+              { value: 'ODONTOLOGO', label: 'Odontólogo' },
+              { value: 'RECEPCIONISTA', label: 'Recepcionista' },
+            ]}
+            control={control}
           />
-          {errors.apellido && (
-            <span className='text-red-500 text-xs'>
-              {errors.apellido.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='dni'
-            className='block text-sm font-medium text-gray-700'
-          >
-            DNI
-          </label>
-          <input
-            {...register('dni')}
-            type='text'
-            id='dni'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.dni && (
-            <span className='text-red-500 text-xs'>{errors.dni.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='password'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Contraseña
-          </label>
-          <input
-            {...register('password')}
-            type='text'
-            id='password'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.password && (
-            <span className='text-red-500 text-xs'>
-              {errors.password.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='sexo'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Sexo
-          </label>
-          <select
-            {...register('sexo')}
-            id='sexo'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          >
-            <option value='MASCULINO'>Masculino</option>
-            <option value='FEMENINO'>Femenino</option>
-          </select>
-          {errors.sexo && (
-            <span className='text-red-500 text-xs'>{errors.sexo.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='email'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Email
-          </label>
-          <input
-            {...register('email')}
-            type='email'
-            id='email'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.email && (
-            <span className='text-red-500 text-xs'>{errors.email.message}</span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='telefono'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Teléfono
-          </label>
-          <input
-            {...register('telefono')}
-            type='text'
-            id='telefono'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.telefono && (
-            <span className='text-red-500 text-xs'>
-              {errors.telefono.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='direccion'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Dirección
-          </label>
-          <input
-            {...register('direccion')}
-            type='text'
-            id='direccion'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.direccion && (
-            <span className='text-red-500 text-xs'>
-              {errors.direccion.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='especialidad'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Especialidad
-          </label>
-          <input
-            {...register('especialidad')}
-            type='text'
-            id='especialidad'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm'
-          />
-          {errors.especialidad && (
-            <span className='text-red-500 text-xs'>
-              {errors.especialidad.message}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <label
-            htmlFor='roles'
-            className='block text-sm font-medium text-gray-700'
-          >
-            Roles
-          </label>
-          <select
-            {...register('roles', {
-              setValueAs: (value) => (value ? [value] : []),
-            })}
-            id='roles'
-            className='mt-1 p-2 block w-full border border-gray-300 rounded-md'
-          >
-            <option value=''>Selecciona un rol</option>
-            <option value='ODONTOLOGO'>ODONTOLOGO</option>
-            <option value='RECEPCIONISTA'>RECEPCIONISTA</option>
-          </select>
         </div>
       </form>
     </Modal>
@@ -260,3 +109,52 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
 }
 
 export default EmployeeFormModal
+
+/** 
+ * Componente reutilizable para inputs de texto 
+ */
+const InputField = ({ label, id, register, error, type = 'text' }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <input
+      {...register(id)}
+      type={type}
+      id={id}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+      aria-invalid={error ? 'true' : 'false'}
+    />
+    {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
+  </div>
+)
+
+/** 
+ * Componente reutilizable para selects 
+ */
+const SelectField = ({ label, id, register, error, options, multiple = false, control }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <Controller
+      name={id}
+      control={control}
+      render={({ field }) => (
+        <select
+          {...field}
+          id={id}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          multiple={multiple}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      )}
+    />
+    {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
+  </div>
+)

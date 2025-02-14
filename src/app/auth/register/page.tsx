@@ -1,8 +1,9 @@
+import Dashboard from '@/components/dashboard/Dashboard'
 import React from 'react'
 
 const RegisterPage = () => {
   return (
-    <div>Register Page</div>
+    <Dashboard />
   )
 }
 
