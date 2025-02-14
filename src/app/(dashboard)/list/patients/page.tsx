@@ -11,13 +11,13 @@ type PatientList = Paciente & { usuario: Usuario, citas: Cita[], historiaClinica
 
 const columns = [
     {
-        header: "Paciente", accessor: "paciente"
+        header: "Paciente", accessor: "dni"
     },
     {
-        header: "Telefono", accessor: "telefonoPaciente"
+        header: "Telefono", accessor: "telefono"
     },
     {
-        header: "Fecha de Nacimiento", accessor: "nacimientoPaciente", className: "hidden md:table-cell"
+        header: "Fecha de Nacimiento", accessor: "fecha_nacimiento", className: "hidden md:table-cell"
     },
     {
         header: "Acciones", accessor: "acciones"
@@ -61,7 +61,7 @@ const PatientListPage = async ({
     searchParams: { [key: string]: string | undefined }
 }) => {
     const params = await searchParams;
-    const { page, ...queryParams } = params;
+    const { page, sort, column, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
 
@@ -96,6 +96,11 @@ const PatientListPage = async ({
                 citas: { select: { id_cita: true } },
                 historiaClinica: { select: { id_historia: true } },
             },
+            orderBy: column
+                ? column === "dni" || column === 'telefono'
+                    ? { usuario: { dni: sort === "asc" ? "asc" : "desc" } } // Ordenar por usuario.dni
+                    : { [column]: sort === "asc" ? "asc" : "desc" }
+                : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),

@@ -1,4 +1,4 @@
-import { MoveDown } from "lucide-react";
+import TableColumn from "./TableColumn";
 
 const Table = ({ columns, renderRow, data, }: {
     columns: { header: string; accessor: string; className?: string }[];
@@ -10,14 +10,12 @@ const Table = ({ columns, renderRow, data, }: {
             <thead>
                 <tr className="text-left text-gray-500 text-sm">
                     {columns.map((col) => (
-                        <th key={col.accessor} className={`${col.className}`}>
-                            <div className="flex items-center gap-2">
-                                <span>
-                                    {col.header}
-                                </span>
-                                {<MoveDown size={12} className="cursor-pointer" />}
-                            </div>
-                        </th>
+                        <TableColumn
+                            key={col.accessor}
+                            header={col.header}
+                            accessor={col.accessor}
+                            className={col.className || ""}
+                        />
                     ))}
                 </tr>
             </thead>
