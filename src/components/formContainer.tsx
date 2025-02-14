@@ -23,6 +23,31 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                 apellido: true,
                             },
                         },
+                        citas: {
+                            select: {
+                                id_cita: true,
+                                deuda_restante: true,
+                                servicios: {
+                                    select: {
+                                        cantidad: true,
+                                        servicio: {
+                                            select: {
+                                                tarifa: true,
+                                            },
+                                        },
+                                    },
+                                },
+                                ticketCitas: {
+                                    select: {
+                                        ticket: {
+                                            select: {
+                                                pagos: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 });
 
@@ -63,7 +88,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                         select: {
                                             id_servicio: true,
                                             nombre_servicio: true,
-                                            tarifa: true, // Agregamos tarifa
+                                            tarifa: true,
                                         },
                                     },
                                 },
@@ -84,6 +109,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         id_paciente: p.id_paciente,
                         nombre: p.usuario.nombre,
                         apellido: p.usuario.apellido,
+                        citas: p.citas,
                     })),
                     empleados: appointmentDoctor.map((d) => ({
                         id_empleado: d.id_empleado,
@@ -133,7 +159,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 break;
 
             case "boleta": {
-                // Consulta de pacientes con sus citas y relaciones
+
                 const patients = await prisma.paciente.findMany({
                     select: {
                         id_paciente: true,
@@ -226,7 +252,6 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     },
                 });
 
-                // Función auxiliar para mapear servicios
                 const mapServicios = (servicios: any[]) =>
                     servicios.map((s) => ({
                         id_servicio: s.servicio.id_servicio,

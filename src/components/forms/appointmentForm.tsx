@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import InputField from "../inputField";
 import { createAppointment, updateAppointment } from "@/actions/appointment.actions";
 import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
@@ -12,6 +12,9 @@ import { useRouter } from "next/navigation";
 import { Servicio } from "@prisma/client";
 import Table from "../table";
 import { Plus, Trash2 } from "lucide-react";
+import { SingleValue } from "react-select";
+import AutocompleteSelect, { OptionType } from "../autocompleteSelect";
+import { useMemo } from "react";
 
 type SelectedService = { service: Servicio; quantity: number; };
 
@@ -31,6 +34,8 @@ const AppointmentForm = ({
         handleSubmit,
         formState: { errors },
         setValue,
+        control,
+        watch,
     } = useForm<AppointmentSchema>({
         resolver: zodResolver(appointmentSchema),
         defaultValues: {
@@ -79,6 +84,11 @@ const AppointmentForm = ({
     const [selectedServiceId, setSelectedServiceId] = useState<string>("");
     const [selectedQuantity, setSelectedQuantity] = useState<string>("1");
 
+    const serviceOptions: OptionType[] = servicios.map((service: Servicio) => ({
+        value: service.id_servicio.toString(),
+        label: service.nombre_servicio,
+    }));
+
     useEffect(() => {
         if (type === "update" && relatedData?.selectedServices) {
             console.log("Cargando servicios en update:", relatedData.selectedServices);
@@ -121,7 +131,19 @@ const AppointmentForm = ({
         setSelectedQuantity("1");
     };
 
+    const selectedPatientId = watch("id_paciente");
 
+    const patientHasDebt = useMemo(() => {
+        if (!selectedPatientId || !relatedData?.pacientes) return false;
+        const selectedPatient = relatedData.pacientes.find(
+            (p: { id_paciente: number; citas?: any[] }) =>
+                p.id_paciente === Number(selectedPatientId)
+        );
+        if (!selectedPatient || !selectedPatient.citas) return false;
+        return selectedPatient.citas.some(
+            (cita: any) => Number(cita.deuda_restante) > 0
+        );
+    }, [selectedPatientId, relatedData]);
     const handleRemoveService = (index: number) => {
         setSelectedServices((prev) => prev.filter((_, i) => i !== index));
     };
@@ -198,42 +220,58 @@ const AppointmentForm = ({
             {/* Selección de Paciente y Odontólogo */}
             <div className="grid grid-cols-1 gap-4">
                 <div className="flex flex-col gap-2">
-                    <label className="text-xs text-gray-500">Paciente</label>
-                    <select
-                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                        {...register("id_paciente")}
-                        defaultValue={type === "create" ? "" : data?.id_paciente}
-                    >
-                        <option value="" disabled className="text-textdark">
-                            Seleccione
-                        </option>
-                        {pacientes.map((paciente: { id_paciente: number; nombre: string; apellido: string }) => (
-                            <option value={paciente.id_paciente} key={JSON.stringify(paciente)}>
-                                {paciente.nombre} {paciente.apellido}
-                            </option>
-                        ))}
-                    </select>
+                    <Controller
+                        control={control}
+                        name="id_paciente"
+                        defaultValue={type === "create" ? null : data?.id_paciente}
+                        render={({ field }) => {
+                            const options: OptionType[] = pacientes.map(
+                                (paciente: { id_paciente: number; nombre: string; apellido: string }) => ({
+                                    value: paciente.id_paciente,
+                                    label: `${paciente.nombre} ${paciente.apellido}`,
+                                })
+                            );
+                            return (
+                                <AutocompleteSelect
+                                    label="Paciente"
+                                    options={options}
+                                    value={options.find((option) => option.value === field.value) || null}
+                                    onChange={(selectedOption: SingleValue<OptionType>) =>
+                                        field.onChange(selectedOption ? selectedOption.value : null)
+                                    }
+                                />
+                            );
+                        }}
+                    />
                     {errors.id_paciente?.message && (
                         <p className="text-xs text-red-400">{errors.id_paciente.message.toString()}</p>
                     )}
                 </div>
 
                 <div className="flex flex-col gap-2">
-                    <label className="text-xs text-gray-500">Odontólogo</label>
-                    <select
-                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                        {...register("id_empleado")}
-                        defaultValue={type === "create" ? "" : data?.id_empleado}
-                    >
-                        <option value="" disabled className="text-textdark">
-                            Seleccione
-                        </option>
-                        {empleados.map((empleado: { id_empleado: number; nombre: string; apellido: string }) => (
-                            <option value={empleado.id_empleado} key={JSON.stringify(empleado)}>
-                                {empleado.nombre} {empleado.apellido}
-                            </option>
-                        ))}
-                    </select>
+                    <Controller
+                        control={control}
+                        name="id_empleado"
+                        defaultValue={type === "create" ? null : data?.id_empleado}
+                        render={({ field }) => {
+                            const options = empleados.map(
+                                (empleado: { id_empleado: number; nombre: string; apellido: string }) => ({
+                                    value: empleado.id_empleado,
+                                    label: `${empleado.nombre} ${empleado.apellido}`,
+                                })
+                            );
+                            return (
+                                <AutocompleteSelect
+                                    label="Odontólogo"
+                                    options={options}
+                                    value={options.find((o: { value: number; }) => o.value === field.value) || null}
+                                    onChange={(selectedOption: SingleValue<OptionType>) =>
+                                        field.onChange(selectedOption ? selectedOption.value : null)
+                                    }
+                                />
+                            );
+                        }}
+                    />
                     {errors.id_empleado?.message && (
                         <p className="text-xs text-red-400">{errors.id_empleado.message.toString()}</p>
                     )}
@@ -275,23 +313,27 @@ const AppointmentForm = ({
                 </div>
             </div>
 
+            {patientHasDebt && (
+                <p className="text-red-500 text-sm mt-1">
+                    El paciente tiene deudas pendientes de pago
+                </p>
+            )}
+
             {/* Servicio, Cantidad y Tarifa */}
 
             <div className="flex items-center gap-2 md:gap-4">
                 <div className="w-64">
-                    <label className="text-xs text-gray-500 mb-1 block">Servicio</label>
-                    <select
-                        value={selectedServiceId}
-                        onChange={(e) => setSelectedServiceId(e.target.value)}
-                        className="border border-gray-300 p-2 w-full rounded-md text-sm"
-                    >
-                        <option value="">Seleccione</option>
-                        {servicios.map((service: Servicio) => (
-                            <option key={service.id_servicio} value={service.id_servicio}>
-                                {service.nombre_servicio}
-                            </option>
-                        ))}
-                    </select>
+                    <AutocompleteSelect
+                        label="Servicio"
+                        options={serviceOptions}
+                        value={
+                            serviceOptions.find((option) => option.value === selectedServiceId) ||
+                            null
+                        }
+                        onChange={(selectedOption: SingleValue<OptionType>) =>
+                            setSelectedServiceId(selectedOption ? String(selectedOption.value) : "")
+                        }
+                    />
                 </div>
 
                 <div className="w-24">
@@ -314,13 +356,14 @@ const AppointmentForm = ({
                     <button
                         type="button"
                         onClick={handleAddService}
-                        className="flex items-center gap-2 bg-backbuttondefault text-white px-3 py-2 rounded text-sm"
+                        disabled={!selectedServiceId}
+                        className={`flex items-center gap-2 px-3 py-2 rounded text-sm text-white ${selectedServiceId ? "bg-backbuttondefault" : "bg-gray-400"
+                            }`}
                     >
                         <Plus size={17} color="white" /> Agregar servicio
                     </button>
                 </div>
             </div>
-
 
             {/* Título y tabla de servicios seleccionados */}
             {servicesDataForTable.length > 0 && (
@@ -334,6 +377,10 @@ const AppointmentForm = ({
                         />
                     </div>
                 </div>
+            )}
+
+            {errors.servicios?.message && (
+                <p className="text-xs text-red-400">{errors.servicios.message.toString()}</p>
             )}
 
             {/* Estado */}
@@ -353,6 +400,10 @@ const AppointmentForm = ({
                 {errors.estado?.message && (
                     <p className="text-xs text-red-400">{errors.estado.message.toString()}</p>
                 )}
+                {type === "update" && data?.deuda_restante === 0 && (
+                    <p className="text-green-600 font-bold text-sm mt-1">La cita a sido paga</p>
+                )}
+
             </div>
 
             {state.error && <span className="text-red-400">Algo pasó mal</span>}
