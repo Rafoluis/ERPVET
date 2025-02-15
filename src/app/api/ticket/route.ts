@@ -12,7 +12,21 @@ export async function GET(req: NextRequest) {
     try {
         const ticket = await prisma.ticket.findUnique({
             where: { id_ticket: parseInt(id, 10) },
-            include: { pagos: true },
+            include: {
+                paciente: { include: { usuario: true } },
+                pagos: true,
+                ticketCitas: {
+                    include: {
+                        cita: {
+                            include: {
+                                servicios: {
+                                    include: { servicio: true },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         });
 
         if (!ticket) {
