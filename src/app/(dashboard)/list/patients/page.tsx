@@ -7,7 +7,7 @@ import { numPage } from "@/lib/settings"
 import { Cita, Historia_Clinica, Paciente, Prisma, Usuario } from "@prisma/client"
 import Link from "next/link"
 
-type PatientList = Paciente & { usuario: Usuario, citas: { id_cita: number }[], historiaClinica: { id_historia: number } | null }
+type PatientList = Paciente & { usuario: Usuario, citas: Cita[], historiaClinica: Historia_Clinica[] }
 
 const columns = [
     {
@@ -40,9 +40,7 @@ const renderRow = (item: PatientList) => (
         </td>
         <td>
             <div className="flex items-center gap-2">
-                <Link href={`/list/patients/${item.id_paciente}`}>
-                    <FormContainer table="paciente" type="view" />
-                </Link>
+                <FormContainer table="paciente" type="view" />
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="paciente" type="update" data={item}
@@ -52,18 +50,19 @@ const renderRow = (item: PatientList) => (
                 )}
             </div>
         </td>
-    </tr>
+    </tr >
 );
 
 const PatientListPage = async ({
-    searchParams,
+    searchParams
 }: {
-    searchParams: { [key: string]: string | undefined } | Promise<{ [key: string]: string | undefined }>;
+    searchParams: { [key: string]: string | undefined }
 }) => {
     const params = await searchParams;
     const { page, sort, column, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
+
     const query: Prisma.PacienteWhereInput = {};
     for (const [key, value] of Object.entries(queryParams)) {
         if (value !== undefined && key !== "sortColumn" && key !== "sortDirection") {
@@ -123,15 +122,15 @@ const PatientListPage = async ({
 
     return (
         <div>
-            <div className="rounded-md flex-1 m-4 mt-0">
+            <div className=' rounded-md flex-1 m-4 mt-0'>
                 <div className="flex items-center justify-between p-2">
                     <h1 className="hidden md:block text-lg font-semibold">Gestión de pacientes</h1>
                 </div>
             </div>
 
-            {/* BUSQUEDA Y AGREGAR PACIENTE */}
-            <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
-                <div className="flex items-center justify-between">
+            {/* BUSQUEDA Y AGREGAR CITA */}
+            <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
+                <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Pacientes</h2>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                         <TableSearch />
@@ -160,11 +159,11 @@ const PatientListPage = async ({
 
                 <Table columns={columns} renderRow={renderRow} data={data} />
 
-                {/* PAGINACIÓN */}
+                {/*PAGINACION*/}
                 <Pagination page={p} count={count} />
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default PatientListPage;
+export default PatientListPage
