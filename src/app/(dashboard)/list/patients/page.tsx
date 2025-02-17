@@ -7,7 +7,7 @@ import { numPage } from "@/lib/settings"
 import { Cita, Historia_Clinica, Paciente, Prisma, Usuario } from "@prisma/client"
 import Link from "next/link"
 
-type PatientList = Paciente & { usuario: Usuario, citas: { id_cita: number }[], historiaClinica: { id_historia: number } | null }
+type PatientList = Paciente & { usuario: Usuario, citas: Cita[], historiaClinica: Historia_Clinica[] }
 
 const columns = [
     {
@@ -40,9 +40,7 @@ const renderRow = (item: PatientList) => (
         </td>
         <td>
             <div className="flex items-center gap-2">
-                <Link href={`/list/patients/${item.id_paciente}`}>
-                    <FormContainer table="paciente" type="view" />
-                </Link>
+                <FormContainer table="paciente" type="view" />
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="paciente" type="update" data={item}
@@ -52,40 +50,39 @@ const renderRow = (item: PatientList) => (
                 )}
             </div>
         </td>
-    </tr>
+    </tr >
 );
 
 const PatientListPage = async ({
-    searchParams,
+    searchParams
 }: {
-    searchParams: { [key: string]: string | undefined } | Promise<{ [key: string]: string | undefined }>;
+    searchParams: { [key: string]: string | undefined }
 }) => {
     const params = await searchParams;
-    const { page, sortColumn, sortDirection, ...queryParams } = params;
-    const p = page ? parseInt(page) : 1;
-    const query: Prisma.PacienteWhereInput = {};
-    for (const [key, value] of Object.entries(queryParams)) {
-        if (value !== undefined && key !== "sortColumn" && key !== "sortDirection") {
-            if (key === "id_paciente") {
-                query.id_paciente = parseInt(value);
-            } else if (key === "search") {
-                query.OR = [
-                    { usuario: { nombre: { contains: value, mode: "insensitive" } } },
-                    { usuario: { apellido: { contains: value, mode: "insensitive" } } },
-                    { usuario: { dni: { contains: value, mode: "insensitive" } } },
-                ];
-            }
-        }
-    }
+    const { page, ...queryParams } = params;
 
-    let orderBy: Prisma.PacienteOrderByWithRelationInput | undefined;
-    if (sortColumn) {
-        if (sortColumn === "paciente") {
-            orderBy = { usuario: { nombre: sortDirection === "asc" ? "asc" : "desc" } };
-        } else if (sortColumn === "telefonoPaciente") {
-            orderBy = { usuario: { telefono: sortDirection === "asc" ? "asc" : "desc" } };
-        } else if (sortColumn === "nacimientoPaciente") {
-            orderBy = { fecha_nacimiento: sortDirection === "asc" ? "asc" : "desc" };
+    const p = page ? parseInt(page) : 1;
+
+    const query: Prisma.PacienteWhereInput = {};
+
+    if (queryParams) {
+        for (const [key, value] of Object.entries(queryParams)) {
+            if (value !== undefined) {
+                switch (key) {
+                    case "id_paciente":
+                        query.id_paciente = parseInt(value);
+                        break;
+                    case "search":
+                        query.OR = [
+                            { usuario: { nombre: { contains: value, mode: "insensitive" } } },
+                            { usuario: { apellido: { contains: value, mode: "insensitive" } } },
+                            { usuario: { dni: { contains: value, mode: "insensitive" } } },
+                        ];
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 
@@ -97,37 +94,23 @@ const PatientListPage = async ({
                 citas: { select: { id_cita: true } },
                 historiaClinica: { select: { id_historia: true } },
             },
-            orderBy,
             take: numPage,
             skip: numPage * (p - 1),
         }),
         prisma.paciente.count({ where: query }),
     ]);
 
-
-
-    const generateSortLink = (accessor: string) => {
-        let newSortDirection = "asc";
-        if (sortColumn === accessor) {
-            newSortDirection = sortDirection === "asc" ? "desc" : "asc";
-        }
-        const paramsObj = { ...params, sortColumn: accessor, sortDirection: newSortDirection };
-
-        const searchParamsString = new URLSearchParams(Object.entries(paramsObj)).toString();
-        return `/list/patients?${searchParamsString}`;
-    };
-
     return (
         <div>
-            <div className="rounded-md flex-1 m-4 mt-0">
+            <div className=' rounded-md flex-1 m-4 mt-0'>
                 <div className="flex items-center justify-between p-2">
                     <h1 className="hidden md:block text-lg font-semibold">Gestión de pacientes</h1>
                 </div>
             </div>
 
-            {/* BUSQUEDA Y AGREGAR PACIENTE */}
-            <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
-                <div className="flex items-center justify-between">
+            {/* BUSQUEDA Y AGREGAR CITA */}
+            <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
+                <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Pacientes</h2>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                         <TableSearch />
@@ -136,29 +119,14 @@ const PatientListPage = async ({
                         </div>
                     </div>
                 </div>
-                {/* TABLA */}
-                <table className="w-full mt-4">
-                    <thead>
-                        <tr className="text-left text-gray-500 text-sm">
-                            {columns.map((col) => (
-                                <th key={col.accessor} className={col.className}>
-                                    <Link href={generateSortLink(col.accessor)}>
-                                        {col.header}
-                                        {sortColumn === col.accessor &&
-                                            (sortDirection === "asc" ? " ▲" : " ▼")}
-                                    </Link>
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>{data.map((item: PatientList) => renderRow(item))}</tbody>
-                </table>
+                {/*LISTA*/}
+                <Table columns={columns} renderRow={renderRow} data={data} />
 
-                {/* PAGINACIÓN */}
+                {/*PAGINACION*/}
                 <Pagination page={p} count={count} />
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default PatientListPage;
+export default PatientListPage
