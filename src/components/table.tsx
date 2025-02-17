@@ -1,8 +1,9 @@
+import React from "react";
 import TableColumn from "./TableColumn";
 
 const Table = ({ columns, renderRow, data, }: {
     columns: { header: string; accessor: string; className?: string }[];
-    renderRow: (item: any) => React.ReactNode;
+    renderRow: (item: React.ReactElement) => React.ReactNode;
     data: any[];
 }) => {
     return (

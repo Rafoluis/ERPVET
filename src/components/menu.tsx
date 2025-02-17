@@ -15,7 +15,7 @@ const menuItems = [
             { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
             { label: 'Doctores', href: '/doctores', visible: ['admin'] },
         ],
-        visible: ['admin', 'recepcionista', 'doctor']
+        visible: ['admin', 'recepcionista', 'doctor', 'odontologo']
     },
     {
         title: "OTROS",

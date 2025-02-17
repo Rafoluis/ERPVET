@@ -80,15 +80,15 @@ const PatientListPage = async ({
     }
 
     let orderBy: Prisma.PacienteOrderByWithRelationInput | undefined;
-    if (sortColumn) {
-        if (sortColumn === "paciente") {
-            orderBy = { usuario: { nombre: sortDirection === "asc" ? "asc" : "desc" } };
-        } else if (sortColumn === "telefonoPaciente") {
-            orderBy = { usuario: { telefono: sortDirection === "asc" ? "asc" : "desc" } };
-        } else if (sortColumn === "nacimientoPaciente") {
-            orderBy = { fecha_nacimiento: sortDirection === "asc" ? "asc" : "desc" };
-        }
-    }
+    // if (sortColumn) {
+    //     if (sortColumn === "paciente") {
+    //         orderBy = { usuario: { nombre: sortDirection === "asc" ? "asc" : "desc" } };
+    //     } else if (sortColumn === "telefonoPaciente") {
+    //         orderBy = { usuario: { telefono: sortDirection === "asc" ? "asc" : "desc" } };
+    //     } else if (sortColumn === "nacimientoPaciente") {
+    //         orderBy = { fecha_nacimiento: sortDirection === "asc" ? "asc" : "desc" };
+    //     }
+    // }
 
     const [data, count] = await prisma.$transaction([
         prisma.paciente.findMany({
@@ -99,8 +99,8 @@ const PatientListPage = async ({
                 historiaClinica: { select: { id_historia: true } },
             },
             orderBy: column
-                ? column === "dni" || column === 'telefono'
-                    ? { usuario: { dni: sort === "asc" ? "asc" : "desc" } } // Ordenar por usuario.dni
+                ? column === "dni" || column === "telefono"
+                    ? { usuario: { [column]: sort === "asc" ? "asc" : "desc" } }
                     : { [column]: sort === "asc" ? "asc" : "desc" }
                 : undefined,
             take: numPage,
@@ -110,12 +110,11 @@ const PatientListPage = async ({
     ]);
 
 
-
     const generateSortLink = (accessor: string) => {
-        let newSortDirection = "asc";
-        if (sortColumn === accessor) {
-            newSortDirection = sortDirection === "asc" ? "desc" : "asc";
-        }
+        const newSortDirection = "asc";
+        // if (sortColumn === accessor) {
+        //     newSortDirection = sortDirection === "asc" ? "desc" : "asc";
+        // }
         const paramsObj = { ...params, sortColumn: accessor, sortDirection: newSortDirection };
 
         const searchParamsString = new URLSearchParams(Object.entries(paramsObj)).toString();
@@ -142,22 +141,24 @@ const PatientListPage = async ({
                     </div>
                 </div>
                 {/* TABLA */}
-                <table className="w-full mt-4">
+                {/* <table className="w-full mt-4">
                     <thead>
                         <tr className="text-left text-gray-500 text-sm">
                             {columns.map((col) => (
                                 <th key={col.accessor} className={col.className}>
                                     <Link href={generateSortLink(col.accessor)}>
-                                        {col.header}
-                                        {sortColumn === col.accessor &&
-                                            (sortDirection === "asc" ? " ▲" : " ▼")}
-                                    </Link>
+                                        {col.header} */}
+                                        {/* {sortColumn === col.accessor &&
+                                            (sortDirection === "asc" ? " ▲" : " ▼")} */}
+                                    {/* </Link>
                                 </th>
                             ))}
                         </tr>
                     </thead>
                     <tbody>{data.map((item: PatientList) => renderRow(item))}</tbody>
-                </table>
+                </table> */}
+
+                <Table columns={columns} renderRow={renderRow} data={data} />
 
                 {/* PAGINACIÓN */}
                 <Pagination page={p} count={count} />

@@ -7,6 +7,11 @@ export default withAuth(
 
     const isAuthenticated = !!req.cookies.get('next-auth.session-token')
 
+
+    if (isAuthenticated && pathname === '/auth/login') {
+      return NextResponse.redirect(new URL('/list/appointments', req.url))
+    }
+
     if (pathname === '/') {
       return NextResponse.redirect(
         new URL(isAuthenticated ? '/list/appointments' : '/auth/login', req.url)
@@ -37,5 +42,6 @@ export const config = {
     '/receptionist/:path*',
     '/patient/:path*',
     '/admin/:path*',
+    '/auth/:path', 
   ],
 }

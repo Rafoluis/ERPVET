@@ -32,7 +32,9 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        if (user?.roles[0].rol.nombre === 'PACIENTE') return null
+        if (!user || user?.roles[0].rol.nombre === 'PACIENTE') {
+          throw new Error("No user found");
+        }
 
         if (user && user.password === credentials.password) {
           return {
