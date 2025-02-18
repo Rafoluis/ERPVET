@@ -132,7 +132,7 @@ const InputField = ({ label, id, register, error, type = 'text' }) => (
 /** 
  * Componente reutilizable para selects 
  */
-const SelectField = ({ label, id, register, error, options, multiple = false, control }) => (
+const SelectField = ({ label, id, error, options, multiple = false, control }) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
       {label}
@@ -146,6 +146,11 @@ const SelectField = ({ label, id, register, error, options, multiple = false, co
           id={id}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           multiple={multiple}
+          onChange={(e) => {
+            const values = Array.from(e.target.selectedOptions, (option) => option.value)
+            field.onChange(values)
+          }}
+          value={field.value || []}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -158,3 +163,4 @@ const SelectField = ({ label, id, register, error, options, multiple = false, co
     {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
   </div>
 )
+

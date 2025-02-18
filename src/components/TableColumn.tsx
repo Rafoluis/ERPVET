@@ -1,6 +1,6 @@
 'use client'
 
-import { MoveDown } from "lucide-react"
+import { MoveDown, MoveUp } from "lucide-react"
 import { useSearchParams, useRouter } from "next/navigation"
 
 interface Props {
@@ -14,7 +14,7 @@ const TableColumn = ({ accessor, className, header }: Props) => {
   const router = useRouter()
 
   const sort = searchParams.get("sort") || "asc"
-  const column = searchParams.get("column")
+  // const column = searchParams.get("column")
 
   const handleOrder = () => {
     const newSort = sort === "asc" ? "desc" : "asc"
@@ -24,6 +24,8 @@ const TableColumn = ({ accessor, className, header }: Props) => {
     params.set("column", accessor)
 
     router.push(`?${params.toString()}`)
+
+    console.log(params.get('column'))
   }
 
   return (
@@ -33,18 +35,20 @@ const TableColumn = ({ accessor, className, header }: Props) => {
           {header}
         </span>
         {
-          sort === 'asc' && column === accessor ? (
-            <MoveDown 
-              size={12} 
-              className="cursor-pointer" 
-              onClick={handleOrder} 
-            />
-          ) : (
-            <MoveDown 
-              size={12} 
-              className="cursor-pointer transform rotate-180" 
-              onClick={handleOrder}
-            />
+          accessor !== "acciones" && (
+            sort === "desc" ? (
+              <MoveDown 
+                size={12} 
+                className="cursor-pointer" 
+                onClick={handleOrder} 
+              />
+            ) : (
+              <MoveUp 
+                size={12} 
+                className="cursor-pointer" 
+                onClick={handleOrder}
+              />
+            )
           )
         }
       </div>

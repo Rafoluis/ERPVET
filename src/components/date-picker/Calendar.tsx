@@ -47,17 +47,15 @@ const NavigationButton = React.forwardRef<
         className={cx(
           "flex size-8 shrink-0 select-none items-center justify-center rounded border p-1 outline-none transition sm:size-[30px]",
           // text color
-          "text-gray-600 hover:text-gray-800",
-          "dark:text-gray-400 hover:dark:text-gray-200",
+          "text-gray-600 ",
           // border color
-          "border-gray-300 dark:border-gray-800",
+          "border-gray-300",
           // background color
           "hover:bg-gray-50 active:bg-gray-100",
-          "hover:dark:bg-gray-900 active:dark:bg-gray-800",
           // disabled
           "disabled:pointer-events-none",
-          "disabled:border-gray-200 disabled:dark:border-gray-800",
-          "disabled:text-gray-400 disabled:dark:text-gray-600",
+          "disabled:border-gray-200",
+          "disabled:text-gray-400",
           focusRing,
         )}
         onClick={onClick}
@@ -116,31 +114,29 @@ const Calendar = ({
         nav: "gap-1 flex items-center rounded-full size-full justify-between p-4",
         table: "w-full border-collapse space-y-1",
         head_cell:
-          "w-9 font-medium text-sm sm:text-xs text-center text-gray-400 dark:text-gray-600 pb-2",
+          "w-9 font-medium text-sm sm:text-xs text-center text-gray-400 pb-2",
         row: "w-full mt-0.5",
         cell: cx(
           "relative p-0 text-center focus-within:relative",
-          "text-gray-900 dark:text-gray-50",
+          "text-gray-900 ",
         ),
         day: cx(
           "size-9 rounded text-sm focus:z-10",
-          "text-gray-900 dark:text-gray-50",
-          "hover:bg-gray-200 hover:dark:bg-gray-700",
+          "text-gray-900 ",
+          "hover:bg-gray-200",
           focusRing,
         ),
         day_today: "font-semibold",
         day_selected: cx(
           "rounded",
           "aria-selected:bg-blue-500 aria-selected:text-white",
-          "dark:aria-selected:bg-blue-500 dark:aria-selected:text-white",
         ),
         day_disabled:
-          "!text-gray-300 dark:!text-gray-700 line-through disabled:hover:bg-transparent",
-        day_outside: "text-gray-400 dark:text-gray-600",
+          "!text-gray-300 line-through disabled:hover:bg-transparent",
+        day_outside: "text-gray-400",
         day_range_middle: cx(
           "!rounded-none",
           "aria-selected:!bg-gray-100 aria-selected:!text-gray-900",
-          "dark:aria-selected:!bg-gray-900 dark:aria-selected:!text-gray-50",
         ),
         day_range_start: "rounded-r-none !rounded-l",
         day_range_end: "rounded-l-none !rounded-r",
@@ -223,7 +219,7 @@ const Calendar = ({
               <div
                 role="presentation"
                 aria-live="polite"
-                className="text-sm font-medium capitalize tabular-nums text-gray-900 dark:text-gray-50"
+                className="text-sm font-medium capitalize tabular-nums text-gray-900 "
               >
                 {format(props.displayMonth, "LLLL yyy", { locale })}
               </div>
@@ -296,11 +292,11 @@ const Calendar = ({
                   className={cx(
                     "absolute inset-x-1/2 bottom-1.5 h-0.5 w-4 -translate-x-1/2 rounded-[2px]",
                     {
-                      "bg-blue-500 dark:bg-blue-500": !selected,
-                      "!bg-white dark:!bg-gray-950": selected,
-                      "!bg-gray-400 dark:!bg-gray-600":
+                      "bg-blue-500 ": !selected,
+                      "!bg-white ": selected,
+                      "!bg-gray-400 ":
                         selected && range_middle,
-                      "bg-gray-400 text-gray-400 dark:bg-gray-400 dark:text-gray-600":
+                      "bg-gray-400 text-gray-400 ":
                         disabled,
                     },
                   )}
