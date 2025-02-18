@@ -993,7 +993,7 @@ const RangeDatePicker = ({
               <div className="border-t border-gray-200 p-3 sm:flex sm:items-center sm:justify-between dark:border-gray-800">
                 <p className="tabular-nums text-gray-900 dark:text-gray-50">
                   <span className="text-gray-700 dark:text-gray-300">
-                    {translations?.range ?? "Range"}:
+                    {translations?.range ?? "Rango"}:
                   </span>{" "}
                   <span className="font-medium">{displayRange}</span>
                 </p>
@@ -1004,7 +1004,7 @@ const RangeDatePicker = ({
                     type="button"
                     onClick={onCancel}
                   >
-                    {translations?.cancel ?? "Cancel"}
+                    {translations?.cancel ?? "Cancelar"}
                   </Button>
                   <Button
                     variant="primary"
@@ -1012,7 +1012,7 @@ const RangeDatePicker = ({
                     type="button"
                     onClick={onApply}
                   >
-                    {translations?.apply ?? "Apply"}
+                    {translations?.apply ?? "Aplicar"}
                   </Button>
                 </div>
               </div>
