@@ -15,6 +15,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { SingleValue } from "react-select";
 import AutocompleteSelect, { OptionType } from "../autocompleteSelect";
 import { useMemo } from "react";
+import { showToast } from "@/lib/toast";
 
 type SelectedService = { service: Servicio; quantity: number; };
 
@@ -70,11 +71,14 @@ const AppointmentForm = ({
 
     useEffect(() => {
         if (state.success) {
-            toast(`La cita ha sido ${type === "create" ? "creada" : "actualizada"}`);
+            const message = `La cita ha sido ${type === "create" ? "creada" : "actualizada"}`;
+            // toast(`La cita ha sido ${type === "create" ? "creada" : "actualizada"}`);
+            showToast("success", message);
             setOpen(false);
             router.refresh();
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            // toast("Error en la acción: " + state.error);
+            showToast("error", "Error en la acción: ");
             console.error("Error en la acción:", state.error);
         }
     }, [state, router, setOpen, type]);

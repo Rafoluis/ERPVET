@@ -9,6 +9,7 @@ import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { createPatient, updatePatient } from "@/actions/patient.actions";
+import { showToast } from "@/lib/toast";
 
 const PatientForm = ({
     type,
@@ -46,11 +47,14 @@ const PatientForm = ({
 
     useEffect(() => {
         if (state.success) {
-            toast(`El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`);
+            const message = `El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`
+            showToast("success", message);
+            // toast(`El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`);
             setOpen(false);
             router.refresh();
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            // toast("Error en la acción: " + state.error);
+            showToast("error", "Error en la acción");
             console.error("Error en la acción: ", state.error);
         }
     }, [state]);
