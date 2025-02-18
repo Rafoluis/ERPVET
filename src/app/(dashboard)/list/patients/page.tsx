@@ -78,17 +78,6 @@ const PatientListPage = async ({
         }
     }
 
-    let orderBy: Prisma.PacienteOrderByWithRelationInput | undefined;
-    // if (sortColumn) {
-    //     if (sortColumn === "paciente") {
-    //         orderBy = { usuario: { nombre: sortDirection === "asc" ? "asc" : "desc" } };
-    //     } else if (sortColumn === "telefonoPaciente") {
-    //         orderBy = { usuario: { telefono: sortDirection === "asc" ? "asc" : "desc" } };
-    //     } else if (sortColumn === "nacimientoPaciente") {
-    //         orderBy = { fecha_nacimiento: sortDirection === "asc" ? "asc" : "desc" };
-    //     }
-    // }
-
     const [data, count] = await prisma.$transaction([
         prisma.paciente.findMany({
             where: query,
@@ -107,18 +96,6 @@ const PatientListPage = async ({
         }),
         prisma.paciente.count({ where: query }),
     ]);
-
-
-    const generateSortLink = (accessor: string) => {
-        const newSortDirection = "asc";
-        // if (sortColumn === accessor) {
-        //     newSortDirection = sortDirection === "asc" ? "desc" : "asc";
-        // }
-        const paramsObj = { ...params, sortColumn: accessor, sortDirection: newSortDirection };
-
-        const searchParamsString = new URLSearchParams(Object.entries(paramsObj)).toString();
-        return `/list/patients?${searchParamsString}`;
-    };
 
     return (
         <div>
