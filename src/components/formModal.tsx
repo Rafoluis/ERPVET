@@ -11,6 +11,8 @@ import PatientForm from "./forms/patientForms";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { deleteTicket } from "@/actions/ticket.actions";
 import TicketForm from "./forms/ticketForm";
+import { deleteService } from "@/actions/service.actions";
+import ServiceForm from "./forms/serviceForm";
 
 
 const forms: {
@@ -26,14 +28,18 @@ const forms: {
     paciente: (setOpen, type, data, relatedData) => (
         <PatientForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />),
     boleta: (setOpen, type, data, relatedData) => (
-        <TicketForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />)
+        <TicketForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />),
+    servicio: (setOpen, type, data, relatedData) => (
+        <ServiceForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />)
 };
 
 const deleteActions = {
     cita: deleteAppointment,
     paciente: deletePatient,
     boleta: deleteTicket,
-    empleado: deleteTicket,
+    servicio: deleteService,
+    empleado: deleteService,
+    doctor: deleteService,
 };
 
 const IconComponent = ({ type }: { type: "create" | "view" | "update" | "delete" }) => {

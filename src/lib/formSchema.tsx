@@ -115,4 +115,12 @@ export const ticketSchema = z
 
 export type TicketSchema = z.infer<typeof ticketSchema>;
 
+export const serviceSchema = z.object({
+    id_servicio: z.coerce.number().optional(),
+    nombre_servicio: z.string().min(1, { message: "Nombre requerido" }),
+    descripcion: z.string().optional(),
+    tarifa: z.coerce.number(),
+});
+
+export type ServiceSchema = z.infer<typeof serviceSchema>;
 

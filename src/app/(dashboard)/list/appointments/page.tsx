@@ -6,7 +6,6 @@ import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio, Usuario } from "@prisma/client"
-import { id } from "date-fns/locale"
 import Link from "next/link"
 
 type AppointmentList = Cita & {

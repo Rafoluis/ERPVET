@@ -10,10 +10,11 @@ const menuItems = [
             { label: 'Inicio', href: '/', visible: ['admin', 'recepcionista', 'doctor', 'odontologo'] },
             { label: 'Gestión de citas', href: '/list/appointments', visible: ['admin', 'recepcionista'] },
             { label: 'Pacientes', href: '/list/patients', visible: ['admin', 'recepcionista'] },
+            { label: 'Servicios', href: '/list/service', visible: ['admin'] },
             { label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
             { label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['doctor', 'odontologo'] },
             { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
-            { label: 'Doctores', href: '/doctores', visible: ['admin'] },
+            { label: 'Doctores', href: '/list/doctors', visible: ['admin'] },
         ],
         visible: ['admin', 'recepcionista', 'doctor', 'odontologo']
     },
