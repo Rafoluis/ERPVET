@@ -1,14 +1,15 @@
-import { ReactNode } from "react";
-import TableItem from "./TableItem";
-import { cn } from "@/lib/classNames";
+import { ReactNode } from 'react'
+import TableItem from './TableItem'
+import { cn } from '@/lib/classNames'
+import TableColumn from '../TableColumn'
 
 interface Props<T> {
-  columns: ColumnHeader[];
-  rows: T[];
+  columns: ColumnHeader[]
+  rows: T[]
   customRenderers?: {
-    [key: string]: (row: T) => ReactNode;
-  };
-  customActions?: (row: T) => ReactNode; 
+    [key: string]: (row: T) => ReactNode
+  }
+  customActions?: (row: T) => ReactNode
 }
 
 const Table = <T,>({
@@ -18,13 +19,16 @@ const Table = <T,>({
   customActions,
 }: Props<T>): ReactNode => {
   return (
-    <table className="w-full mt-4">
+    <table className='w-full mt-4'>
       <thead>
-        <tr className="text-left text-gray-500 text-sm">
+        <tr className='text-left text-gray-500 text-sm'>
           {columns.map((column) => (
-            <th key={String(column.id)} className={cn(column.className, "p-2")}>
-              {column.label}
-            </th>
+            <TableColumn
+              key={column.id}
+              header={column.label}
+              className={column.className || ''}
+              accessor={column.id}
+            />
           ))}
           {customActions && <th>Acciones</th>}
         </tr>
@@ -41,7 +45,7 @@ const Table = <T,>({
         ))}
       </tbody>
     </table>
-  );
-};
+  )
+}
 
-export default Table;
+export default Table

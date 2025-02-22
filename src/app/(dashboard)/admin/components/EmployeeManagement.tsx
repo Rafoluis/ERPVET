@@ -6,8 +6,8 @@ import EmployeeFormModal from './EmployeeFormModal'
 import { Employee } from '@/schemas/employee.schema'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import EmployeeDelFormModal from './EmployeeDelFormModal'
-import Pagination from '@/components/pagination'
 import { Plus } from 'lucide-react'
+import TableSearch from '@/components/tableSearch'
 
 interface Props {
   getAllEmployees: Promise<Employee[]>
@@ -39,16 +39,20 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
   return (
     <>
       <div className='flex justify-between items-center mb-4'>
-        <h2 className='font-bold text-lg uppercase'>Usuarios</h2>
-        <button
-          className={`px-4 py-2 flex items-center justify-center rounded-full bg-backbuttondefault`}
-          onClick={() => handleOpenModal('create')}
-        >
-          <Plus size={20} color="white" />
-          <span className='ml-2 text-sm font-medium text-textdefault'>
-            Agregar
-          </span>
-        </button>
+        <h2 className='font-bold text-lg uppercase'>Empleados</h2>
+
+        <div className='flex gap-4'>
+          <TableSearch />
+          <button
+            className={`px-4 py-2 flex items-center justify-center rounded-full bg-backbuttondefault`}
+            onClick={() => handleOpenModal('create')}
+          >
+            <Plus size={20} color='white' />
+            <span className='ml-2 text-sm font-medium text-textdefault'>
+              Agregar
+            </span>
+          </button>
+        </div>
       </div>
 
       <ErrorBoundary fallback={<div>Ha ocurrido un error</div>}>
@@ -59,7 +63,6 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
             onEditEmployee={(employee) => handleOpenModal('edit', employee)}
             onDeleteEmployee={(employee) => handleOpenModal('delete', employee)}
           />
-          <Pagination page={2} count={4} />
         </Suspense>
       </ErrorBoundary>
 

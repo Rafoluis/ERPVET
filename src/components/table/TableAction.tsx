@@ -6,20 +6,56 @@ interface Props {
   icon: React.ReactElement<LucideProps>
   className?: string
   onClick?: () => void
+  iconColor?: string
+  hoverBgColor?: string
+  hoverIconColor?: string
 }
 
-const TableAction = ({ icon, className, onClick }: Props) => {
+const baseContainerClasses = `
+  group
+  flex
+  items-center
+  justify-center
+  cursor-pointer
+  p-2
+  bg-slate-100
+  rounded-full
+  transition-transform
+  duration-200
+  transform
+  hover:scale-105
+`
+
+const baseIconClasses = `
+  transition-colors
+  duration-200
+`
+
+const TableAction = ({
+  icon,
+  className,
+  onClick,
+  iconColor = 'text-slate-500',
+  hoverBgColor = 'hover:bg-slate-200',
+  hoverIconColor,
+}: Props) => {
   return (
     <div
+      onClick={onClick}
       className={cn(
-        'cursor-pointer p-2 bg-slate-100 rounded-full hover:bg-slate-200',
+        baseContainerClasses,
+        hoverBgColor,
         className
       )}
-      onClick={onClick}
     >
       {React.cloneElement(icon, {
         size: 14,
-        className: cn('text-slate-500', icon.props.className),
+        className: cn(
+          iconColor,
+          hoverIconColor && `group-hover:${hoverIconColor}`,
+          baseIconClasses,
+          icon.props.className
+        ),
       })}
     </div>
   )

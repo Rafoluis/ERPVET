@@ -20,7 +20,7 @@ import { RiCalendar2Fill, RiSubtractFill } from "@remixicon/react"
 import { format, type Locale } from "date-fns"
 import { enUS } from "date-fns/locale"
 import { tv, VariantProps } from "tailwind-variants"
-
+import { useRouter } from "next/navigation"
 import { cx, focusInput, focusRing, hasErrorInput } from "@/lib/utils"
 
 // import { Button } from "../Button"
@@ -723,6 +723,7 @@ const RangeDatePicker = ({
     value ?? defaultValue ?? undefined,
   )
   const [month, setMonth] = React.useState<Date | undefined>(range?.from)
+  const router = useRouter()
 
   const [startTime, setStartTime] = React.useState<TimeValue | null>(
     value?.from
@@ -739,11 +740,6 @@ const RangeDatePicker = ({
         : new Time(0, 0),
   )
 
-  const initialRange = React.useMemo(() => {
-    return range
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
-
   React.useEffect(() => {
     setRange(value ?? defaultValue ?? undefined)
   }, [value, defaultValue])
@@ -758,7 +754,6 @@ const RangeDatePicker = ({
     if (!open) {
       setMonth(range?.from)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
   const onRangeChange = (range: DateRange | undefined) => {
@@ -786,26 +781,24 @@ const RangeDatePicker = ({
     setRange(newRange)
   }
 
+  // Aquí se limpia la selección al cancelar
   const onCancel = () => {
-    setRange(initialRange)
-    setStartTime(
-      initialRange?.from
-        ? new Time(initialRange.from.getHours(), initialRange.from.getMinutes())
-        : new Time(0, 0),
-    )
-    setEndTime(
-      initialRange?.to
-        ? new Time(initialRange.to.getHours(), initialRange.to.getMinutes())
-        : new Time(0, 0),
-    )
+    setRange(undefined)
+    setStartTime(new Time(0, 0))
+    setEndTime(new Time(0, 0))
     setOpen(false)
+
+    // Actualizar URL: eliminamos los parámetros "start" y "end"
+    const params = new URLSearchParams(window.location.search)
+    params.delete("start")
+    params.delete("end")
+    router.push(`${window.location.pathname}?${params.toString()}`)
   }
 
   const onOpenChange = (open: boolean) => {
     if (!open) {
       onCancel()
     }
-
     setOpen(open)
   }
 
@@ -890,13 +883,18 @@ const RangeDatePicker = ({
 
   const displayRange = React.useMemo(() => {
     if (!range) {
-      return null
+      return null;
     }
 
-    return `${range.from ? formatDate(range.from, locale, showTimePicker) : ""} - ${
-      range.to ? formatDate(range.to, locale, showTimePicker) : ""
-    }`
-  }, [range, locale, showTimePicker])
+    const formattedFrom = range.from ? formatDate(range.from, locale, showTimePicker) : "";
+    const formattedTo = range.to ? formatDate(range.to, locale, showTimePicker) : "";
+
+    if (formattedFrom && !formattedTo) {
+      return formattedFrom;
+    }
+
+    return `${formattedFrom} - ${formattedTo}`;
+  }, [range, locale, showTimePicker]);
 
   const onApply = () => {
     setOpen(false)

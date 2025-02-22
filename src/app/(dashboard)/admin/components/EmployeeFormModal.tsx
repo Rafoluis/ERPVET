@@ -110,9 +110,6 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
 
 export default EmployeeFormModal
 
-/** 
- * Componente reutilizable para inputs de texto 
- */
 const InputField = ({ label, id, register, error, type = 'text' }) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
@@ -129,9 +126,6 @@ const InputField = ({ label, id, register, error, type = 'text' }) => (
   </div>
 )
 
-/** 
- * Componente reutilizable para selects 
- */
 const SelectField = ({ label, id, error, options, multiple = false, control }) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">

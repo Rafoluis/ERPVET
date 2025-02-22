@@ -9,12 +9,7 @@ interface Props {
   onClose: () => void
 }
 
-const EmployeeDelFormModal = ({
-  employee,
-  isOpen,
-  onClose,
-}: Props) => {
-
+const EmployeeDelFormModal = ({ employee, isOpen, onClose }: Props) => {
   const handleDeleteEmployee = async () => {
     const response = await deleteEmployee(employee.dni)
 
@@ -22,7 +17,6 @@ const EmployeeDelFormModal = ({
       showToast('error', response.error)
       return
     }
-
     showToast('success', response.message)
   }
 
