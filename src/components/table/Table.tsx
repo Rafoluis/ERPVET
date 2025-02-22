@@ -30,7 +30,7 @@ const Table = <T,>({
               accessor={column.id}
             />
           ))}
-          {customActions && <th>Acciones</th>}
+          {customActions && <th className=''>Acciones</th>}
         </tr>
       </thead>
       <tbody>

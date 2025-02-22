@@ -30,7 +30,7 @@ const TableItem = <T,>({
         const value = (row as Record<string, unknown>)[column.id];
 
         return (
-          <td key={`cell-${String(column.id)}`} className="p-2 align-middle">
+          <td key={`cell-${String(column.id)}`} className="py-2 align-middle">
             {customRenderer ? customRenderer(row) : String(value ?? '')}
           </td>
         );
