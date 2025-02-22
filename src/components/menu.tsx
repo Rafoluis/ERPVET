@@ -14,13 +14,15 @@ const menuItems = [
             { label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
             { label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['doctor', 'odontologo'] },
             { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
-            { label: 'Doctores', href: '/list/doctors', visible: ['admin'] },
         ],
         visible: ['admin', 'recepcionista', 'doctor', 'odontologo']
     },
     {
         title: "OTROS",
-        items: [{ label: 'Empleados', href: '/admin', visible: ['admin'] }],
+        items: [
+            { label: 'Empleados', href: '/admin', visible: ['admin'] },
+            { label: 'Empresa', href: '/company', visible: ['admin'] }
+        ],
         visible: ['admin']
     }
 ];

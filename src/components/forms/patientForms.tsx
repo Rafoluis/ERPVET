@@ -1,25 +1,23 @@
-"use client"
+"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../inputField";
 import { patientSchema, PatientSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import { createPatient, updatePatient } from "@/actions/patient.actions";
 
-const PatientForm = ({
-    type,
-    data,
-    setOpen,
-}: {
+interface PatientFormProps {
     type: "create" | "update";
     data?: any;
     setOpen: Dispatch<SetStateAction<boolean>>;
     relatedData?: any;
-}) => {
+    onSuccess?: (patient: any) => void;
+}
+
+const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
     const {
         register,
         handleSubmit,
@@ -28,37 +26,42 @@ const PatientForm = ({
         resolver: zodResolver(patientSchema),
     });
 
+    const [submittedData, setSubmittedData] = useState<any>(null);
     const [state, formAction] = useActionState(
         type === "create" ? createPatient : updatePatient,
         { success: false, error: null }
     );
 
-    const onSubmit = handleSubmit((data) => {
+    const actionText = type === "create" ? "creado" : "actualizado";
 
-        console.log("Fecha UTC enviada:", data);
-
+    const onSubmit = handleSubmit((formData) => {
+        setSubmittedData(formData);
         startTransition(() => {
-            formAction(data);
+            formAction(formData);
         });
     });
 
-    const router = useRouter()
-
     useEffect(() => {
         if (state.success) {
-            toast(`El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`);
+            toast(`El paciente ha sido ${actionText}`);
+            const result = state as { success: boolean; error: string | null; data?: any };
+            const newPatient = result.data || { ...submittedData, id_paciente: Date.now() };
+            onSuccess && newPatient && onSuccess(newPatient);
             setOpen(false);
-            router.refresh();
         } else if (state.error) {
             toast("Error en la acción: " + state.error);
-            console.error("Error en la acción: ", state.error);
+            console.error("Error en la acción:", state.error);
         }
-    }, [state]);
-
-    //const {} = relatedData;
+    }, [state, submittedData, setOpen, onSuccess, actionText]);
 
     return (
-        <form className="flex flex-col gap-8" onSubmit={onSubmit}>
+        <form
+            className="flex flex-col gap-8"
+            onSubmit={(e) => {
+                e.stopPropagation();
+                onSubmit(e);
+            }}
+        >
             <h1 className="text-xl font-semibold">
                 {type === "create" ? "Registrar nuevo paciente" : "Actualizar paciente"}
             </h1>
@@ -76,31 +79,29 @@ const PatientForm = ({
                 <InputField
                     label="Nombre del paciente"
                     name="nombre"
-                    defaultValue={data?.usuario.nombre}
+                    defaultValue={data?.usuario?.nombre}
                     register={register}
                     error={errors.nombre}
                 />
-
                 <InputField
                     label="Apellido del paciente"
                     name="apellido"
-                    defaultValue={data?.usuario.apellido}
+                    defaultValue={data?.usuario?.apellido}
                     register={register}
                     error={errors?.apellido}
                 />
-
                 <div className="flex flex-col gap-2 w-full md:w-1/2">
                     <InputField
                         label="DNI"
                         name="dni"
-                        defaultValue={data?.usuario.dni}
+                        defaultValue={data?.usuario?.dni}
                         register={register}
                         error={errors.dni}
                     />
                     <InputField
                         label="Teléfono"
                         name="telefono"
-                        defaultValue={data?.usuario.telefono}
+                        defaultValue={data?.usuario?.telefono}
                         register={register}
                         error={errors?.telefono}
                     />
@@ -108,16 +109,13 @@ const PatientForm = ({
                     <select
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                         {...register("sexo")}
-                        defaultValue={data?.usuario.sexo}
+                        defaultValue={data?.usuario?.sexo}
                     >
                         <option value="MASCULINO">Masculino</option>
                         <option value="FEMENINO">Femenino</option>
-
                     </select>
                     {errors.sexo?.message && (
-                        <p className="text-xs text-red-400">
-                            {errors.sexo.message.toString()}
-                        </p>
+                        <p className="text-xs text-red-400">{errors.sexo.message.toString()}</p>
                     )}
                     <InputField
                         label="Fecha de nacimiento"
@@ -131,13 +129,14 @@ const PatientForm = ({
                         error={errors.fecha_nacimiento}
                         type="date"
                     />
-
                 </div>
             </div>
-            {state.error && <span className="text-red-400"> Algo paso mal </span>}
-            <button type="submit" className="bg-backbuttondefault text-white p-2 rounded-md">{type === "create" ? "Crear" : "Actualizar"}</button>
+            {state.error && <span className="text-red-400">Algo pasó mal</span>}
+            <button type="submit" className="bg-backbuttondefault text-white p-2 rounded-md">
+                {type === "create" ? "Crear" : "Actualizar"}
+            </button>
         </form>
     );
 };
 
-export default PatientForm
+export default PatientForm;

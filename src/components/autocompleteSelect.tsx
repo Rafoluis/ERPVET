@@ -9,6 +9,7 @@ export interface OptionType {
 }
 
 interface AutocompleteSelectProps {
+    name?: string;
     label: string;
     options: OptionType[];
     placeholder?: string;
@@ -19,35 +20,45 @@ interface AutocompleteSelectProps {
     filterOption?: SelectProps<OptionType>["filterOption"];
 }
 
-const AutocompleteSelect: React.FC<AutocompleteSelectProps> = ({
-    label,
-    options,
-    placeholder = "Seleccione",
-    value,
-    onChange,
-    className = "w-full",
-    isClearable = true,
-    filterOption,
-}) => {
-    const defaultFilterOption: SelectProps<OptionType>["filterOption"] = (option, inputValue) => {
-        if (!inputValue) return false;
-        return option.label.toLowerCase().includes(inputValue.toLowerCase());
-    };
+const AutocompleteSelect = React.forwardRef<any, AutocompleteSelectProps>(
+    (
+        {
+            name,
+            label,
+            options,
+            placeholder = "Seleccione",
+            value,
+            onChange,
+            className = "w-full",
+            isClearable = true,
+            filterOption,
+        },
+        ref
+    ) => {
+        const defaultFilterOption: SelectProps<OptionType>["filterOption"] = (option, inputValue) => {
+            if (!inputValue) return false;
+            return option.label.toLowerCase().includes(inputValue.toLowerCase());
+        };
 
-    return (
-        <div>
-            <label className="text-xs text-gray-500 mb-1 block">{label}</label>
-            <Select
-                value={value}
-                onChange={onChange}
-                options={options}
-                placeholder={placeholder}
-                isClearable={isClearable}
-                filterOption={filterOption || defaultFilterOption}
-                className={className}
-            />
-        </div>
-    );
-};
+        return (
+            <div className="w-full">
+                <label className="text-xs text-gray-500 mb-1 block">{label}</label>
+                <Select
+                    ref={ref}
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    options={options}
+                    placeholder={placeholder}
+                    isClearable={isClearable}
+                    filterOption={filterOption || defaultFilterOption}
+                    className={className}
+                />
+            </div>
+        );
+    }
+);
+
+AutocompleteSelect.displayName = "AutocompleteSelect";
 
 export default AutocompleteSelect;

@@ -6,7 +6,7 @@ import InputField from "../inputField";
 import { createAppointment, updateAppointment } from "@/actions/appointment.actions";
 import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
 import { startTransition, useActionState, useState } from "react";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Servicio } from "@prisma/client";
@@ -14,9 +14,9 @@ import Table from "../table";
 import { Plus, Trash2 } from "lucide-react";
 import { SingleValue } from "react-select";
 import AutocompleteSelect, { OptionType } from "../autocompleteSelect";
-import { useMemo } from "react";
+import FormModal from "../formModal";
 
-type SelectedService = { service: Servicio; quantity: number; };
+type SelectedService = { service: Servicio; quantity: number };
 
 const AppointmentForm = ({
     type,
@@ -38,34 +38,38 @@ const AppointmentForm = ({
         watch,
     } = useForm<AppointmentSchema>({
         resolver: zodResolver(appointmentSchema),
-        defaultValues: {
-            servicios: [],
-        },
+        defaultValues: { servicios: [] },
     });
 
     const [state, formAction] = useActionState(
         type === "create" ? createAppointment : updateAppointment,
         { success: false, error: null }
     );
-
     const router = useRouter();
 
-    const onSubmit = handleSubmit((data) => {
-        if (data.hora_cita_final) {
-            const baseDate = data.fecha_cita ? new Date(data.fecha_cita) : new Date();
-            const [hours, minutes] = data.hora_cita_final.split(":").map(Number);
-            baseDate.setHours(hours, minutes, 0, 0);
-            const dateWithTimezone = new Date(baseDate.getTime() - 5 * 60 * 60 * 1000);
-            data.hora_cita_final = dateWithTimezone.toISOString();
-        } else {
-            data.hora_cita_final = undefined;
-        }
+    const formatHoraCitaFinal = (
+        fecha: string | Date | undefined,
+        hora: string | undefined
+    ) => {
+        if (!hora) return undefined;
+        const baseDate = fecha
+            ? fecha instanceof Date
+                ? new Date(fecha)
+                : new Date(fecha)
+            : new Date();
+        const [hours, minutes] = hora.split(":").map(Number);
+        baseDate.setHours(hours, minutes, 0, 0);
+        const dateWithTimezone = new Date(baseDate.getTime() - 5 * 60 * 60 * 1000);
+        return dateWithTimezone.toISOString();
+    };
 
-        console.log("Form submitted with modified data", data);
-
-        startTransition(() => {
-            formAction(data);
-        });
+    const onSubmit = handleSubmit((formData) => {
+        formData.hora_cita_final = formatHoraCitaFinal(
+            formData.fecha_cita,
+            formData.hora_cita_final
+        );
+        console.log("Form submitted with modified data", formData);
+        startTransition(() => formAction(formData));
     });
 
     useEffect(() => {
@@ -79,19 +83,29 @@ const AppointmentForm = ({
         }
     }, [state, router, setOpen, type]);
 
+    const mapOptions = <T,>(
+        items: T[],
+        idKey: keyof T,
+        labelFn: (item: T) => string
+    ): OptionType[] =>
+        items.map((item) => ({
+            value: String(item[idKey]),
+            label: labelFn(item),
+        }));
+
     const { pacientes, empleados, servicios } = relatedData;
     const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
     const [selectedServiceId, setSelectedServiceId] = useState<string>("");
     const [selectedQuantity, setSelectedQuantity] = useState<string>("1");
 
-    const serviceOptions: OptionType[] = servicios.map((service: Servicio) => ({
-        value: service.id_servicio.toString(),
-        label: service.nombre_servicio,
-    }));
+    const serviceOptions: OptionType[] = mapOptions(
+        servicios,
+        "id_servicio",
+        (s: Servicio) => s.nombre_servicio
+    );
 
     useEffect(() => {
         if (type === "update" && relatedData?.selectedServices) {
-            console.log("Cargando servicios en update:", relatedData.selectedServices);
             const initialServices: SelectedService[] = relatedData.selectedServices.map((s: any) => ({
                 service: {
                     id_servicio: s.id_servicio,
@@ -115,20 +129,32 @@ const AppointmentForm = ({
     const handleAddService = () => {
         if (!selectedServiceId) return;
         const selectedServiceIdNumber = parseInt(selectedServiceId, 10);
-        const selectedService = servicios.find((s: Servicio) => s.id_servicio === selectedServiceIdNumber);
+        const selectedService = servicios.find(
+            (s: Servicio) => s.id_servicio === selectedServiceIdNumber
+        );
         if (!selectedService) return;
 
         setSelectedServices((prevServices) => {
-            const alreadyExists = prevServices.some((s) => s.service.id_servicio === selectedServiceIdNumber);
-            if (alreadyExists) {
-                return prevServices;
-            } else {
-                return [...prevServices, { service: selectedService, quantity: parseInt(selectedQuantity, 10) }];
-            }
+            const alreadyExists = prevServices.some(
+                (s) => s.service.id_servicio === selectedServiceIdNumber
+            );
+            return alreadyExists
+                ? prevServices
+                : [...prevServices, { service: selectedService, quantity: parseInt(selectedQuantity, 10) }];
         });
 
         setSelectedServiceId("");
         setSelectedQuantity("1");
+    };
+
+    const [patients, setPatients] = useState(relatedData?.pacientes || []);
+    useEffect(() => {
+        setPatients(relatedData?.pacientes || []);
+    }, [relatedData?.pacientes]);
+
+    const handlePatientSuccess = (newPatient: { id_paciente: number; nombre: string; apellido: string }) => {
+        setPatients((prev: any) => [...prev, newPatient]);
+        setValue("id_paciente", newPatient.id_paciente);
     };
 
     const selectedPatientId = watch("id_paciente");
@@ -136,24 +162,31 @@ const AppointmentForm = ({
     const patientHasDebt = useMemo(() => {
         if (!selectedPatientId || !relatedData?.pacientes) return false;
         const selectedPatient = relatedData.pacientes.find(
-            (p: { id_paciente: number; citas?: any[] }) =>
-                p.id_paciente === Number(selectedPatientId)
+            (p: { id_paciente: number; citas?: any[] }) => p.id_paciente === Number(selectedPatientId)
         );
         if (!selectedPatient || !selectedPatient.citas) return false;
-        return selectedPatient.citas.some(
-            (cita: any) => Number(cita.deuda_restante) > 0
-        );
+        return selectedPatient.citas.some((cita: any) => Number(cita.deuda_restante) > 0);
     }, [selectedPatientId, relatedData]);
+
     const handleRemoveService = (index: number) => {
         setSelectedServices((prev) => prev.filter((_, i) => i !== index));
     };
 
+    const handleQuantityChange = (index: number, newQuantity: number) => {
+        if (newQuantity < 1) return;
+        setSelectedServices((prevServices) =>
+            prevServices.map((service, i) =>
+                i === index ? { ...service, quantity: newQuantity } : service
+            )
+        );
+    };
+
     const serviceColumns = [
-        { header: "Servicio", accessor: "nombre", className: "text-sm font-bold  p-1" },
-        { header: "Cantidad", accessor: "cantidad", className: "text-sm  font-bold p-1" },
-        { header: "Tarifa", accessor: "tarifa", className: "text-sm  font-bold  p-1" },
-        { header: "Tarifa Total", accessor: "total", className: "text-sm  font-bold  p-1" },
-        { header: "Acción", accessor: "accion", className: "text-sm  font-bold  p-1" },
+        { header: "Servicio", accessor: "nombre", className: "text-sm font-bold p-1" },
+        { header: "Cantidad", accessor: "cantidad", className: "text-sm font-bold p-1" },
+        { header: "Tarifa", accessor: "tarifa", className: "text-sm font-bold p-1" },
+        { header: "Tarifa Total", accessor: "total", className: "text-sm font-bold p-1" },
+        { header: "Acción", accessor: "accion", className: "text-sm font-bold p-1" },
     ];
 
     const servicesDataForTable = selectedServices.map((item, index) => ({
@@ -161,30 +194,21 @@ const AppointmentForm = ({
         __index: index,
     }));
 
-    const handleQuantityChange = (index: number, newQuantity: number) => {
-        if (newQuantity < 1) return;
-
-        setSelectedServices((prevServices) => {
-            const updatedServices = prevServices.map((service, i) =>
-                i === index ? { ...service, quantity: newQuantity } : service
-            );
-            return updatedServices;
-        });
-    };
-
     const renderServiceRow = (item: SelectedService & { __index: number }) => (
-        <tr key={item.__index} className="">
-            <td className="text-xs  p-1">{item.service.nombre_servicio}</td>
+        <tr key={item.__index}>
+            <td className="text-xs p-1">{item.service.nombre_servicio}</td>
             <td className="text-xs p-1">
                 <input
                     type="number"
                     className="w-16 p-1 border rounded border-gray-300 text-center text-xs"
                     value={item.quantity}
-                    onChange={(e) => handleQuantityChange(item.__index, parseInt(e.target.value, 10))}
+                    onChange={(e) =>
+                        handleQuantityChange(item.__index, parseInt(e.target.value, 10))
+                    }
                 />
             </td>
             <td className="text-xs p-1">S/ {item.service.tarifa.toFixed(2)}</td>
-            <td className="text-xs  p-1">
+            <td className="text-xs p-1">
                 S/ {(item.service.tarifa * item.quantity).toFixed(2)}
             </td>
             <td className="text-xs p-1">
@@ -199,6 +223,48 @@ const AppointmentForm = ({
         </tr>
     );
 
+    const renderAutocompleteField = <T extends keyof AppointmentSchema>(
+        name: T,
+        label: string,
+        options: OptionType[],
+        defaultValue: AppointmentSchema[T] | undefined,
+        extra?: React.ReactNode,
+        error?: any
+    ) => (
+        <div className="flex flex-col gap-2">
+            <Controller
+                control={control}
+                name={name}
+                defaultValue={defaultValue as any}
+                render={({ field }) => (
+                    <div className="flex items-center gap-2">
+                        <AutocompleteSelect
+                            name={field.name}
+                            label={label}
+                            options={options}
+                            value={options.find((option) => option.value === String(field.value)) || null}
+                            onChange={(selectedOption: SingleValue<OptionType>) =>
+                                field.onChange(selectedOption ? selectedOption.value : null)
+                            }
+                        />
+                        {extra}
+                    </div>
+                )}
+            />
+            {error && <p className="text-xs text-red-400">{error.message.toString()}</p>}
+        </div>
+    );
+
+    const patientOptions = mapOptions(
+        patients,
+        "id_paciente",
+        (p: any) => `${p.nombre} ${p.apellido}`
+    );
+    const employeeOptions = mapOptions(
+        empleados,
+        "id_empleado",
+        (e: any) => `${e.nombre} ${e.apellido}`
+    );
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -219,63 +285,25 @@ const AppointmentForm = ({
 
             {/* Selección de Paciente y Odontólogo */}
             <div className="grid grid-cols-1 gap-4">
-                <div className="flex flex-col gap-2">
-                    <Controller
-                        control={control}
-                        name="id_paciente"
-                        defaultValue={type === "create" ? null : data?.id_paciente}
-                        render={({ field }) => {
-                            const options: OptionType[] = pacientes.map(
-                                (paciente: { id_paciente: number; nombre: string; apellido: string }) => ({
-                                    value: paciente.id_paciente,
-                                    label: `${paciente.nombre} ${paciente.apellido}`,
-                                })
-                            );
-                            return (
-                                <AutocompleteSelect
-                                    label="Paciente"
-                                    options={options}
-                                    value={options.find((option) => option.value === field.value) || null}
-                                    onChange={(selectedOption: SingleValue<OptionType>) =>
-                                        field.onChange(selectedOption ? selectedOption.value : null)
-                                    }
-                                />
-                            );
-                        }}
-                    />
-                    {errors.id_paciente?.message && (
-                        <p className="text-xs text-red-400">{errors.id_paciente.message.toString()}</p>
-                    )}
-                </div>
-
-                <div className="flex flex-col gap-2">
-                    <Controller
-                        control={control}
-                        name="id_empleado"
-                        defaultValue={type === "create" ? null : data?.id_empleado}
-                        render={({ field }) => {
-                            const options = empleados.map(
-                                (empleado: { id_empleado: number; nombre: string; apellido: string }) => ({
-                                    value: empleado.id_empleado,
-                                    label: `${empleado.nombre} ${empleado.apellido}`,
-                                })
-                            );
-                            return (
-                                <AutocompleteSelect
-                                    label="Odontólogo"
-                                    options={options}
-                                    value={options.find((o: { value: number; }) => o.value === field.value) || null}
-                                    onChange={(selectedOption: SingleValue<OptionType>) =>
-                                        field.onChange(selectedOption ? selectedOption.value : null)
-                                    }
-                                />
-                            );
-                        }}
-                    />
-                    {errors.id_empleado?.message && (
-                        <p className="text-xs text-red-400">{errors.id_empleado.message.toString()}</p>
-                    )}
-                </div>
+                {renderAutocompleteField(
+                    "id_paciente",
+                    "Paciente",
+                    patientOptions,
+                    type === "create" ? undefined : data?.id_paciente,
+                    <div className="w-auto">
+                        <label className="text-xs text-transparent mb-1 block">Acción</label>
+                        <FormModal table="paciente" type="create" onSuccess={handlePatientSuccess} variant="appointment" />
+                    </div>,
+                    errors.id_paciente
+                )}
+                {renderAutocompleteField(
+                    "id_empleado",
+                    "Odontólogo",
+                    employeeOptions,
+                    type === "create" ? undefined : data?.id_empleado,
+                    undefined,
+                    errors.id_empleado
+                )}
             </div>
 
             {/* Fecha y Hora */}
@@ -296,7 +324,6 @@ const AppointmentForm = ({
                         type="datetime-local"
                     />
                 </div>
-
                 <div className="flex flex-col gap-2 w-1/3">
                     <InputField
                         label="Hora Final"
@@ -320,22 +347,18 @@ const AppointmentForm = ({
             )}
 
             {/* Servicio, Cantidad y Tarifa */}
-
             <div className="flex items-center gap-2 md:gap-4">
                 <div className="w-64">
                     <AutocompleteSelect
+                        name="servicioSelect"
                         label="Servicio"
                         options={serviceOptions}
-                        value={
-                            serviceOptions.find((option) => option.value === selectedServiceId) ||
-                            null
-                        }
+                        value={serviceOptions.find((option) => option.value === selectedServiceId) || null}
                         onChange={(selectedOption: SingleValue<OptionType>) =>
                             setSelectedServiceId(selectedOption ? String(selectedOption.value) : "")
                         }
                     />
                 </div>
-
                 <div className="w-24">
                     <InputField
                         label="Cantidad"
@@ -350,7 +373,6 @@ const AppointmentForm = ({
                         register={() => { }}
                     />
                 </div>
-
                 <div className="w-auto">
                     <label className="text-xs text-transparent mb-1 block">Acción</label>
                     <button
@@ -365,9 +387,8 @@ const AppointmentForm = ({
                 </div>
             </div>
 
-            {/* Título y tabla de servicios seleccionados */}
             {servicesDataForTable.length > 0 && (
-                <div className="">
+                <div>
                     <h3 className="text-xs text-gray-500 mt-1">Servicios seleccionados:</h3>
                     <div className="border border-gray-300 rounded-md p-2 mt-1">
                         <Table
@@ -401,16 +422,17 @@ const AppointmentForm = ({
                     <p className="text-xs text-red-400">{errors.estado.message.toString()}</p>
                 )}
                 {type === "update" && data?.deuda_restante === 0 && (
-                    <p className="text-green-600 font-bold text-sm mt-1">La cita a sido paga</p>
+                    <p className="text-green-600 font-bold text-sm mt-1">
+                        La cita ha sido paga
+                    </p>
                 )}
-
             </div>
 
             {state.error && <span className="text-red-400">Algo pasó mal</span>}
             <button type="submit" className="bg-backbuttondefault text-white p-2 rounded-md">
                 {type === "create" ? "Crear" : "Actualizar"}
             </button>
-        </form >
+        </form>
     );
 };
 
