@@ -8,6 +8,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary'
 import EmployeeDelFormModal from './EmployeeDelFormModal'
 import { Plus } from 'lucide-react'
 import TableSearch from '@/components/tableSearch'
+import Loader from '@/components/Loader'
 
 interface Props {
   getAllEmployees: Promise<Employee[]>
@@ -56,7 +57,7 @@ const EmployeeManagement = ({ columns, getAllEmployees }: Props) => {
       </div>
 
       <ErrorBoundary fallback={<div>Ha ocurrido un error</div>}>
-        <Suspense fallback={<div>Cargando usuarios, por favor espera...</div>}>
+        <Suspense fallback={<Loader />}>
           <EmployeesTable
             columns={columns}
             getAllEmployees={getAllEmployees}

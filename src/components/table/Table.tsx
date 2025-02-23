@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import TableItem from './TableItem'
-import { cn } from '@/lib/classNames'
 import TableColumn from '../TableColumn'
 
 interface Props<T> {
