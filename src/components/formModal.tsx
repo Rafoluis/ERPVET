@@ -14,6 +14,7 @@ import TicketForm from "./forms/ticketForm";
 import { deleteService } from "@/actions/service.actions";
 import ServiceForm from "./forms/serviceForm";
 import { createPortal } from "react-dom";
+import { showToast } from "@/lib/toast";
 
 interface ExtendedFormModalProps extends FormContainerProps {
     relatedData?: any;
@@ -112,7 +113,8 @@ const FormModal = ({
 
         useEffect(() => {
             if (state.success) {
-                toast(`La ${table} ha sido eliminada`);
+                showToast("success", `La ${table} ha sido eliminada`);
+                // toast(`La ${table} ha sido eliminada`);
                 setOpen(false);
                 router.refresh();
             }

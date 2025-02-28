@@ -59,7 +59,7 @@ const PatientListPage = async ({
     searchParams: { [key: string]: string | undefined }
 }) => {
     const params = await searchParams;
-    const { page, sort, column, ...queryParams } = params;
+    const { page, sort, column, start, end,...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
 
@@ -76,6 +76,15 @@ const PatientListPage = async ({
                 ];
             }
         }
+    }
+
+    if (start || end) {
+        query.usuario = {
+            fecha_creacion: {
+                gte: start ? new Date(start) : undefined,
+                lte: end ? new Date(end) : undefined,
+            }
+        };
     }
 
     const [data, count] = await prisma.$transaction([

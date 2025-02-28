@@ -19,19 +19,19 @@ type AppointmentList = Cita & {
 
 const columns = [
     {
-        header: "Paciente", accessor: "paciente"
+        header: "Paciente", accessor: "dni"
     },
     {
-        header: "Fecha de cita", accessor: "fechaCita"
+        header: "Fecha de cita", accessor: "fecha_cita"
     },
     {
-        header: "Hora de cita", accessor: "horaCita", className: "hidden md:table-cell"
+        header: "Hora de cita", accessor: "hora_cita_inicial", className: "hidden md:table-cell"
     },
     {
-        header: "Odontólogo asignado", accessor: "doctorAsignado", className: "hidden md:table-cell"
+        header: "Odontólogo asignado", accessor: "apellido", className: "hidden md:table-cell"
     },
     {
-        header: "Servicio", accessor: "servicio", className: "hidden md:table-cell"
+        header: "Servicio", accessor: "nombre_servicio", className: "hidden md:table-cell"
     },
     {
         header: "Tarifa total", accessor: "tarifa", className: "hidden md:table-cell"
@@ -111,7 +111,7 @@ const AppointmentListPage = async ({
 }) => {
 
     const params = await searchParams;
-    const { page, ...queryParams } = params;
+    const { page, sort, column, start, end, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
 
@@ -164,6 +164,14 @@ const AppointmentListPage = async ({
         }
     }
 
+    if (start || end) {
+        query.fecha_cita = {
+            gte: start ? new Date(start) : undefined,
+            lte: end ? new Date(end) : undefined,
+        };
+    }
+    
+
     const [data, count] = await prisma.$transaction([
         prisma.cita.findMany({
             where: query,
@@ -200,11 +208,39 @@ const AppointmentListPage = async ({
                     },
                 },
             },
+            orderBy: column
+            ? column === "dni"
+                ? { paciente: { usuario: { dni: sort === "asc" ? "asc" : "desc" } } }
+                : column === "apellido"
+                ? { empleado: { usuario: { apellido: sort === "asc" ? "asc" : "desc" } } }
+                : column === "nombre_servicio" || column === "tarifa"
+                ? undefined
+                : { [column]: sort === "asc" ? "asc" : "desc" }
+            : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),
         prisma.cita.count({ where: query }),
     ]);
+
+    if (column === "nombre_servicio" || column === "tarifa") {
+        data.sort((a, b) => {
+            const servicioA = a.servicios[0]?.servicio;
+            const servicioB = b.servicios[0]?.servicio;
+    
+            if (column === "tarifa") {
+                const tarifaA = servicioA?.tarifa ?? 0;
+                const tarifaB = servicioB?.tarifa ?? 0;
+                if (tarifaA !== tarifaB) {
+                    return sort === "asc" ? tarifaA - tarifaB : tarifaB - tarifaA;
+                }
+            }
+    
+            const nameA = servicioA?.nombre_servicio || "";
+            const nameB = servicioB?.nombre_servicio || "";
+            return sort === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+        });
+    }
 
     return (
         <div>
