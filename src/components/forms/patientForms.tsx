@@ -52,7 +52,8 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
             onSuccess && newPatient && onSuccess(newPatient);
             setOpen(false);
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            showToast("error", "Algo pasó mal");
+            // toast("Error en la acción: " + state.error);
             console.error("Error en la acción: ", state.error);
         }
     }, [state, submittedData, setOpen, onSuccess, actionText]);

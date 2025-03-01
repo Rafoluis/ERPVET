@@ -11,6 +11,7 @@ import { unauthorized, useRouter } from "next/navigation";
 import { createTicket, updateTicket } from "@/actions/ticket.actions";
 import AutocompleteSelect, { OptionType } from "../autocompleteSelect";
 import { SingleValue } from "react-select";
+import { showToast } from "@/lib/toast";
 
 const TicketForm = ({
     type,
@@ -97,13 +98,15 @@ const TicketForm = ({
 
     useEffect(() => {
         if (state.success) {
-            toast(
-                `La boleta ha sido ${type === "create" ? "creada" : "actualizada"}`
-            );
+            showToast("success", `La boleta ha sido ${type === "create" ? "creada" : "actualizada"}`);
+            // toast(
+            //     `La boleta ha sido ${type === "create" ? "creada" : "actualizada"}`
+            // );
             setOpen(false);
             router.refresh();
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            showToast("error", `Error en la acción: ${state.error}`);
+            // toast("Error en la acción: " + state.error);
             console.error("Error en la acción: ", state.error);
         }
     }, [state]);
