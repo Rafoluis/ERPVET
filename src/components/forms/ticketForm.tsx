@@ -33,7 +33,14 @@ const TicketForm = ({
     } = useForm<TicketSchema>({
         resolver: zodResolver(ticketSchema),
         defaultValues: {
-            monto_total: 0,
+            monto_total: data?.monto_total || 0,
+            fraccionar_pago: data?.fraccionar_pago || false,
+            monto_parcial: data?.monto_parcial || 0,
+            fecha_emision: data?.fecha_emision ? new Date(data.fecha_emision) : undefined,
+            tipo_comprobante: data?.tipo_comprobante || "",
+            medio_pago: data?.medio_pago || "",
+            id_paciente: data?.id_paciente || null,
+            citas: data?.citas ? data.citas.map((c: any) => c.id_cita) : [],
         },
     });
 
@@ -43,13 +50,14 @@ const TicketForm = ({
     );
 
     const [citas, setCitas] = useState<any[]>([]);
+    const [selectedCitas, setSelectedCitas] = useState<number[]>([]);
+
     const router = useRouter();
 
     const isCitaFullyPaid = (cita: any) => {
         if (cita.deuda_restante !== undefined) {
             return Number(cita.deuda_restante) === 0;
         }
-
         const totalCost = cita.servicios.reduce(
             (acc: number, serv: any) => acc + serv.tarifa * serv.cantidad,
             0
@@ -68,20 +76,91 @@ const TicketForm = ({
         return totalPaid >= totalCost;
     };
 
-    // const handlePacienteChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    //     const pacienteId = parseInt(e.target.value, 10);
-    //     const { pacientes = [] } = relatedData || {};
-    //     const selectedPaciente = pacientes.find(
-    //         (p: { id_paciente: number; citas: any[] }) => p.id_paciente === pacienteId
-    //     );
-    //     if (selectedPaciente) {
-    //         const filteredCitas = selectedPaciente.citas.filter((cita: any) => {
-    //             return !isCitaFullyPaid(cita);
-    //         });
-    //         setCitas(filteredCitas);
-    //         setValue("citas", []);
-    //     }
-    // };
+    useEffect(() => {
+        if (
+            type === "update" &&
+            data &&
+            relatedData?.pacientes &&
+            relatedData?.tickets
+        ) {
+            console.log("Data update:", data);
+            console.log("Related pacientes:", relatedData.pacientes);
+
+            const relatedTicket = relatedData.tickets.find(
+                (t: any) => t.id_ticket === data.id_ticket
+            );
+
+            let selectedCitasArray: number[] = [];
+            if (
+                relatedTicket &&
+                Array.isArray(relatedTicket.citas) &&
+                relatedTicket.citas.length > 0
+            ) {
+                selectedCitasArray = relatedTicket.citas.map(
+                    (cita: any) => cita.id_cita
+                );
+            } else if (
+                Array.isArray(data.ticketCitas) &&
+                data.ticketCitas.length > 0
+            ) {
+                selectedCitasArray = data.ticketCitas.map((tc: any) => tc.id_cita);
+            } else if (Array.isArray(data.citas) && data.citas.length > 0) {
+                selectedCitasArray = data.citas.map((cita: any) => cita.id_cita);
+            } else {
+                console.warn("No se encontraron citas asociadas en data.");
+            }
+            const defaultPaciente = relatedData.pacientes.find(
+                (p: any) => p.id_paciente === data.id_paciente
+            );
+            if (defaultPaciente) {
+                const selectedCitasData = defaultPaciente.citas.filter((cita: any) =>
+                    selectedCitasArray.includes(cita.id_cita)
+                );
+                const citasReset = selectedCitasData.map((cita: any) => {
+                    const totalFee = cita.servicios.reduce(
+                        (acc: number, s: any) => acc + s.tarifa * s.cantidad,
+                        0
+                    );
+                    return { ...cita, deuda_restante: totalFee };
+                });
+                console.log("Citas seleccionadas para update:", citasReset);
+                setCitas(citasReset);
+                setSelectedCitas(citasReset.map((cita: any) => cita.id_cita));
+                setValue("id_paciente", defaultPaciente.id_paciente);
+                setValue("citas", citasReset.map((cita: any) => cita.id_cita));
+            }
+        }
+    }, [type, data, relatedData, setValue]);
+
+    useEffect(() => {
+        if (type === "update" && data) {
+            const isPartial = data.monto_pagado < data.monto_total;
+            setValue("fraccionar_pago", isPartial);
+            setValue("monto_parcial", isPartial ? data.monto_pagado : 0);
+        }
+    }, [data, type, setValue]);
+
+    const computedTotal = useMemo(() => {
+        return selectedCitas.reduce((sum: number, citaId: number) => {
+            const cita = citas.find((c: any) => c.id_cita === citaId);
+            if (!cita) return sum;
+            const totalFee = cita.servicios.reduce(
+                (acc: number, s: any) => acc + s.tarifa * s.cantidad,
+                0
+            );
+            const remaining =
+                type === "update"
+                    ? totalFee
+                    : cita.deuda_restante !== undefined
+                        ? Number(cita.deuda_restante)
+                        : totalFee;
+            return sum + remaining;
+        }, 0);
+    }, [selectedCitas, citas, type]);
+
+    useEffect(() => {
+        setValue("monto_total", computedTotal);
+    }, [computedTotal, setValue]);
 
     const onSubmit = handleSubmit(
         (data) => {
@@ -109,7 +188,6 @@ const TicketForm = ({
     }, [state]);
 
     const { pacientes = [] } = relatedData || {};
-    const [selectedCitas, setSelectedCitas] = useState<number[]>([]);
     const watchFraccionar = watch("fraccionar_pago");
 
     const handleToggleCita = (citaId: number) => {
@@ -122,26 +200,6 @@ const TicketForm = ({
         setSelectedCitas(newSelected);
         setValue("citas", newSelected);
     };
-
-    const computedTotal = useMemo(() => {
-        return selectedCitas.reduce((sum: number, citaId: number) => {
-            const cita = citas.find((c: any) => c.id_cita === citaId);
-            if (!cita) return sum;
-            const totalFee = cita.servicios.reduce(
-                (acc: number, s: any) => acc + s.tarifa * s.cantidad,
-                0
-            );
-            const remaining =
-                cita.deuda_restante !== undefined
-                    ? Number(cita.deuda_restante)
-                    : totalFee;
-            return sum + remaining;
-        }, 0);
-    }, [selectedCitas, citas]);
-
-    useEffect(() => {
-        setValue("monto_total", computedTotal);
-    }, [computedTotal, setValue]);
 
     return (
         <form className="flex flex-col gap-8" onSubmit={onSubmit}>
@@ -187,7 +245,7 @@ const TicketForm = ({
                                 onChange={(selectedOption: SingleValue<OptionType>) => {
                                     const newValue = selectedOption ? selectedOption.value : null;
                                     field.onChange(newValue);
-                                    if (newValue) {
+                                    if (newValue && type !== "update") {
                                         const selectedPaciente = pacientes.find(
                                             (p: { id_paciente: number; citas: any[] }) =>
                                                 p.id_paciente === newValue
@@ -200,7 +258,7 @@ const TicketForm = ({
                                             setValue("citas", []);
                                             setSelectedCitas([]);
                                         }
-                                    } else {
+                                    } else if (!newValue) {
                                         setCitas([]);
                                         setValue("citas", []);
                                         setSelectedCitas([]);
@@ -217,7 +275,7 @@ const TicketForm = ({
                 )}
             </div>
 
-            {/* Selección múltiple de Citas (filtradas) */}
+            {/* Selección múltiple de Citas (en update se muestran las precargadas) */}
             <div className="flex flex-col gap-2">
                 <label className="text-xs text-gray-500">
                     Citas disponibles (con deuda pendiente)
@@ -229,17 +287,23 @@ const TicketForm = ({
                 ) : (
                     <div className="grid grid-cols-2 gap-2">
                         {citas.map(
-                            (cita: { id_cita: number; fecha_cita: string; servicios: any[]; deuda_restante?: number }) => {
+                            (cita: {
+                                id_cita: number;
+                                fecha_cita: string;
+                                servicios: any[];
+                                deuda_restante?: number;
+                            }) => {
                                 const totalFee = cita.servicios.reduce(
                                     (acc: number, s: any) =>
                                         acc + s.tarifa * s.cantidad,
                                     0
                                 );
-
                                 const remaining =
-                                    cita.deuda_restante !== undefined
-                                        ? Number(cita.deuda_restante)
-                                        : totalFee;
+                                    type === "update"
+                                        ? totalFee
+                                        : cita.deuda_restante !== undefined
+                                            ? Number(cita.deuda_restante)
+                                            : totalFee;
                                 const isSelected = selectedCitas.includes(cita.id_cita);
                                 return (
                                     <div
@@ -291,7 +355,6 @@ const TicketForm = ({
                     </p>
                 )}
 
-                {/* Monto total acumulado */}
                 {selectedCitas.length > 0 && (
                     <div className="mt-4 border-t pt-4">
                         <label className="text-xs text-gray-500">
@@ -337,19 +400,27 @@ const TicketForm = ({
             </div>
 
             {/* Fecha de emisión */}
-            <div className="mt-2">
-                <label className="text-sm font-medium">Fecha de emisión</label>
-                <input
-                    type="date"
-                    {...register("fecha_emision")}
-                    className="p-2 border rounded-md w-full"
-                />
-                {errors.fecha_emision && (
-                    <p className="text-xs text-red-400">
-                        {errors.fecha_emision.message}
-                    </p>
+            <Controller
+                name="fecha_emision"
+                control={control}
+                render={({ field }) => (
+                    <input
+                        type="date"
+                        className="p-2 border rounded-md w-full"
+                        value={
+                            field.value
+                                ? new Date(field.value).toISOString().slice(0, 10)
+                                : ""
+                        }
+                        onChange={(e) => {
+                            field.onChange(new Date(e.target.value));
+                        }}
+                    />
                 )}
-            </div>
+            />
+            {errors.fecha_emision && (
+                <p className="text-xs text-red-400">{errors.fecha_emision.message}</p>
+            )}
 
             {/* Tipo de comprobante */}
             <div className="mt-2">
@@ -410,7 +481,7 @@ const TicketForm = ({
             >
                 {type === "create" ? "Crear" : "Actualizar"}
             </button>
-        </form >
+        </form>
     );
 };
 
