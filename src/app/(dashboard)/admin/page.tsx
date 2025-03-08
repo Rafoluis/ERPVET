@@ -11,7 +11,7 @@ const columns = [
 ]
 
 interface AdminPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: { [key: string]: string | string[] | undefined } | Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const AdminPage = async ({ searchParams }: AdminPageProps) => {
