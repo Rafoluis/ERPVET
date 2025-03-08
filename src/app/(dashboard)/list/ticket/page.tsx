@@ -12,22 +12,22 @@ type TicketList = Ticket & { paciente: Paciente & { usuario: Usuario }, pagos: P
 
 const columns = [
     {
-        header: "Id", accessor: "idTicket", className: "hidden md:table-cell"
+        header: "Id", accessor: "id_ticket", className: "hidden md:table-cell"
     },
     {
-        header: "Fecha", accessor: "fechaEmision", className: "hidden md:table-cell"
+        header: "Fecha", accessor: "fecha_emision", className: "hidden md:table-cell"
     },
     {
         header: "Paciente", accessor: "paciente", className: "hidden md:table-cell"
     },
     {
-        header: "Monto", accessor: "montoTotal", className: "hidden md:table-cell"
+        header: "Monto", accessor: "monto_total", className: "hidden md:table-cell"
     },
     {
-        header: "Tipo de comprobante", accessor: "tipoComprobante"
+        header: "Tipo de comprobante", accessor: "tipo_comprobante"
     },
     {
-        header: "Medio de pago", accessor: "medioPago"
+        header: "Medio de pago", accessor: "medio_pago"
     },
     {
         header: "Acciones", accessor: "acciones"
@@ -74,7 +74,7 @@ const PatientListPage = async ({
     searchParams: { [key: string]: string | undefined }
 }) => {
     const params = await searchParams;
-    const { page, ...queryParams } = params;
+    const { page, column, sort, start, end, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
 
@@ -109,6 +109,11 @@ const PatientListPage = async ({
                 paciente: { include: { usuario: true } },
                 pagos: true,
             },
+            orderBy: column === "paciente"
+            ? { paciente: { usuario: { nombre: sort === "asc" ? "asc" : "desc" } } }
+            : column
+            ? { [column]: sort === "asc" ? "asc" : "desc" }
+            : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),
