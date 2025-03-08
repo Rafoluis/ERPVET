@@ -58,7 +58,7 @@ const renderRow = (item: AppointmentList) => (
                 : ""}
         </td>
         <td className="hidden md:table-cell">
-            {new Date(item.fecha_cita).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false })}</td>
+            {new Date(item.fecha_cita).toLocaleTimeString("es-PE", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", hour12: false })}</td>
         <td className="hidden md:table-cell">{`${item.empleado.usuario.nombre} ${item.empleado.usuario.apellido}`}</td>
         <td className="hidden md:table-cell">
             {item.servicios && Array.isArray(item.servicios) && item.servicios.length > 0
@@ -66,11 +66,9 @@ const renderRow = (item: AppointmentList) => (
                 : "-"}
         </td>
         <td className="hidden md:table-cell">
-            {item.servicios && Array.isArray(item.servicios) && item.servicios.length > 0
-                ? `S/ ${item.servicios
-                    .reduce((total, s) => total + s.servicio.tarifa * s.cantidad, 0)
-                    .toFixed(2)}`
-                : "0.00"}
+            {`S/ ${((Array.isArray(item.servicios) && item.servicios.length > 0
+                ? item.servicios.reduce((total, s) => total + s.servicio.tarifa * s.cantidad, 0)
+                : 0)).toFixed(2)}`}
         </td>
         <td className="hidden md:table-cell">
             <div
@@ -115,7 +113,7 @@ const AppointmentListPage = async ({
 
     const p = page ? parseInt(page) : 1;
 
-    const query: Prisma.CitaWhereInput = {};
+    const query: Prisma.CitaWhereInput = { deletedAt: null };
 
     if (queryParams) {
         for (const [key, value] of Object.entries(queryParams)) {

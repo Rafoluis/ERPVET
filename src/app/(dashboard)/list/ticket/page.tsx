@@ -1,6 +1,7 @@
 import FormContainer from "@/components/formContainer"
 import Pagination from "@/components/pagination"
 import PrintButton from "@/components/printer/printerButton"
+import SunatBoleta from "@/components/sunat"
 import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
@@ -49,12 +50,12 @@ const renderRow = (item: TicketList) => (
                 <p className="text-xs text-gray-500">{item.paciente.usuario.dni}</p>
             </div>
         </td>
-        <td className="hidden md:table-cell">{item.monto_total}</td>
+        <td className="hidden md:table-cell">{`S/ ${Number(item.monto_total).toFixed(2)}`}</td>
         <td className="hidden md:table-cell">{item.tipo_comprobante}</td>
         <td className="hidden md:table-cell">{item.medio_pago}</td>
         <td>
             <div className="flex items-center gap-2">
-                <PrintButton ticketId={item.id_ticket} />
+                <SunatBoleta ticketId={1} />
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="boleta" type="update" data={item} />
@@ -77,7 +78,7 @@ const PatientListPage = async ({
 
     const p = page ? parseInt(page) : 1;
 
-    const query: Prisma.TicketWhereInput = {};
+    const query: Prisma.TicketWhereInput = { deletedAt: null };
 
     if (queryParams) {
         for (const [key, value] of Object.entries(queryParams)) {
@@ -122,7 +123,7 @@ const PatientListPage = async ({
                 </div>
             </div>
 
-            {/* BUSQUEDA Y AGREGAR CITA */}
+            {/* BUSQUEDA Y AGREGAR  */}
             <div className='bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0'>
                 <div className='flex items-center justify-between'>
                     <h2 className="hidden md:block text-ls font-semibold">Boletas</h2>

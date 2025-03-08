@@ -7,7 +7,7 @@ import { TicketSchema, ticketSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { unauthorized, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { createTicket, updateTicket } from "@/actions/ticket.actions";
 import AutocompleteSelect, { OptionType } from "../autocompleteSelect";
 import { SingleValue } from "react-select";

@@ -1,5 +1,5 @@
 import { deleteEmployee } from '@/actions/admin.actions'
-import Modal from '@/components/modal/Modal'
+import Modal from '@/components/forms/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee } from '@/schemas/employee.schema'
 

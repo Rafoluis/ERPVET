@@ -5,10 +5,7 @@ import prisma from "../lib/prisma";
 
 type CurrentState = { success: boolean; error: string | null };
 
-export const createService = async (
-    currentState: CurrentState,
-    data: ServiceSchema
-) => {
+export const createService = async (currentState: CurrentState, data: ServiceSchema) => {
     try {
         await prisma.servicio.create({
             data: {
@@ -28,10 +25,7 @@ export const createService = async (
     }
 };
 
-export const updateService = async (
-    currentState: CurrentState,
-    data: ServiceSchema
-) => {
+export const updateService = async (currentState: CurrentState, data: ServiceSchema) => {
     try {
         await prisma.servicio.update({
             where: { id_servicio: data.id_servicio! },
@@ -53,13 +47,17 @@ export const updateService = async (
 };
 
 export const deleteService = async (
-    currentState: CurrentState,
     data: FormData
 ) => {
     const id = data.get("id") as string;
+    const serviceId = parseInt(id, 10);
+    if (isNaN(serviceId)) {
+        throw new Error("ID de servicio inválido");
+    }
     try {
-        await prisma.servicio.delete({
-            where: { id_servicio: parseInt(id) },
+        await prisma.servicio.update({
+            where: { id_servicio: serviceId },
+            data: { deletedAt: new Date() },
         });
         return { success: true, error: null };
     } catch (err) {
@@ -68,6 +66,15 @@ export const deleteService = async (
         } else {
             console.error("Se produjo un error desconocido:", err);
         }
-        return { success: false, error: "Error al eliminar un servicio" };
+        return { success: false, error: "Error al eliminar el servicio" };
     }
 };
+
+
+
+
+
+
+
+
+

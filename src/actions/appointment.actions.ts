@@ -11,40 +11,59 @@ const processAppointment = async (
     isUpdate = false
 ) => {
     try {
-        const horaFinalUTC = data.hora_cita_final ? new Date(data.hora_cita_final) : undefined;
         const fechaCitaUTC = new Date(data.fecha_cita);
         const options = { timeZone: "America/Lima", hour12: false };
-        const horaFinal = horaFinalUTC
-            ? new Date(horaFinalUTC.toLocaleString("en-US", options))
-            : undefined;
         const fechaCita = new Date(fechaCitaUTC.getTime() - fechaCitaUTC.getTimezoneOffset() * 60000);
+        const horaFinal = data.hora_cita_final
+            ? new Date(new Date(data.hora_cita_final).toLocaleString("en-US", options))
+            : new Date(fechaCita.getTime() + 60 * 60 * 1000);
 
-        if (horaFinal && horaFinal <= fechaCita) {
+        if (horaFinal <= fechaCita) {
             return { success: false, error: "La hora final debe ser después de la hora de inicio" };
         }
 
-        const exclusionCondition = isUpdate && data.id_cita ? { NOT: { id_cita: data.id_cita } } : {};
+        let shouldCheckOverlap = true;
+        if (isUpdate && data.id_cita) {
+            const currentCita = await prisma.cita.findUnique({
+                where: { id_cita: data.id_cita },
+                select: { hora_cita_inicial: true, hora_cita_final: true },
+            });
+            if (currentCita && currentCita.hora_cita_inicial && currentCita.hora_cita_final) {
+                if (
+                    currentCita.hora_cita_inicial.getTime() === fechaCita.getTime() &&
+                    (horaFinal ? currentCita.hora_cita_final.getTime() === horaFinal.getTime() : true)
+                ) {
+                    shouldCheckOverlap = false;
+                }
+            }
+        }
 
-        const overlappingCitas = await prisma.cita.findMany({
-            where: {
-                id_empleado: data.id_empleado,
-                estado: { in: ["AGENDADO", "EN_PROCESO"] },
-                ...exclusionCondition,
-                AND: [
-                    {
-                        OR: [
-                            { hora_cita_inicial: { lte: fechaCita }, hora_cita_final: { gte: fechaCita } },
-                            { hora_cita_inicial: { lte: horaFinal }, hora_cita_final: { gte: horaFinal } },
-                            { hora_cita_inicial: { gte: fechaCita }, hora_cita_final: { lte: horaFinal } },
-                            { hora_cita_inicial: { lte: fechaCita }, hora_cita_final: { gte: horaFinal } },
-                        ],
-                    },
-                ],
-            },
-        });
+        if (shouldCheckOverlap) {
+            const exclusionCondition =
+                isUpdate && data.id_cita ? { NOT: { id_cita: Number(data.id_cita) } } : {};
 
-        if (overlappingCitas.length > 0) {
-            return { success: false, error: "El odontólogo ya tiene una cita en este horario." };
+            const overlappingCitas = await prisma.cita.findMany({
+                where: {
+                    id_empleado: data.id_empleado,
+                    estado: { in: ["AGENDADO", "EN_PROCESO"] },
+                    deletedAt: null,
+                    ...exclusionCondition,
+                    AND: [
+                        {
+                            OR: [
+                                { hora_cita_inicial: { lte: fechaCita }, hora_cita_final: { gte: fechaCita } },
+                                { hora_cita_inicial: { lte: horaFinal }, hora_cita_final: { gte: horaFinal } },
+                                { hora_cita_inicial: { gte: fechaCita }, hora_cita_final: { lte: horaFinal } },
+                                { hora_cita_inicial: { lte: fechaCita }, hora_cita_final: { gte: horaFinal } },
+                            ],
+                        },
+                    ],
+                },
+            });
+
+            if (overlappingCitas.length > 0) {
+                return { success: false, error: "El odontólogo ya tiene una cita en este horario." };
+            }
         }
 
         let serviciosData: { id_servicio: number; cantidad: number }[] = [];
@@ -179,6 +198,8 @@ const processAppointment = async (
     }
 };
 
+
+
 export const createAppointment = async (currentState: CurrentState, data: AppointmentSchema) => {
     return processAppointment(currentState, data, false);
 };
@@ -187,14 +208,22 @@ export const updateAppointment = async (currentState: CurrentState, data: Appoin
     return processAppointment(currentState, data, true);
 };
 
-export const deleteAppointment = async (currentState: CurrentState, data: FormData) => {
+export const deleteAppointment = async (
+    currentState: CurrentState,
+    data: FormData
+): Promise<CurrentState> => {
     const id = data.get("id") as string;
+    if (!id) {
+        return { success: false, error: "ID no proporcionado" };
+    }
+    const appointmentId = parseInt(id, 10);
+    if (isNaN(appointmentId)) {
+        return { success: false, error: "ID de cita no válido" };
+    }
     try {
-        await prisma.servicioCita.deleteMany({
-            where: { id_cita: parseInt(id) },
-        });
-        await prisma.cita.delete({
-            where: { id_cita: parseInt(id) },
+        await prisma.cita.update({
+            where: { id_cita: appointmentId },
+            data: { deletedAt: new Date(), deuda_restante: 0 },
         });
         return { success: true, error: null };
     } catch (err) {
@@ -203,6 +232,9 @@ export const deleteAppointment = async (currentState: CurrentState, data: FormDa
         } else {
             console.error("Se produjo un error desconocido:", err);
         }
-        return { success: false, error: null };
+        return { success: false, error: "Error al eliminar la cita" };
     }
 };
+
+
+

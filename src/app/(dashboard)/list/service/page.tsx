@@ -31,7 +31,7 @@ const renderRow = (item: ServicioList) => (
         <td className="hidden md:table-cell p-2">{item.id_servicio}</td>
         <td className="hidden md:table-cell">{item.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.descripcion}</td>
-        <td className="hidden md:table-cell">{item.tarifa}</td>
+        <td className="hidden md:table-cell">{`S/ ${Number(item.tarifa).toFixed(2)}`}</td>
         <td>
             <div className="flex items-center gap-2">
                 {"recepcionista" === "recepcionista" && (
@@ -56,7 +56,10 @@ const ServiceListPage = async ({
 
     const p = page ? parseInt(page) : 1;
 
-    const query: Prisma.ServicioWhereInput = {};
+    const query: Prisma.ServicioWhereInput = {
+        deletedAt: null,
+    };
+
     for (const [key, value] of Object.entries(queryParams)) {
         if (value !== undefined && key !== "sortColumn" && key !== "sortDirection") {
             if (key === "id_servicio") {

@@ -85,15 +85,24 @@ export const updatePatient = async (
     }
 };
 
-export const deletePatient = async (currentState: CurrentState, data: FormData) => {
+export const deletePatient = async (
+    currentState: CurrentState,
+    data: FormData
+) => {
     const id = data.get("id") as string;
+    const patientId = parseInt(id, 10);
+    if (isNaN(patientId)) {
+        throw new Error("ID de paciente inválido");
+    }
     try {
         await prisma.$transaction(async (tx) => {
-            const pacienteEliminado = await tx.paciente.delete({
-                where: { id_paciente: parseInt(id) },
+            const pacienteEliminado = await tx.paciente.update({
+                where: { id_paciente: patientId },
+                data: { deletedAt: new Date() },
             });
-            await tx.usuario.delete({
+            await tx.usuario.update({
                 where: { id_usuario: pacienteEliminado.id_usuario },
+                data: { deletedAt: new Date() },
             });
         });
         return { success: true, error: null };
@@ -101,8 +110,8 @@ export const deletePatient = async (currentState: CurrentState, data: FormData) 
         if (err instanceof Error) {
             console.error(err.stack);
         } else {
-            console.error('Se produjo un error desconocido:', err);
+            console.error("Se produjo un error desconocido:", err);
         }
         return { success: false, error: "Error al eliminar un paciente" };
     }
-}
+};
