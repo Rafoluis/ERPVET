@@ -102,6 +102,10 @@ const PatientListPage = async ({
         }
     }
 
+    if (start && end) {
+        query.fecha_emision = { gte: new Date(start), lte: new Date(end) };
+    }
+
     const [data, count] = await prisma.$transaction([
         prisma.ticket.findMany({
             where: query,
