@@ -1,0 +1,1 @@
+export const numPage = 5;

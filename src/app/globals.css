@@ -1,3 +1,23 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --default-gray: #d7dbe1;
+        --default-white: #f9f9f9;
+        --default-text-dark: #3b3b3b;
+        --button-hover: #d6f4ff;
+        --blue-dark-bg: #2a4d69;
+        --blue-dark-select-bg: #113452;
+        --page-bg: #CFE1F1;
+        --button-default-bg: #547AA5;
+        --button-secondary-bg: #77a8ec;
+        --button-green-bg: #74FFDC;
+        --button-yellow-bg: #FFF4C3;
+        --button-red-bg: #FFBBBC;
+        --blue-navbar-bg: #B5CEE8;
+        --blue-text: #00AFC6;
+        --red-text: #FFA0A4;
+    }
+}

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,183 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario     Int       @id @default(autoincrement())
+  nombre         String
+  apellido       String
+  dni            String    @unique
+  sexo           Sexo
+  email          String?   @unique
+  telefono       String    @default("")
+  direccion      String?
+  fecha_creacion DateTime  @default(now())
+  password       String
+  deletedAt      DateTime?
+
+  empleado Empleado?
+  paciente Paciente?
+  roles    UsuarioRol[]
+}
+
+model Rol {
+  id_rol    Int          @id @default(autoincrement())
+  nombre    TipoRol      @unique
+  deletedAt DateTime?
+  usuarios  UsuarioRol[]
+}
+
+model UsuarioRol {
+  id               Int       @id @default(autoincrement())
+  id_usuario       Int
+  id_rol           Int
+  fecha_asignacion DateTime  @default(now())
+  deletedAt        DateTime?
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  rol     Rol     @relation(fields: [id_rol], references: [id_rol])
+
+  @@unique([id_usuario, id_rol])
+}
+
+model Paciente {
+  id_paciente      Int               @id @default(autoincrement())
+  id_usuario       Int               @unique
+  fecha_nacimiento DateTime
+  citas            Cita[]
+  tickets          Ticket[]
+  historiaClinica  Historia_Clinica?
+  fecha_creacion   DateTime          @default(now())
+  deletedAt        DateTime?
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Empleado {
+  id_empleado    Int       @id @default(autoincrement())
+  id_usuario     Int       @unique
+  especialidad   String
+  citas          Cita[]
+  fecha_creacion DateTime  @default(now())
+  deletedAt      DateTime?
+
+  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+}
+
+model Servicio {
+  id_servicio     Int            @id @default(autoincrement())
+  nombre_servicio String
+  descripcion     String?
+  tarifa          Float
+  citas           ServicioCita[]
+  deletedAt       DateTime?
+}
+
+model ServicioCita {
+  id_cita     Int
+  id_servicio Int
+  cantidad    Int @default(1)
+
+  cita     Cita     @relation(fields: [id_cita], references: [id_cita])
+  servicio Servicio @relation(fields: [id_servicio], references: [id_servicio])
+
+  @@id([id_cita, id_servicio])
+}
+
+model Cita {
+  id_cita           Int            @id @default(autoincrement())
+  id_paciente       Int
+  id_empleado       Int
+  fecha_cita        DateTime
+  hora_cita_inicial DateTime?
+  hora_cita_final   DateTime?
+  monto_pagado      Float          @default(0)
+  deuda_restante    Float          @default(0)
+  estado            EstadoCita
+  servicios         ServicioCita[]
+  ticketCitas       TicketCita[]
+  deletedAt         DateTime?
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+  empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
+}
+
+model Ticket {
+  id_ticket        Int       @id @default(autoincrement())
+  id_paciente      Int
+  fecha_emision    DateTime
+  tipo_comprobante String
+  medio_pago       String
+  monto_total      Float
+  monto_pagado     Float     @default(0)
+  deuda_restante   Float     @default(0)
+  deletedAt        DateTime?
+
+  paciente    Paciente     @relation(fields: [id_paciente], references: [id_paciente])
+  pagos       Pago[]
+  ticketCitas TicketCita[]
+}
+
+model TicketCita {
+  id_ticket Int
+  id_cita   Int
+
+  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
+  cita   Cita   @relation(fields: [id_cita], references: [id_cita])
+
+  @@id([id_ticket, id_cita])
+}
+
+model Pago {
+  id_pago        Int        @id @default(autoincrement())
+  id_ticket      Int
+  monto          Float
+  fecha_pago     DateTime
+  medio_pago     String
+  fecha_creacion DateTime
+  estado_pago    EstadoPago @default(PENDIENTE)
+  deletedAt      DateTime?
+
+  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
+}
+
+model Historia_Clinica {
+  id_historia    Int       @id @default(autoincrement())
+  id_paciente    Int       @unique
+  fecha_creacion DateTime  @default(now())
+  antecedentes   String?
+  tratamientos   String?
+  medicamentos   String?
+  observaciones  String?
+  deletedAt      DateTime?
+
+  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+}
+
+enum EstadoPago {
+  PENDIENTE
+  COMPLETADO
+  FRACCIONADO
+}
+
+enum Sexo {
+  MASCULINO
+  FEMENINO
+}
+
+enum EstadoCita {
+  AGENDADO
+  COMPLETADO
+  EN_PROCESO
+  FINALIZADO
+  CANCELADO
+  PAGADA
+}
+
+enum TipoRol {
+  ADMIN
+  ODONTOLOGO
+  PACIENTE
+  RECEPCIONISTA
 }
