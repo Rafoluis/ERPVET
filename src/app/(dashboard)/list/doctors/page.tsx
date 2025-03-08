@@ -11,7 +11,7 @@ type DoctorList = Empleado & { usuario: { nombre: string; apellido: string; dni:
 
 const columns = [
     {
-        header: "Nombre de odontólogo", accessor: "odontologo"
+        header: "Nombre de odontólogo", accessor: "nombre"
     },
     {
         header: "Especialidad", accessor: "especialidad", className: "hidden md:table-cell"
@@ -88,18 +88,44 @@ const DoctorListPage = async ({
 
     const [data, count] = await prisma.$transaction([
         prisma.empleado.findMany({
-            where: query,
+            where: {
+                AND: [
+                    query, 
+                    {
+                        usuario: {
+                            roles: {
+                                some: { rol: { nombre: "ODONTOLOGO" } } } 
+                        }
+                    }
+                ]
+            },
             include: { usuario: true },
             orderBy: column
-                ? column === "doctor_info"
+                ? column === "doctor_info" || column === "nombre"
                     ? { usuario: { nombre: sort === "asc" ? "asc" : "desc" } }
+                    : column === "especialidad"
+                    ? { especialidad: sort === "asc" ? "asc" : "desc" }
                     : { [column]: sort === "asc" ? "asc" : "desc" }
                 : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),
-        prisma.empleado.count({ where: query }),
+        prisma.empleado.count({
+            where: {
+                AND: [
+                    query,
+                    {
+                        usuario: {
+                            roles: {
+                                some: { rol: { nombre: "ODONTOLOGO" } } }
+                        }
+                    }
+                ]
+            }
+        }),
     ]);
+    
+    console.log(data)
 
     return (
         <div>
