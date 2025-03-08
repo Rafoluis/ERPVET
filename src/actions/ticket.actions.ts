@@ -40,40 +40,34 @@ export const createTicket = async (
         const citaUpdates = [];
 
         for (const cita of citasOrdenadas) {
-
             const costoCita = cita.servicios.reduce(
                 (acc, s) => acc + s.cantidad * s.servicio.tarifa,
                 0
             );
 
             if (remainingPayment >= costoCita) {
-
                 citaUpdates.push(
                     prisma.cita.update({
                         where: { id_cita: cita.id_cita },
                         data: {
                             monto_pagado: costoCita,
                             deuda_restante: 0,
-                            estado: "PAGADA",
                         },
                     })
                 );
                 remainingPayment -= costoCita;
             } else if (remainingPayment > 0) {
-
                 citaUpdates.push(
                     prisma.cita.update({
                         where: { id_cita: cita.id_cita },
                         data: {
                             monto_pagado: remainingPayment,
                             deuda_restante: costoCita - remainingPayment,
-
                         },
                     })
                 );
                 remainingPayment = 0;
             }
-
         }
 
         const ticketMontoPagado = paymentAmount;
@@ -159,26 +153,31 @@ export const updateTicket = async (
 };
 
 export const deleteTicket = async (
-    currentState: CurrentState,
     data: FormData
 ): Promise<CurrentState> => {
-    const idValue = data.get("id");
+    const idValue = data.get("id") as string;
     if (!idValue) {
         return { success: false, error: "ID no proporcionado" };
     }
-    const ticketId = parseInt(idValue as string, 10);
+    const ticketId = parseInt(idValue, 10);
     if (isNaN(ticketId)) {
         return { success: false, error: "Ticket ID no válido" };
     }
     try {
         await prisma.$transaction([
-            prisma.pago.deleteMany({ where: { id_ticket: ticketId } }),
-            prisma.ticketCita.deleteMany({ where: { id_ticket: ticketId } }),
-            prisma.ticket.delete({ where: { id_ticket: ticketId } }),
+            prisma.pago.updateMany({
+                where: { id_ticket: ticketId },
+                data: { deletedAt: new Date() },
+            }),
+            prisma.ticket.update({
+                where: { id_ticket: ticketId },
+                data: { deletedAt: new Date() },
+            }),
         ]);
-        return { success: true, error: "" };
-    } catch (err: unknown) {
+        return { success: true, error: null };
+    } catch (err) {
         console.error(String(err));
         return { success: false, error: "Error al eliminar el ticket" };
     }
 };
+

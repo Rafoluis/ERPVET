@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Usuario {
-  id_usuario     Int      @id @default(autoincrement())
+  id_usuario     Int       @id @default(autoincrement())
   nombre         String
   apellido       String
-  dni            String   @unique
+  dni            String    @unique
   sexo           Sexo
-  email          String?  @unique
-  telefono       String   @default("")
+  email          String?   @unique
+  telefono       String    @default("")
   direccion      String?
-  fecha_creacion DateTime @default(now())
+  fecha_creacion DateTime  @default(now())
   password       String
+  deletedAt      DateTime?
 
   empleado Empleado?
   paciente Paciente?
@@ -25,16 +26,18 @@ model Usuario {
 }
 
 model Rol {
-  id_rol   Int          @id @default(autoincrement())
-  nombre   TipoRol      @unique
-  usuarios UsuarioRol[]
+  id_rol    Int          @id @default(autoincrement())
+  nombre    TipoRol      @unique
+  deletedAt DateTime?
+  usuarios  UsuarioRol[]
 }
 
 model UsuarioRol {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   id_usuario       Int
   id_rol           Int
-  fecha_asignacion DateTime @default(now())
+  fecha_asignacion DateTime  @default(now())
+  deletedAt        DateTime?
 
   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
   rol     Rol     @relation(fields: [id_rol], references: [id_rol])
@@ -50,16 +53,18 @@ model Paciente {
   tickets          Ticket[]
   historiaClinica  Historia_Clinica?
   fecha_creacion   DateTime          @default(now())
+  deletedAt        DateTime?
 
   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
 
 model Empleado {
-  id_empleado    Int      @id @default(autoincrement())
-  id_usuario     Int      @unique
+  id_empleado    Int       @id @default(autoincrement())
+  id_usuario     Int       @unique
   especialidad   String
   citas          Cita[]
-  fecha_creacion DateTime @default(now())
+  fecha_creacion DateTime  @default(now())
+  deletedAt      DateTime?
 
   usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
 }
@@ -70,6 +75,7 @@ model Servicio {
   descripcion     String?
   tarifa          Float
   citas           ServicioCita[]
+  deletedAt       DateTime?
 }
 
 model ServicioCita {
@@ -95,20 +101,22 @@ model Cita {
   estado            EstadoCita
   servicios         ServicioCita[]
   ticketCitas       TicketCita[]
+  deletedAt         DateTime?
 
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
   empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
 }
 
 model Ticket {
-  id_ticket        Int      @id @default(autoincrement())
+  id_ticket        Int       @id @default(autoincrement())
   id_paciente      Int
   fecha_emision    DateTime
   tipo_comprobante String
   medio_pago       String
   monto_total      Float
-  monto_pagado     Float    @default(0)
-  deuda_restante   Float    @default(0)
+  monto_pagado     Float     @default(0)
+  deuda_restante   Float     @default(0)
+  deletedAt        DateTime?
 
   paciente    Paciente     @relation(fields: [id_paciente], references: [id_paciente])
   pagos       Pago[]
@@ -133,18 +141,20 @@ model Pago {
   medio_pago     String
   fecha_creacion DateTime
   estado_pago    EstadoPago @default(PENDIENTE)
+  deletedAt      DateTime?
 
   ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
 }
 
 model Historia_Clinica {
-  id_historia    Int      @id @default(autoincrement())
-  id_paciente    Int      @unique
-  fecha_creacion DateTime @default(now())
+  id_historia    Int       @id @default(autoincrement())
+  id_paciente    Int       @unique
+  fecha_creacion DateTime  @default(now())
   antecedentes   String?
   tratamientos   String?
   medicamentos   String?
   observaciones  String?
+  deletedAt      DateTime?
 
   paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
 }

@@ -318,9 +318,7 @@ const AppointmentForm = ({
                         name="fecha_cita"
                         defaultValue={
                             data?.fecha_cita
-                                ? new Date(data.fecha_cita)
-                                    .toLocaleString("sv-SE", { timeZone: "America/Lima" })
-                                    .replace(" ", "T")
+                                ? new Date(data.fecha_cita).toISOString().slice(0, 16)
                                 : ""
                         }
                         register={register}

@@ -5,7 +5,11 @@ import { Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { defaultTableStyles } from "./pdfStyles";
 
-const PrintButton = ({ ticketId }: { ticketId: number }) => {
+type PrintButtonProps = {
+  ticketId: number | string;
+};
+
+const PrintButton = ({ ticketId }: PrintButtonProps) => {
   const [ticket, setTicket] = useState<any>(null);
 
   useEffect(() => {

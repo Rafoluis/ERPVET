@@ -6,6 +6,7 @@ export type FormContainerProps = {
     type: "create" | "update" | "delete" | "view";
     data?: any;
     id?: number | string;
+    //where?: any;
 };
 
 const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
@@ -15,6 +16,10 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
         switch (table) {
             case "cita":
                 const appointmentPatient = await prisma.paciente.findMany({
+                    where: {
+                        deletedAt: null,
+                        usuario: { deletedAt: null },
+                    },
                     select: {
                         id_paciente: true,
                         usuario: {
@@ -24,6 +29,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                             },
                         },
                         citas: {
+                            where: { deletedAt: null },
                             select: {
                                 id_cita: true,
                                 deuda_restante: true,
@@ -52,6 +58,17 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 });
 
                 const appointmentDoctor = await prisma.empleado.findMany({
+                    where: {
+                        deletedAt: null,
+                        usuario: {
+                            deletedAt: null,
+                            roles: {
+                                some: {
+                                    rol: { nombre: "ODONTOLOGO" },
+                                },
+                            },
+                        },
+                    },
                     select: {
                         id_empleado: true,
                         usuario: {
@@ -64,6 +81,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 });
 
                 const appointmentService = await prisma.servicio.findMany({
+                    where: { deletedAt: null },
                     select: {
                         id_servicio: true,
                         nombre_servicio: true,
@@ -96,12 +114,13 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         },
                     });
 
-                    selectedServices = citaWithServices?.servicios.map(sc => ({
-                        id_servicio: sc.servicio.id_servicio,
-                        nombre_servicio: sc.servicio.nombre_servicio,
-                        tarifa: sc.servicio.tarifa,
-                        cantidad: sc.cantidad,
-                    })) || [];
+                    selectedServices =
+                        citaWithServices?.servicios.map((sc) => ({
+                            id_servicio: sc.servicio.id_servicio,
+                            nombre_servicio: sc.servicio.nombre_servicio,
+                            tarifa: sc.servicio.tarifa,
+                            cantidad: sc.cantidad,
+                        })) || [];
                 }
 
                 relatedData = {
@@ -123,6 +142,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     })),
                     selectedServices,
                 };
+
                 //console.log(relatedData);
                 break;
             case "paciente":
@@ -157,14 +177,16 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     })),
                 };
                 break;
-
             case "boleta": {
-
                 const patients = await prisma.paciente.findMany({
+                    where: { deletedAt: null },
                     select: {
                         id_paciente: true,
-                        usuario: { select: { nombre: true, apellido: true } },
+                        usuario: {
+                            select: { nombre: true, apellido: true }
+                        },
                         citas: {
+                            where: { deletedAt: null },
                             select: {
                                 id_cita: true,
                                 fecha_cita: true,
@@ -174,16 +196,27 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                 servicios: {
                                     select: {
                                         servicio: {
-                                            select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                                            select: {
+                                                id_servicio: true,
+                                                nombre_servicio: true,
+                                                tarifa: true
+                                            },
                                         },
                                         cantidad: true,
                                     },
                                 },
                                 ticketCitas: {
+                                    where: { cita: { deletedAt: null } },
                                     select: {
                                         ticket: {
                                             select: {
-                                                pagos: { select: { monto: true, fecha_pago: true, medio_pago: true } },
+                                                pagos: {
+                                                    select: {
+                                                        monto: true,
+                                                        fecha_pago: true,
+                                                        medio_pago: true
+                                                    }
+                                                },
                                                 monto_pagado: true,
                                                 deuda_restante: true,
                                             },
@@ -196,6 +229,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 });
 
                 const tickets = await prisma.ticket.findMany({
+                    where: { deletedAt: null },
                     select: {
                         id_ticket: true,
                         fecha_emision: true,
@@ -209,6 +243,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                 id_paciente: true,
                                 usuario: { select: { nombre: true, apellido: true } },
                                 citas: {
+                                    where: { deletedAt: null },
                                     select: {
                                         id_cita: true,
                                         fecha_cita: true,
@@ -218,7 +253,11 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                         servicios: {
                                             select: {
                                                 servicio: {
-                                                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                                                    select: {
+                                                        id_servicio: true,
+                                                        nombre_servicio: true,
+                                                        tarifa: true
+                                                    },
                                                 },
                                                 cantidad: true,
                                             },
@@ -229,6 +268,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         },
                         pagos: { select: { id_pago: true, monto: true, fecha_pago: true, medio_pago: true } },
                         ticketCitas: {
+                            where: { cita: { deletedAt: null } },
                             select: {
                                 cita: {
                                     select: {
@@ -240,7 +280,11 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                         servicios: {
                                             select: {
                                                 servicio: {
-                                                    select: { id_servicio: true, nombre_servicio: true, tarifa: true },
+                                                    select: {
+                                                        id_servicio: true,
+                                                        nombre_servicio: true,
+                                                        tarifa: true
+                                                    },
                                                 },
                                                 cantidad: true,
                                             },

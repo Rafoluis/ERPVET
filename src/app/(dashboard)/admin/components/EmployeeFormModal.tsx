@@ -1,7 +1,7 @@
 'use client'
 
 import { createOrUpdateEmployee } from '@/actions/admin.actions'
-import Modal from '@/components/modal/Modal'
+import Modal from '@/components/forms/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -70,7 +70,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
         </div>
 
         <InputField label="Email" id="email" register={register} error={errors.email} type="email" />
-        
+
         <div className="grid grid-cols-2 gap-4">
           <InputField label="Teléfono" id="telefono" register={register} error={errors.telefono} />
           <InputField label="Dirección" id="direccion" register={register} error={errors.direccion} />

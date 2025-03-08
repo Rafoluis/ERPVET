@@ -63,7 +63,9 @@ const PatientListPage = async ({
 
     const p = page ? parseInt(page) : 1;
 
-    const query: Prisma.PacienteWhereInput = {};
+    const query: Prisma.PacienteWhereInput = {
+        deletedAt: null,
+    };
     for (const [key, value] of Object.entries(queryParams)) {
         if (value !== undefined && key !== "sortColumn" && key !== "sortDirection") {
             if (key === "id_paciente") {
@@ -124,9 +126,9 @@ const PatientListPage = async ({
                                 <th key={col.accessor} className={col.className}>
                                     <Link href={generateSortLink(col.accessor)}>
                                         {col.header} */}
-                                        {/* {sortColumn === col.accessor &&
+                {/* {sortColumn === col.accessor &&
                                             (sortDirection === "asc" ? " ▲" : " ▼")} */}
-                                    {/* </Link>
+                {/* </Link>
                                 </th>
                             ))}
                         </tr>
