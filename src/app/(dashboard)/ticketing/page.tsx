@@ -1,7 +1,6 @@
-import Table from '@/app/components/table';
-import TableSearch from '@/app/components/tableSearch';
+
 import React from 'react';
-import { renderRow } from '../list/appointments/page';
+import TableSearch from '@/components/tableSearch';
 
 const COLUMNS = [
   {
@@ -100,7 +99,9 @@ const Ticketing = () => {
                 <tr key={index}>
                   {COLUMNS.map((column) => (
                     <td key={column.header} className='p-4'>
+                      {/*
                       {row[column.accessor]}
+                      */}
                     </td>
                   ))}
                 </tr>

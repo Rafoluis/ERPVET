@@ -1,10 +1,11 @@
-import Dashboard from '@/components/dashboard/Dashboard'
+//import Dashboard from '@/components/dashboard/Dashboard'
 import React from 'react'
 
 const RegisterPage = () => {
-  return (
-    <Dashboard />
-  )
+  return;
+  //<Dashboard />
+
 }
+
 
 export default RegisterPage
