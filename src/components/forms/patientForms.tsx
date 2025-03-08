@@ -51,7 +51,8 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
             router.refresh();
             setOpen(false);
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            showToast("error", "Algo pasó mal");
+            // toast("Error en la acción: " + state.error);
             console.error("Error en la acción: ", state.error);
         }
     }, [state, router, setOpen, type]);

@@ -9,6 +9,7 @@ import { Dispatch, SetStateAction, useEffect } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { createService, updateService } from "@/actions/service.actions";
+import { showToast } from "@/lib/toast";
 
 const ServiceForm = ({
     type,
@@ -44,13 +45,15 @@ const ServiceForm = ({
 
     useEffect(() => {
         if (state.success) {
-            toast(
-                `El servicio ha sido ${type === "create" ? "creado" : "actualizado"}`
-            );
+            showToast("success", `El servicio ha sido ${type === "create" ? "creado" : "actualizado"}`);
+            // toast(
+            //     `El servicio ha sido ${type === "create" ? "creado" : "actualizado"}`
+            // );
             setOpen(false);
             router.refresh();
         } else if (state.error) {
-            toast("Error en la acción: " + state.error);
+            showToast("error", "Algo salió mal, inténtalo de nuevo");
+            // toast("Error en la acción: " + state.error);
             console.error("Error en la acción: ", state.error);
         }
     }, [state]);

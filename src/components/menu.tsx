@@ -14,6 +14,7 @@ const menuItems = [
             { label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
             { label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['doctor', 'odontologo'] },
             { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
+            { label: 'Doctores', href: '/list/doctors', visible: ['admin', 'recepcionista'] },
         ],
         visible: ['admin', 'recepcionista', 'doctor', 'odontologo']
     },
