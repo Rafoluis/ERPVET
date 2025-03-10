@@ -12,19 +12,17 @@ type CompanyFormData = {
     logo: string;
 };
 
-type CompanyFormProps = {
-    onSubmit?: SubmitHandler<CompanyFormData>; // Ahora es opcional
-};
-
-const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
+const CompanyForm: React.FC = () => {
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<CompanyFormData>();
 
-    // Si no se proporciona onSubmit, se usa una función vacía.
-    const submitHandler: SubmitHandler<CompanyFormData> = onSubmit ?? (() => { });
+    const submitHandler: SubmitHandler<CompanyFormData> = (data) => {
+        console.log("Datos del formulario:", data);
+        //LOGICA DE ENVIO PENDIENTE
+    };
 
     return (
         <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">

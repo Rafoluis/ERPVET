@@ -5,7 +5,6 @@ import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Historia_Clinica, Paciente, Prisma, Usuario } from "@prisma/client"
-import Link from "next/link"
 
 type PatientList = Paciente & { usuario: Usuario, citas: Cita[], historiaClinica: Historia_Clinica[] }
 
@@ -56,10 +55,10 @@ const renderRow = (item: PatientList) => (
 const PatientListPage = async ({
     searchParams
 }: {
-    searchParams: { [key: string]: string | undefined }
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
     const params = await searchParams;
-    const { page, sort, column, start, end,...queryParams } = params;
+    const { page, sort, column, start, end, ...queryParams } = params;
 
     const p = page ? parseInt(page) : 1;
 

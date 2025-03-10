@@ -1,13 +1,11 @@
 import AppointmentCard from "@/components/appointmentCard"
 import AppointmentCalendar from "@/components/calendar"
-import FormContainer from "@/components/formContainer"
 import Pagination from "@/components/pagination"
 import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
 import { Cita, Empleado, Paciente, Prisma, Servicio, Usuario } from "@prisma/client"
-import Link from "next/link"
 
 type AppointmentList = Cita & { paciente: Paciente & { usuario: Usuario }, empleado: Empleado & { usuario: Usuario }, servicio: Servicio }
 
@@ -68,14 +66,11 @@ const renderRow = (item: AppointmentList) => (
 const AppointmentListPage = async ({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | undefined };
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
-
     const params = await searchParams;
     const { page, ...queryParams } = params;
-
     const p = page ? parseInt(page) : 1;
-
     const query: Prisma.CitaWhereInput = {};
 
     if (queryParams) {
@@ -83,41 +78,17 @@ const AppointmentListPage = async ({
             if (value !== undefined) {
                 switch (key) {
                     case "id_empleado":
-                        query.empleado = {
-                            id_empleado: parseInt(value),
-                        };
+                        query.empleado = { id_empleado: parseInt(value) };
                         break;
-
                     case "search":
                         query.OR = [
-                            {
-                                paciente: {
-                                    usuario: { nombre: { contains: value, mode: "insensitive" }, },
-                                },
-                            },
-                            {
-                                paciente: {
-                                    usuario: { apellido: { contains: value, mode: "insensitive" }, },
-                                },
-                            },
-                            {
-                                paciente: {
-                                    usuario: { dni: { contains: value, mode: "insensitive" }, },
-                                },
-                            },
-                            {
-                                empleado: {
-                                    usuario: { nombre: { contains: value, mode: "insensitive" }, },
-                                },
-                            },
-                            {
-                                empleado: {
-                                    usuario: { apellido: { contains: value, mode: "insensitive" }, },
-                                },
-                            },
+                            { paciente: { usuario: { nombre: { contains: value, mode: "insensitive" } } } },
+                            { paciente: { usuario: { apellido: { contains: value, mode: "insensitive" } } } },
+                            { paciente: { usuario: { dni: { contains: value, mode: "insensitive" } } } },
+                            { empleado: { usuario: { nombre: { contains: value, mode: "insensitive" } } } },
+                            { empleado: { usuario: { apellido: { contains: value, mode: "insensitive" } } } },
                         ];
                         break;
-
                     default:
                         break;
                 }
@@ -129,33 +100,8 @@ const AppointmentListPage = async ({
         prisma.cita.findMany({
             where: query,
             include: {
-                paciente: {
-                    include: {
-                        usuario: {
-                            select: {
-                                nombre: true,
-                                apellido: true,
-                                dni: true,
-                            },
-                        },
-                    },
-                },
-                empleado: {
-                    include: {
-                        usuario: {
-                            select: {
-                                nombre: true,
-                                apellido: true,
-                            },
-                        },
-                    },
-                },
-                servicio: {
-                    select: {
-                        nombre_servicio: true,
-                        tarifa: true,
-                    },
-                },
+                paciente: { include: { usuario: { select: { nombre: true, apellido: true, dni: true } } } },
+                empleado: { include: { usuario: { select: { nombre: true, apellido: true } } } },
             },
             take: numPage,
             skip: numPage * (p - 1),
@@ -169,9 +115,7 @@ const AppointmentListPage = async ({
                 {/* CARTAS */}
                 <div className="rounded-md">
                     <div className="flex items-center justify-between p-2">
-                        <h1 className="hidden md:block text-lg font-semibold">
-                            Agenda de citas
-                        </h1>
+                        <h1 className="hidden md:block text-lg font-semibold">Agenda de citas</h1>
                     </div>
                     <div className="flex flex-wrap gap-4 justify-between">
                         <AppointmentCard type="appountmentTotal" />
@@ -179,14 +123,10 @@ const AppointmentListPage = async ({
                         <AppointmentCard type="appountmentNext" />
                     </div>
                 </div>
-
                 <div className="bg-backgrounddefault rounded-md p-4">
                     <AppointmentCalendar />
                 </div>
-
-
             </div>
-
             <div className="w-full lg:w-1/3 mt-0">
                 {/* TABLE */}
                 <div className="bg-backgrounddefault rounded-md p-4 flex flex-col gap-4">
@@ -203,7 +143,7 @@ const AppointmentListPage = async ({
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-export default AppointmentListPage
+export default AppointmentListPage;

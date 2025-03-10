@@ -53,7 +53,7 @@ const renderRow = (item: DoctorList) => (
 const DoctorListPage = async ({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | undefined };
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
     const params = await searchParams;
     const { page, sort, column, start, end, ...queryParams } = params;
@@ -99,11 +99,12 @@ const DoctorListPage = async ({
         prisma.empleado.findMany({
             where: {
                 AND: [
-                    query, 
+                    query,
                     {
                         usuario: {
                             roles: {
-                                some: { rol: { nombre: "ODONTOLOGO" } } } 
+                                some: { rol: { nombre: "ODONTOLOGO" } }
+                            }
                         }
                     }
                 ]
@@ -113,8 +114,8 @@ const DoctorListPage = async ({
                 ? column === "doctor_info" || column === "nombre"
                     ? { usuario: { nombre: sort === "asc" ? "asc" : "desc" } }
                     : column === "especialidad"
-                    ? { especialidad: sort === "asc" ? "asc" : "desc" }
-                    : { [column]: sort === "asc" ? "asc" : "desc" }
+                        ? { especialidad: sort === "asc" ? "asc" : "desc" }
+                        : { [column]: sort === "asc" ? "asc" : "desc" }
                 : undefined,
             take: numPage,
             skip: numPage * (p - 1),
@@ -126,14 +127,15 @@ const DoctorListPage = async ({
                     {
                         usuario: {
                             roles: {
-                                some: { rol: { nombre: "ODONTOLOGO" } } }
+                                some: { rol: { nombre: "ODONTOLOGO" } }
+                            }
                         }
                     }
                 ]
             }
         }),
     ]);
-    
+
     return (
         <div>
             <div className="rounded-md flex-1 m-4 mt-0">
