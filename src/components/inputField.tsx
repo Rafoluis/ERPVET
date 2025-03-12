@@ -1,6 +1,6 @@
-import { FieldError } from "react-hook-form";
+import { FieldError } from "react-hook-form"
 
-type InputFieldProps = {
+interface InputFieldProps {
     label: string;
     type?: string;
     register: any;
@@ -13,7 +13,8 @@ type InputFieldProps = {
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     min?: number;
 }
-const InputField = ({
+
+const InputField: React.FC<InputFieldProps> = ({
     label,
     type = "text",
     register,
@@ -25,21 +26,26 @@ const InputField = ({
     value,
     min,
     onChange,
-}: InputFieldProps) => {
+}) => {
     return (
         <div className={hidden ? "hidden" : "flex flex-col gap-2 w-full"}>
-            <label className="text-xs text-gray-500">{label}</label>
-            <input type={type}
+            <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">
+                {label}
+            </label>
+            <input
                 {...register(name)}
-                className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                type={type}
+                id={name}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 {...inputProps}
                 {...(value !== undefined ? { value } : { defaultValue })}
                 {...(onChange ? { onChange } : {})}
                 {...(min !== undefined ? { min } : {})}
+                aria-invalid={error ? "true" : "false"}
             />
-            {error?.message && <p className="text-xs text-red-500">{error.message.toString()}</p>}
+            {error && <span className="text-xs text-red-500 mt-1">{error.message}</span>}
         </div>
-    );
+    )
 }
 
-export default InputField
+export default InputField;

@@ -54,7 +54,7 @@ const SunatBoleta = ({ ticketId }: { ticketId: number | string }) => {
             <button onClick={consultarEstado} disabled={!ticket}>
                 Consultar Estado
             </button>
-            <PrintButton ticketId={ticket} />
+
         </div>
     );
 };

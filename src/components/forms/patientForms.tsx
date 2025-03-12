@@ -6,7 +6,6 @@ import InputField from "../inputField";
 import { patientSchema, PatientSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { createPatient, updatePatient } from "@/actions/patient.actions";
 import { showToast } from "@/lib/toast";
 import { useRouter } from "next/navigation";
@@ -28,7 +27,7 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
         resolver: zodResolver(patientSchema),
     });
 
-    const [submittedData, setSubmittedData] = useState<any>(null);
+    const [setSubmittedData] = useState<any>(null);
     const [state, formAction] = useActionState(
         type === "create" ? createPatient : updatePatient,
         { success: false, error: null }

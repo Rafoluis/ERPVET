@@ -47,6 +47,7 @@ export const updateService = async (currentState: CurrentState, data: ServiceSch
 };
 
 export const deleteService = async (
+    currentState: CurrentState,
     data: FormData
 ) => {
     const id = data.get("id") as string;

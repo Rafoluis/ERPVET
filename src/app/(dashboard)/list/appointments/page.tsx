@@ -105,7 +105,7 @@ const renderRow = (item: AppointmentList) => (
 const AppointmentListPage = async ({
     searchParams,
 }: {
-    searchParams: { [key: string]: string | undefined };
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
 
     const params = await searchParams;
@@ -168,7 +168,7 @@ const AppointmentListPage = async ({
             lte: end ? new Date(end) : undefined,
         };
     }
-    
+
 
     const [data, count] = await prisma.$transaction([
         prisma.cita.findMany({
@@ -207,14 +207,14 @@ const AppointmentListPage = async ({
                 },
             },
             orderBy: column
-            ? column === "dni"
-                ? { paciente: { usuario: { dni: sort === "asc" ? "asc" : "desc" } } }
-                : column === "apellido"
-                ? { empleado: { usuario: { apellido: sort === "asc" ? "asc" : "desc" } } }
-                : column === "nombre_servicio" || column === "tarifa"
-                ? undefined
-                : { [column]: sort === "asc" ? "asc" : "desc" }
-            : undefined,
+                ? column === "dni"
+                    ? { paciente: { usuario: { dni: sort === "asc" ? "asc" : "desc" } } }
+                    : column === "apellido"
+                        ? { empleado: { usuario: { apellido: sort === "asc" ? "asc" : "desc" } } }
+                        : column === "nombre_servicio" || column === "tarifa"
+                            ? undefined
+                            : { [column]: sort === "asc" ? "asc" : "desc" }
+                : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),
@@ -225,7 +225,7 @@ const AppointmentListPage = async ({
         data.sort((a, b) => {
             const servicioA = a.servicios[0]?.servicio;
             const servicioB = b.servicios[0]?.servicio;
-    
+
             if (column === "tarifa") {
                 const tarifaA = servicioA?.tarifa ?? 0;
                 const tarifaB = servicioB?.tarifa ?? 0;
@@ -233,7 +233,7 @@ const AppointmentListPage = async ({
                     return sort === "asc" ? tarifaA - tarifaB : tarifaB - tarifaA;
                 }
             }
-    
+
             const nameA = servicioA?.nombre_servicio || "";
             const nameB = servicioB?.nombre_servicio || "";
             return sort === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);

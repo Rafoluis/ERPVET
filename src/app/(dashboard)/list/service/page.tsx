@@ -49,7 +49,7 @@ const renderRow = (item: ServicioList) => (
 const ServiceListPage = async ({
     searchParams
 }: {
-    searchParams: { [key: string]: string | undefined }
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
     const params = await searchParams;
     const { page, sort, column, ...queryParams } = params;

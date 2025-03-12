@@ -228,6 +228,7 @@ export const updateTicket = async (
 };
 
 export const deleteTicket = async (
+    currentState: CurrentState,
     data: FormData
 ): Promise<CurrentState> => {
     const idValue = data.get("id") as string;

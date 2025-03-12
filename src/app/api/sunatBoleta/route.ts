@@ -307,7 +307,7 @@ export async function POST(req: NextRequest) {
         let xmlData = generarXMLBoleta();
 
         console.log("Firmando el XML");
-        xmlData = firmarXML(xmlData);
+        //xmlData = firmarXML(xmlData);
 
         console.log("Creando archivo ZIP");
         const zipPath = await crearArchivoZIP(xmlData, fileName);

@@ -12,20 +12,21 @@ type CompanyFormData = {
     logo: string;
 };
 
-type CompanyFormProps = {
-    onSubmit: SubmitHandler<CompanyFormData>;
-};
-
-const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
+const CompanyForm: React.FC = () => {
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<CompanyFormData>();
 
+    const submitHandler: SubmitHandler<CompanyFormData> = (data) => {
+        console.log("Datos del formulario:", data);
+        //LOGICA DE ENVIO PENDIENTE
+    };
+
     return (
         <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
-            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-wrap gap-4">
+            <form onSubmit={handleSubmit(submitHandler)} className="flex flex-wrap gap-4">
                 <div className="w-full md:w-1/2">
                     <InputField
                         label="Nombre de la Empresa"
@@ -42,7 +43,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
                         error={errors.ruc}
                     />
                 </div>
-
                 <div className="w-full md:w-1/2">
                     <InputField
                         label="Dirección"
@@ -60,7 +60,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
                         error={errors.phone}
                     />
                 </div>
-
                 <div className="w-full md:w-1/2 flex flex-col gap-2">
                     <label className="text-xs text-gray-500">Logo</label>
                     <input
@@ -70,7 +69,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
                         className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
                     />
                 </div>
-
                 <div className="w-full md:w-1/2 flex justify-center items-end">
                     <button
                         type="submit"
@@ -81,7 +79,6 @@ const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
                 </div>
             </form>
         </div>
-
     );
 };
 

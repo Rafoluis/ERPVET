@@ -5,7 +5,6 @@ import AppointmentForm from "@/components/forms/appointmentForm";
 import { deleteAppointment } from "@/actions/appointment.actions";
 import { deletePatient } from "@/actions/patient.actions";
 import { useRouter } from "next/navigation";
-import { toast } from "react-toastify";
 import { FormContainerProps } from "./formContainer";
 import PatientForm from "./forms/patientForms";
 import { Eye, Pencil, Plus, Trash2, UserRoundPlus } from "lucide-react";
@@ -54,9 +53,9 @@ const forms: {
 const deleteActions = {
     cita: deleteAppointment,
     paciente: deletePatient,
+    empleado: deleteService,
     boleta: deleteTicket,
     servicio: deleteService,
-    empleado: deleteService,
     doctor: deleteService,
 };
 

@@ -11,11 +11,11 @@ const columns = [
 ]
 
 interface AdminPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 const AdminPage = async ({ searchParams }: AdminPageProps) => {
-  const resolvedParams = await Promise.resolve(searchParams)
+  const resolvedParams = await searchParams;
   const search = typeof resolvedParams.search === 'string' ? resolvedParams.search : ''
   const start = typeof resolvedParams.start === 'string' ? resolvedParams.start : undefined
   const end = typeof resolvedParams.end === 'string' ? resolvedParams.end : undefined

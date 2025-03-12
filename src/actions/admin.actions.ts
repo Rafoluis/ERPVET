@@ -1,7 +1,6 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { sleep } from '@/lib/sleep'
 import { tryCatch } from '@/lib/try-catch'
 import { Employee } from '@/schemas/employee.schema'
 import { ApiResponse } from '@/types/api-response.type'
@@ -57,7 +56,7 @@ export const getAllEmployees = async (
 
   const employees = await prisma.empleado.findMany({
     where: whereClause,
-    orderBy, 
+    orderBy,
     select: {
       id_empleado: true,
       especialidad: true,
