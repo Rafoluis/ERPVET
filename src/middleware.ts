@@ -24,13 +24,13 @@ export default withAuth(
       if (isAuthenticated && pathname === '/auth/login') {
         return NextResponse.redirect(new URL(defaultRoute, req.url))
       }
-      
+
       if (pathname === '/') {
         return NextResponse.redirect(
           new URL(isAuthenticated ? defaultRoute : '/auth/login', req.url)
         )
       }
-      
+
       return NextResponse.next()
     }
 
@@ -58,15 +58,11 @@ export default withAuth(
 export const config = {
   matcher: [
     '/',
-    '/:path*',
-
-    '/doctor/:path*',
+    '/auth/login',
     '/list/:path*',
+    '/doctor/:path*',
     '/receptionist/:path*',
     '/patient/:path*',
-
     '/admin/:path*'
-    ,
-    '/auth/login',
   ],
 }
