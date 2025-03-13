@@ -68,6 +68,7 @@ const authOptions: NextAuthOptions = {
     signIn: '/auth/login',
     signOut: '/',
   },
+  debug: true,
 };
 
 const handler = NextAuth(authOptions);
