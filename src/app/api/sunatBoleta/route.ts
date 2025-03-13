@@ -1,5 +1,5 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import fs from "fs";
+import { NextRequest, NextResponse } from "next/server";
+//import fs from "fs";
 // import path from "path";
 // import archiver from "archiver";
 // import { DOMImplementation, XMLSerializer } from "xmldom";
@@ -326,3 +326,6 @@
 //         return NextResponse.json({ error: "Error en API de boleta", details: error.message }, { status: 500 });
 //     }
 // }
+export async function POST(req: NextRequest) {
+        return;
+}

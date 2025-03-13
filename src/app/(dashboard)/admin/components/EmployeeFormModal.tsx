@@ -5,10 +5,7 @@ import Modal from '@/components/forms/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, Controller, UseFormRegister, FieldError, Control } from 'react-hook-form'
-import React from 'react'
-import InputField from '@/components/inputField'
-import SelectField from '@/components/selectField'
+import { useForm, Controller } from 'react-hook-form'
 
 interface Props {
   isOpen: boolean
@@ -63,28 +60,29 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
     >
       <form className="space-y-6 py-4">
         <div className="grid grid-cols-2 gap-4">
-          <InputField label="Nombre" name="nombre" register={register} error={errors.nombre} />
-          <InputField label="Apellido" name="apellido" register={register} error={errors.apellido} />
+          <InputField label="Nombre" id="nombre" register={register} error={errors.nombre} />
+          <InputField label="Apellido" id="apellido" register={register} error={errors.apellido} />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <InputField label="DNI" name="dni" register={register} error={errors.dni} />
-          <InputField label="Contraseña" name="password" register={register} error={errors.password} type="password" />
+          <InputField label="DNI" id="dni" register={register} error={errors.dni} />
+          <InputField label="Contraseña" id="password" register={register} error={errors.password} type="password" />
         </div>
 
-        <InputField label="Email" name="email" register={register} error={errors.email} type="email" />
+        <InputField label="Email" id="email" register={register} error={errors.email} type="email" />
 
         <div className="grid grid-cols-2 gap-4">
-          <InputField label="Teléfono" name="telefono" register={register} error={errors.telefono} />
-          <InputField label="Dirección" name="direccion" register={register} error={errors.direccion} />
+          <InputField label="Teléfono" id="telefono" register={register} error={errors.telefono} />
+          <InputField label="Dirección" id="direccion" register={register} error={errors.direccion} />
         </div>
 
-        <InputField label="Especialidad" name="especialidad" register={register} error={errors.especialidad} />
+        <InputField label="Especialidad" id="especialidad" register={register} error={errors.especialidad} />
 
         <div className="grid grid-cols-2 gap-4">
           <SelectField
             label="Sexo"
             id="sexo"
+            register={register}
             error={errors.sexo}
             options={[
               { value: 'MASCULINO', label: 'Masculino' },
@@ -96,7 +94,9 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
           <SelectField
             label="Rol"
             id="roles"
-            error={Array.isArray(errors.roles) ? errors.roles[0] : errors.roles}
+            multiple
+            register={register}
+            error={errors.roles}
             options={[
               { value: 'ODONTOLOGO', label: 'Odontólogo' },
               { value: 'RECEPCIONISTA', label: 'Recepcionista' },
@@ -140,7 +140,7 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
           {...field}
           id={id}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          multiple={multiple}
+          // multiple={multiple}
           onChange={(e) => {
             if (multiple) {
               const values = Array.from(e.target.selectedOptions, (option) => option.value);
