@@ -6,7 +6,7 @@ import Table from "@/components/table"
 import TableSearch from "@/components/tableSearch"
 import prisma from "@/lib/prisma"
 import { numPage } from "@/lib/settings"
-import { Cita, Paciente, Pago, Prisma, Ticket, Usuario } from "@prisma/client"
+import { Paciente, Pago, Prisma, Ticket, Usuario } from "@prisma/client"
 
 type TicketList = Ticket & { paciente: Paciente & { usuario: Usuario }, pagos: Pago[] }
 
@@ -55,7 +55,8 @@ const renderRow = (item: TicketList) => (
         <td className="hidden md:table-cell">{item.medio_pago}</td>
         <td>
             <div className="flex items-center gap-2">
-                <SunatBoleta ticketId={1} />
+                <PrintButton ticketId={item.id_ticket} />
+                {/* <SunatBoleta ticketId={1} /> */}
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="boleta" type="update" data={item} />
@@ -71,7 +72,7 @@ const renderRow = (item: TicketList) => (
 const PatientListPage = async ({
     searchParams
 }: {
-    searchParams: { [key: string]: string | undefined }
+    searchParams: Promise<{ [key: string]: string | undefined }>;
 }) => {
     const params = await searchParams;
     const { page, column, sort, start, end, ...queryParams } = params;
@@ -114,10 +115,10 @@ const PatientListPage = async ({
                 pagos: true,
             },
             orderBy: column === "paciente"
-            ? { paciente: { usuario: { nombre: sort === "asc" ? "asc" : "desc" } } }
-            : column
-            ? { [column]: sort === "asc" ? "asc" : "desc" }
-            : undefined,
+                ? { paciente: { usuario: { nombre: sort === "asc" ? "asc" : "desc" } } }
+                : column
+                    ? { [column]: sort === "asc" ? "asc" : "desc" }
+                    : undefined,
             take: numPage,
             skip: numPage * (p - 1),
         }),

@@ -7,7 +7,6 @@ import { createAppointment, updateAppointment } from "@/actions/appointment.acti
 import { appointmentSchema, AppointmentSchema } from "@/lib/formSchema";
 import { startTransition, useActionState, useState } from "react";
 import { Dispatch, SetStateAction, useEffect, useMemo } from "react";
-import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { Servicio } from "@prisma/client";
 import Table from "../table";
@@ -97,7 +96,7 @@ const AppointmentForm = ({
             label: labelFn(item),
         }));
 
-    const { pacientes, empleados, servicios } = relatedData;
+    const { empleados, servicios } = relatedData;
     const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
     const [selectedServiceId, setSelectedServiceId] = useState<string>("");
     const [selectedQuantity, setSelectedQuantity] = useState<string>("1");

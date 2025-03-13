@@ -80,14 +80,14 @@ type RangeProps = OmitKeys<DayPickerRangeProps, KeysToOmit>
 
 type CalendarProps =
   | ({
-      mode: "single"
-    } & SingleProps)
+    mode: "single"
+  } & SingleProps)
   | ({
-      mode?: undefined
-    } & SingleProps)
+    mode?: undefined
+  } & SingleProps)
   | ({
-      mode: "range"
-    } & RangeProps)
+    mode: "range"
+  } & RangeProps)
 
 const Calendar = ({
   mode = "single",
@@ -199,7 +199,7 @@ const Calendar = ({
                       !previousMonth ||
                       (fromDate &&
                         addYears(currentMonth, -1).getTime() <
-                          fromDate.getTime())
+                        fromDate.getTime())
                     }
                     aria-label="Go to previous year"
                     onClick={goToPreviousYear}
@@ -253,7 +253,7 @@ const Calendar = ({
         Day: ({ date, displayMonth }: DayProps) => {
           const buttonRef = React.useRef<HTMLButtonElement>(null)
           const { activeModifiers, buttonProps, divProps, isButton, isHidden } =
-            useDayRender(date, displayMonth, buttonRef)
+            useDayRender(date, displayMonth, buttonRef as React.RefObject<HTMLButtonElement>)
 
           const { selected, today, disabled, range_middle } = activeModifiers
 

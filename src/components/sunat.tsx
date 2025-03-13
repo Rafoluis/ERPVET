@@ -48,13 +48,13 @@ const SunatBoleta = ({ ticketId }: { ticketId: number | string }) => {
 
     return (
         <div>
-            <button onClick={enviarBoleta} disabled={loading}>
+            <button onClick={enviarBoleta} disabled={loading} style={{ marginRight: "10px" }}>
                 {loading ? "Enviando..." : "Enviar Boleta"}
             </button>
             <button onClick={consultarEstado} disabled={!ticket}>
                 Consultar Estado
             </button>
-            <PrintButton ticketId={ticket} />
+
         </div>
     );
 };

@@ -183,7 +183,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     select: {
                         id_paciente: true,
                         usuario: {
-                            select: { nombre: true, apellido: true }
+                            select: { nombre: true, apellido: true },
                         },
                         citas: {
                             where: { deletedAt: null },
@@ -199,7 +199,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                             select: {
                                                 id_servicio: true,
                                                 nombre_servicio: true,
-                                                tarifa: true
+                                                tarifa: true,
                                             },
                                         },
                                         cantidad: true,
@@ -212,10 +212,12 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                             select: {
                                                 pagos: {
                                                     select: {
+                                                        id_pago: true,
                                                         monto: true,
                                                         fecha_pago: true,
-                                                        medio_pago: true
-                                                    }
+                                                        medio_pago: true,
+                                                        estado_pago: true, // (PENDIENTE, COMPLETADO, FRACCIONADO)
+                                                    },
                                                 },
                                                 monto_pagado: true,
                                                 deuda_restante: true,
@@ -256,7 +258,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                                     select: {
                                                         id_servicio: true,
                                                         nombre_servicio: true,
-                                                        tarifa: true
+                                                        tarifa: true,
                                                     },
                                                 },
                                                 cantidad: true,
@@ -266,7 +268,15 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                 },
                             },
                         },
-                        pagos: { select: { id_pago: true, monto: true, fecha_pago: true, medio_pago: true } },
+                        pagos: {
+                            select: {
+                                id_pago: true,
+                                monto: true,
+                                fecha_pago: true,
+                                medio_pago: true,
+                                estado_pago: true,
+                            },
+                        },
                         ticketCitas: {
                             where: { cita: { deletedAt: null } },
                             select: {
@@ -283,7 +293,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                                                     select: {
                                                         id_servicio: true,
                                                         nombre_servicio: true,
-                                                        tarifa: true
+                                                        tarifa: true,
                                                     },
                                                 },
                                                 cantidad: true,
@@ -345,13 +355,13 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                         apellido: p.usuario.apellido,
                         citas: mapCitas(p.citas),
                     })),
-
                 };
 
                 break;
             }
             default:
                 break;
+
         }
     }
 

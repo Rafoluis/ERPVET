@@ -6,9 +6,9 @@ import InputField from "../inputField";
 import { patientSchema, PatientSchema } from "@/lib/formSchema";
 import { startTransition, useActionState } from "react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import { createPatient, updatePatient } from "@/actions/patient.actions";
 import { showToast } from "@/lib/toast";
+import { useRouter } from "next/navigation";
 
 interface PatientFormProps {
     type: "create" | "update";
@@ -27,7 +27,7 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
         resolver: zodResolver(patientSchema),
     });
 
-    const [submittedData, setSubmittedData] = useState<any>(null);
+    const [setSubmittedData] = useState<any>(null);
     const [state, formAction] = useActionState(
         type === "create" ? createPatient : updatePatient,
         { success: false, error: null }
@@ -42,21 +42,19 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
         });
     });
 
+    const router = useRouter();
+
     useEffect(() => {
         if (state.success) {
-            const message = `El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`
-            showToast("success", message);
-            // toast(`El paciente ha sido ${actionText}`);
-            const result = state as { success: boolean; error: string | null; data?: any };
-            const newPatient = result.data || { ...submittedData, id_paciente: Date.now() };
-            onSuccess && newPatient && onSuccess(newPatient);
+            showToast("success", `El paciente ha sido ${type === "create" ? "creado" : "actualizado"}`);
+            router.refresh();
             setOpen(false);
         } else if (state.error) {
             showToast("error", "Algo pasó mal");
             // toast("Error en la acción: " + state.error);
             console.error("Error en la acción: ", state.error);
         }
-    }, [state, submittedData, setOpen, onSuccess, actionText]);
+    }, [state, router, setOpen, type]);
 
     return (
         <form

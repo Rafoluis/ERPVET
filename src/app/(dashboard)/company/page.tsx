@@ -12,63 +12,73 @@ type CompanyFormData = {
     logo: string;
 };
 
-type CompanyFormProps = {
-    onSubmit: SubmitHandler<CompanyFormData>;
-};
-
-const CompanyForm: React.FC<CompanyFormProps> = ({ onSubmit }) => {
+const CompanyForm: React.FC = () => {
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<CompanyFormData>();
 
+    const submitHandler: SubmitHandler<CompanyFormData> = (data) => {
+        console.log("Datos del formulario:", data);
+        //LOGICA DE ENVIO PENDIENTE
+    };
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <InputField
-                label="Nombre de la Empresa"
-                name="companyName"
-                register={register}
-                error={errors.companyName}
-            />
-
-            <InputField
-                label="RUC"
-                name="ruc"
-                register={register}
-                error={errors.ruc}
-            />
-
-            <InputField
-                label="Dirección"
-                name="address"
-                register={register}
-                error={errors.address}
-            />
-
-            <InputField
-                label="Teléfono"
-                name="phone"
-                type="tel"
-                register={register}
-                error={errors.phone}
-            />
-
-            {/* Campo de ejemplo para el logo */}
-            <div className="flex flex-col gap-2 w-full">
-                <label className="text-xs text-gray-500">Logo</label>
-                <input
-                    type="text"
-                    placeholder="Ej: URL del logo"
-                    {...register("logo")}
-                    className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
-                />
-            </div>
-
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded">
-                Enviar
-            </button>
-        </form>
+        <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
+            <form onSubmit={handleSubmit(submitHandler)} className="flex flex-wrap gap-4">
+                <div className="w-full md:w-1/2">
+                    <InputField
+                        label="Nombre de la Empresa"
+                        name="companyName"
+                        register={register}
+                        error={errors.companyName}
+                    />
+                </div>
+                <div className="w-full md:w-1/2">
+                    <InputField
+                        label="RUC"
+                        name="ruc"
+                        register={register}
+                        error={errors.ruc}
+                    />
+                </div>
+                <div className="w-full md:w-1/2">
+                    <InputField
+                        label="Dirección"
+                        name="address"
+                        register={register}
+                        error={errors.address}
+                    />
+                </div>
+                <div className="w-full md:w-1/2">
+                    <InputField
+                        label="Teléfono"
+                        name="phone"
+                        type="tel"
+                        register={register}
+                        error={errors.phone}
+                    />
+                </div>
+                <div className="w-full md:w-1/2 flex flex-col gap-2">
+                    <label className="text-xs text-gray-500">Logo</label>
+                    <input
+                        type="text"
+                        placeholder="Ej: URL del logo"
+                        {...register("logo")}
+                        className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
+                    />
+                </div>
+                <div className="w-full md:w-1/2 flex justify-center items-end">
+                    <button
+                        type="submit"
+                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm w-auto"
+                    >
+                        Enviar
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 };
 

@@ -117,34 +117,109 @@ export const updateTicket = async (
     data: TicketSchema
 ): Promise<CurrentState> => {
     try {
-        await prisma.ticket.update({
-            where: { id_ticket: data.id_ticket as number },
-            data: {
-                id_paciente: data.id_paciente,
-                fecha_emision: new Date(),
-                tipo_comprobante: data.tipo_comprobante,
-                medio_pago: data.medio_pago,
-                monto_total: data.monto_total,
-                pagos: data.pagos
-                    ? {
-                        deleteMany: {},
-                        create: data.pagos.map((pago) => ({
-                            ...pago,
-                            fecha_pago: new Date(),
-                            fecha_creacion: new Date(),
-                        })),
-                    }
-                    : undefined,
-                ticketCitas: data.citas
-                    ? {
-                        deleteMany: {},
-                        create: data.citas.map((id_cita: number) => ({
-                            id_cita,
-                        })),
-                    }
-                    : undefined,
+        const citaIds: number[] = data.citas || [];
+        const citasSeleccionadas = await prisma.cita.findMany({
+            where: { id_cita: { in: citaIds } },
+            include: {
+                servicios: {
+                    include: {
+                        servicio: true,
+                    },
+                },
             },
         });
+        const citasOrdenadas = citasSeleccionadas.sort(
+            (a, b) => new Date(a.fecha_cita).getTime() - new Date(b.fecha_cita).getTime()
+        );
+        const totalCitasCost = citasOrdenadas.reduce((sum, cita) => {
+            const costoCita = cita.servicios.reduce(
+                (acc, s) => acc + s.cantidad * s.servicio.tarifa,
+                0
+            );
+            return sum + costoCita;
+        }, 0);
+        const paymentAmount = data.fraccionar_pago ? (data.monto_parcial || 0) : totalCitasCost;
+        let remainingPayment = paymentAmount;
+        const citaUpdates = [];
+
+        for (const cita of citasOrdenadas) {
+            const costoCita = cita.servicios.reduce(
+                (acc, s) => acc + s.cantidad * s.servicio.tarifa,
+                0
+            );
+            if (remainingPayment >= costoCita) {
+                citaUpdates.push(
+                    prisma.cita.update({
+                        where: { id_cita: cita.id_cita },
+                        data: {
+                            monto_pagado: costoCita,
+                            deuda_restante: 0,
+                        },
+                    })
+                );
+                remainingPayment -= costoCita;
+            } else if (remainingPayment > 0) {
+                citaUpdates.push(
+                    prisma.cita.update({
+                        where: { id_cita: cita.id_cita },
+                        data: {
+                            monto_pagado: remainingPayment,
+                            deuda_restante: costoCita - remainingPayment,
+                        },
+                    })
+                );
+                remainingPayment = 0;
+            } else {
+                citaUpdates.push(
+                    prisma.cita.update({
+                        where: { id_cita: cita.id_cita },
+                        data: {
+                            monto_pagado: 0,
+                            deuda_restante: costoCita,
+                        },
+                    })
+                );
+            }
+        }
+
+        const ticketMontoPagado = paymentAmount;
+        const ticketDeudaRestante = totalCitasCost - paymentAmount;
+
+        await prisma.$transaction([
+            prisma.ticket.update({
+                where: { id_ticket: data.id_ticket as number },
+                data: {
+                    id_paciente: data.id_paciente,
+                    fecha_emision: new Date(),
+                    tipo_comprobante: data.tipo_comprobante,
+                    medio_pago: data.medio_pago,
+                    monto_total: totalCitasCost,
+                    monto_pagado: ticketMontoPagado,
+                    deuda_restante: ticketDeudaRestante,
+                    pagos: data.pagos
+                        ? {
+                            deleteMany: {},
+                            create: data.pagos.map((pago) => ({
+                                ...pago,
+                                fecha_pago: new Date(),
+                                fecha_creacion: new Date(),
+                            })),
+                        }
+                        : undefined,
+
+                    ticketCitas: data.citas
+                        ? {
+                            deleteMany: {},
+                            create: data.citas.map((id_cita: number) => ({
+                                id_cita,
+                            })),
+                        }
+                        : undefined,
+                },
+            }),
+            ...citaUpdates,
+        ]);
+
         return { success: true, error: null };
     } catch (err) {
         console.error(err);
@@ -153,6 +228,7 @@ export const updateTicket = async (
 };
 
 export const deleteTicket = async (
+    currentState: CurrentState,
     data: FormData
 ): Promise<CurrentState> => {
     const idValue = data.get("id") as string;
