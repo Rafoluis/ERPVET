@@ -94,6 +94,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
           <SelectField
             label="Rol"
             id="roles"
+            multiple
             register={register}
             error={errors.roles}
             options={[
@@ -139,7 +140,7 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
           {...field}
           id={id}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          multiple={multiple}
+          // multiple={multiple}
           onChange={(e) => {
             if (multiple) {
               const values = Array.from(e.target.selectedOptions, (option) => option.value);
