@@ -5,7 +5,7 @@ import Modal from '@/components/forms/modal/Modal'
 import { showToast } from '@/lib/toast'
 import { Employee, EmployeeSchema } from '@/schemas/employee.schema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, Controller, Control } from 'react-hook-form'
 
 interface Props {
   isOpen: boolean
@@ -82,7 +82,6 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
           <SelectField
             label="Sexo"
             id="sexo"
-            register={register}
             error={errors.sexo}
             options={[
               { value: 'MASCULINO', label: 'Masculino' },
@@ -95,8 +94,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
             label="Rol"
             id="roles"
             multiple
-            register={register}
-            error={errors.roles}
+            error={errors.roles as FieldError}
             options={[
               { value: 'ODONTOLOGO', label: 'Odontólogo' },
               { value: 'RECEPCIONISTA', label: 'Recepcionista' },
@@ -111,7 +109,23 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
 
 export default EmployeeFormModal
 
-const InputField = ({ label, id, register, error, type = 'text' }) => (
+import { FieldError, UseFormRegister } from "react-hook-form";
+
+interface InputFieldProps {
+  label?: string;
+  id: string;
+  register: UseFormRegister<any>;
+  error?: FieldError;
+  type?: string;
+}
+
+const InputField: React.FC<InputFieldProps> = ({
+  label = "",
+  id,
+  register,
+  error,
+  type = "text",
+}) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
       {label}
@@ -121,13 +135,29 @@ const InputField = ({ label, id, register, error, type = 'text' }) => (
       type={type}
       id={id}
       className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-      aria-invalid={error ? 'true' : 'false'}
+      aria-invalid={error ? "true" : "false"}
     />
     {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
   </div>
-)
+);
 
-const SelectField = ({ label, id, error, options, multiple = false, control }) => (
+interface SelectFieldProps {
+  label: string;
+  id: string;
+  error?: FieldError;
+  options: { value: string; label: string }[];
+  multiple?: boolean;
+  control: Control<any>;
+}
+
+const SelectField: React.FC<SelectFieldProps> = ({
+  label,
+  id,
+  error,
+  options,
+  multiple = false,
+  control,
+}) => (
   <div className="flex flex-col">
     <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
       {label}
@@ -140,7 +170,7 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
           {...field}
           id={id}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-          // multiple={multiple}
+          multiple={multiple}
           onChange={(e) => {
             if (multiple) {
               const values = Array.from(e.target.selectedOptions, (option) => option.value);
@@ -149,7 +179,7 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
               field.onChange(e.target.value);
             }
           }}
-          value={multiple ? field.value || [] : field.value || ''}
+          value={multiple ? field.value || [] : field.value || ""}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
