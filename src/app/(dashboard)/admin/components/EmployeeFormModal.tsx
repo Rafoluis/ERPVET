@@ -141,10 +141,14 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           multiple={multiple}
           onChange={(e) => {
-            const values = Array.from(e.target.selectedOptions, (option) => option.value)
-            field.onChange(values)
+            if (multiple) {
+              const values = Array.from(e.target.selectedOptions, (option) => option.value);
+              field.onChange(values);
+            } else {
+              field.onChange(e.target.value);
+            }
           }}
-          value={field.value || []}
+          value={multiple ? field.value || [] : field.value || ''}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -156,5 +160,5 @@ const SelectField = ({ label, id, error, options, multiple = false, control }) =
     />
     {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
   </div>
-)
+);
 
