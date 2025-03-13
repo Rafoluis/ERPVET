@@ -110,3 +110,56 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
 }
 
 export default EmployeeFormModal
+
+const InputField = ({ label, id, register, error, type = 'text' }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <input
+      {...register(id)}
+      type={type}
+      id={id}
+      className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+      aria-invalid={error ? 'true' : 'false'}
+    />
+    {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
+  </div>
+)
+
+const SelectField = ({ label, id, error, options, multiple = false, control }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <Controller
+      name={id}
+      control={control}
+      render={({ field }) => (
+        <select
+          {...field}
+          id={id}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+          multiple={multiple}
+          onChange={(e) => {
+            if (multiple) {
+              const values = Array.from(e.target.selectedOptions, (option) => option.value);
+              field.onChange(values);
+            } else {
+              field.onChange(e.target.value);
+            }
+          }}
+          value={multiple ? field.value || [] : field.value || ''}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      )}
+    />
+    {error && <span className="text-red-500 text-xs mt-1">{error.message}</span>}
+  </div>
+);
+
