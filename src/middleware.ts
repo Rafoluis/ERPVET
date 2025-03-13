@@ -18,7 +18,7 @@ const defaultRoute = '/list/appointments'
 export default withAuth(
   function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
-    const isAuthenticated = !!req.cookies.get('next-auth.session-token')
+    const isAuthenticated = !!req.cookies.get('next-auth.session-token') || !!req.cookies.get('__Secure-next-auth.session-token')
 
     if (publicRoutes.includes(pathname)) {
       if (isAuthenticated && pathname === '/auth/login') {
