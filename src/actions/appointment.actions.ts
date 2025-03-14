@@ -5,13 +5,31 @@ import prisma from "../lib/prisma";
 
 type CurrentState = { success: boolean; error: string | null };
 
+const parseLocalAsUTC = (dateTime: string | Date): Date => {
+    if (dateTime instanceof Date) {
+        const year = dateTime.getFullYear();
+        const month = dateTime.getMonth() + 1;
+        const day = dateTime.getDate();
+        const hour = dateTime.getHours();
+        const minute = dateTime.getMinutes();
+        const second = dateTime.getSeconds();
+        return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
+    } else {
+        const [datePart, timePart] = dateTime.split("T");
+        const [year, month, day] = datePart.split("-").map(Number);
+        const [hour, minute, second] = timePart.split(":").map(Number);
+        return new Date(Date.UTC(year, month - 1, day, hour, minute, second || 0));
+    }
+};
+
+
 const processAppointment = async (
     currentState: CurrentState,
     data: AppointmentSchema,
     isUpdate = false
 ) => {
     try {
-        const fechaCita = new Date(data.fecha_cita);
+        const fechaCita = parseLocalAsUTC(data.fecha_cita);
         const horaFinal = data.hora_cita_final
             ? (() => {
                 const horaCitaFinalLocal = new Date(data.hora_cita_final);
