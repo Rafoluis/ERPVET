@@ -5,23 +5,27 @@ import prisma from "../lib/prisma";
 
 type CurrentState = { success: boolean; error: string | null };
 
-const parseLocalAsUTC = (dateTime: string | Date): Date => {
-    if (dateTime instanceof Date) {
-        const year = dateTime.getFullYear();
-        const month = dateTime.getMonth() + 1;
-        const day = dateTime.getDate();
-        const hour = dateTime.getHours();
-        const minute = dateTime.getMinutes();
-        const second = dateTime.getSeconds();
-        return new Date(Date.UTC(year, month - 1, day, hour, minute, second));
-    } else {
-        const [datePart, timePart] = dateTime.split("T");
-        const [year, month, day] = datePart.split("-").map(Number);
-        const [hour, minute, second] = timePart.split(":").map(Number);
-        return new Date(Date.UTC(year, month - 1, day, hour, minute, second || 0));
-    }
+const formatDateInTimeZone = (date: Date, timeZone: string): string => {
+    return new Intl.DateTimeFormat("sv-SE", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+    })
+        .format(date)
+        .replace(" ", "T");
 };
 
+const parseLocalAsUTC = (dateTimeStr: string): Date => {
+    const [datePart, timePart] = dateTimeStr.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute, second] = timePart.split(":").map(Number);
+    return new Date(Date.UTC(year, month - 1, day, hour, minute, second || 0));
+};
 
 const processAppointment = async (
     currentState: CurrentState,
@@ -29,14 +33,20 @@ const processAppointment = async (
     isUpdate = false
 ) => {
     try {
-        const fechaCita = parseLocalAsUTC(data.fecha_cita);
-        const horaFinal = data.hora_cita_final
-            ? (() => {
-                const horaCitaFinalLocal = new Date(data.hora_cita_final);
-                return new Date(horaCitaFinalLocal.getTime() - horaCitaFinalLocal.getTimezoneOffset() * 60000);
-            })()
-            : new Date(fechaCita.getTime() + 60 * 60 * 1000);
+        let fechaCita: Date;
+        if (data.fecha_cita instanceof Date) {
+            const fechaCitaStr = formatDateInTimeZone(data.fecha_cita, "America/Lima");
+            fechaCita = parseLocalAsUTC(fechaCitaStr);
+        } else {
+            fechaCita = parseLocalAsUTC(data.fecha_cita);
+        }
 
+        let horaFinal: Date;
+        if (data.hora_cita_final) {
+            horaFinal = parseLocalAsUTC(data.hora_cita_final);
+        } else {
+            horaFinal = new Date(fechaCita.getTime() + 60 * 60 * 1000);
+        }
         if (horaFinal <= fechaCita) {
             return { success: false, error: "La hora final debe ser después de la hora de inicio" };
         }
