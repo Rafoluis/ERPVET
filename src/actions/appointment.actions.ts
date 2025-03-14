@@ -15,7 +15,10 @@ const processAppointment = async (
         const options = { timeZone: "America/Lima", hour12: false };
         const fechaCita = new Date(fechaCitaUTC.getTime() - fechaCitaUTC.getTimezoneOffset() * 60000);
         const horaFinal = data.hora_cita_final
-            ? new Date(new Date(data.hora_cita_final).toLocaleString("en-US", options))
+            ? (() => {
+                const horaCitaFinalLocal = new Date(data.hora_cita_final);
+                return new Date(horaCitaFinalLocal.getTime() - horaCitaFinalLocal.getTimezoneOffset() * 60000);
+            })()
             : new Date(fechaCita.getTime() + 60 * 60 * 1000);
 
         if (horaFinal <= fechaCita) {
