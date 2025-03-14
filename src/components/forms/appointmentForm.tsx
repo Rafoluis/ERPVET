@@ -77,7 +77,7 @@ const AppointmentForm = ({
             router.refresh();
         } else if (state.error) {
             // toast("Error en la acción: " + state.error);
-            showToast("error", "Error en la acción: ");
+            showToast("error", state.error);
             console.error("Error en la acción:", state.error);
         }
     }, [state, router, setOpen, type]);
