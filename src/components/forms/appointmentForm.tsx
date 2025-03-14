@@ -52,15 +52,11 @@ const AppointmentForm = ({
         hora: string | undefined
     ) => {
         if (!hora) return undefined;
-        const baseDate = fecha
-            ? fecha instanceof Date
-                ? new Date(fecha)
-                : new Date(fecha)
+        const fechaDate = fecha
+            ? (fecha instanceof Date ? fecha : new Date(fecha))
             : new Date();
-        const [hours, minutes] = hora.split(":").map(Number);
-        baseDate.setHours(hours, minutes, 0, 0);
-        const dateWithTimezone = new Date(baseDate.getTime() - 5 * 60 * 60 * 1000);
-        return dateWithTimezone.toISOString();
+        const fechaStr = fechaDate.toISOString().split("T")[0];
+        return `${fechaStr}T${hora}:00`;
     };
 
     const onSubmit = handleSubmit((formData) => {
