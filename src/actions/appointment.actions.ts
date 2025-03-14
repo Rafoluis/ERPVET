@@ -11,9 +11,7 @@ const processAppointment = async (
     isUpdate = false
 ) => {
     try {
-        const fechaCitaUTC = new Date(data.fecha_cita);
-        const options = { timeZone: "America/Lima", hour12: false };
-        const fechaCita = new Date(fechaCitaUTC.getTime() - fechaCitaUTC.getTimezoneOffset() * 60000);
+        const fechaCita = new Date(data.fecha_cita);
         const horaFinal = data.hora_cita_final
             ? (() => {
                 const horaCitaFinalLocal = new Date(data.hora_cita_final);
