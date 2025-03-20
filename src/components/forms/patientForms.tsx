@@ -27,7 +27,7 @@ const PatientForm = ({ type, data, setOpen, onSuccess }: PatientFormProps) => {
         resolver: zodResolver(patientSchema),
     });
 
-    const [setSubmittedData] = useState<any>(null);
+    const [submittedData, setSubmittedData] = useState<any>(null);
     const [state, formAction] = useActionState(
         type === "create" ? createPatient : updatePatient,
         { success: false, error: null }
