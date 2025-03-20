@@ -7,6 +7,7 @@ const columns = [
   { id: 'especialidad', label: 'Especialidad' },
   { id: 'fecha_creacion', label: 'Fecha de creación' },
   { id: 'roles', label: 'Roles' },
+  { id: 'estado', label: 'Estado' },
 ]
 
 interface AdminPageProps {
@@ -20,8 +21,9 @@ const AdminPage = async ({ searchParams }: AdminPageProps) => {
   const end = typeof resolvedParams.end === 'string' ? resolvedParams.end : undefined
   const sort = typeof resolvedParams.sort === 'string' ? (resolvedParams.sort as 'asc' | 'desc') : undefined
   const column = typeof resolvedParams.column === 'string' ? resolvedParams.column : undefined
+  const page = typeof resolvedParams.page === 'string' ? parseInt(resolvedParams.page) : 1
 
-  const employeesPromise = getAllEmployees(search, start, end, sort, column)
+  const employeesPromise = getAllEmployees(search, start, end, sort, column, page)
 
   return (
     <>

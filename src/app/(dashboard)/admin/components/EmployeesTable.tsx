@@ -6,7 +6,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { use } from 'react'
 
 interface Props {
-  getAllEmployees: Promise<Employee[]>
+  getAllEmployees: Promise<{ data: Employee[]; total: number }>
   columns: { id: string; label: string }[]
   onDeleteEmployee: (employee: Employee) => void
   onEditEmployee: (employee: Employee) => void
@@ -18,7 +18,7 @@ const EmployeesTable = ({
   onDeleteEmployee,
   onEditEmployee,
 }: Props) => {
-  const data = use(getAllEmployees)
+  const {data, total} = use(getAllEmployees)
 
   return (
     <>
@@ -32,11 +32,26 @@ const EmployeesTable = ({
               : '',
           nombre: (row) => (
             <div className='flex flex-col'>
-              <span className='font-semibold'>{ row.nombre.concat(' ', row.apellido) }</span>
+              <span className='font-semibold'>
+                {row.nombre.concat(' ', row.apellido)}
+              </span>
               <span className='text-gray-500 text-sm'>{row.dni}</span>
             </div>
           ),
-          roles: (row) => (<span className='lowercase'>{row.roles.join(', ')}</span>),
+          roles: (row) => (
+            <span className='lowercase'>{row.roles.join(', ')}</span>
+          ),
+          estado: (row) => (
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                row.estado === 'Activo'
+                  ? 'bg-green-100 text-green-600'
+                  : 'bg-red-100 text-red-600'
+              }`}
+            >
+              {row.estado}
+            </span>
+          ),
         }}
         customActions={(row) => (
           <>
@@ -56,7 +71,7 @@ const EmployeesTable = ({
           </>
         )}
       />
-      <Pagination page={5} count={data.length} />
+      <Pagination page={5} count={total} />
     </>
   )
 }

@@ -11,7 +11,7 @@ import TableSearch from '@/components/tableSearch'
 import Loader from '@/components/Loader'
 
 interface Props {
-  getAllEmployees: Promise<Employee[]>
+  getAllEmployees: Promise<{ data: Employee[]; total: number }>
   columns: { id: string; label: string }[]
 }
 

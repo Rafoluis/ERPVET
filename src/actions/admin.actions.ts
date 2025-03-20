@@ -12,8 +12,9 @@ export const getAllEmployees = async (
   start?: string,
   end?: string,
   sort?: 'asc' | 'desc',
-  column?: string
-): Promise<Employee[]> => {
+  column?: string,
+  page: number = 1
+): Promise<{ data: Employee[]; total: number }> => {
   const whereClause: Prisma.EmpleadoWhereInput = {}
 
   if (search) {
@@ -42,50 +43,69 @@ export const getAllEmployees = async (
     }
   }
 
-  let orderBy: Prisma.EmpleadoOrderByWithRelationInput | undefined = undefined;
+  let orderBy: Prisma.EmpleadoOrderByWithRelationInput | undefined = undefined
   if (sort && column) {
-    const userColumns = ['nombre', 'apellido', 'dni', 'email', 'telefono', 'direccion', 'password', 'sexo'];
-    if (userColumns.includes(column)) {
-      orderBy = { usuario: { [column]: sort } };
+    const userColumns = [
+      'nombre',
+      'apellido',
+      'dni',
+      'email',
+      'telefono',
+      'direccion',
+      'password',
+      'sexo',
+    ]
+    if (column === 'estado') {
+      orderBy = {
+        deletedAt: sort === 'asc' ? 'asc' : 'desc',
+      }
+    } else if (userColumns.includes(column)) {
+      orderBy = { usuario: { [column]: sort } }
     } else {
-      orderBy = { [column]: sort };
+      orderBy = { [column]: sort }
     }
   }
 
-  // await sleep(3000)
+  const pageSize = 5
+  const skip = (page - 1) * pageSize
 
-  const employees = await prisma.empleado.findMany({
-    where: whereClause,
-    orderBy,
-    select: {
-      id_empleado: true,
-      especialidad: true,
-      fecha_creacion: true,
-      usuario: {
-        select: {
-          nombre: true,
-          apellido: true,
-          dni: true,
-          email: true,
-          telefono: true,
-          direccion: true,
-          password: true,
-          sexo: true,
-          roles: {
-            select: {
-              rol: {
-                select: {
-                  nombre: true,
+  const [employees, total] = await prisma.$transaction([
+    prisma.empleado.findMany({
+      where: whereClause,
+      orderBy,
+      skip,
+      take: pageSize,
+      select: {
+        id_empleado: true,
+        especialidad: true,
+        fecha_creacion: true,
+        deletedAt: true,
+        usuario: {
+          select: {
+            nombre: true,
+            apellido: true,
+            dni: true,
+            email: true,
+            telefono: true,
+            direccion: true,
+            password: true,
+            sexo: true,
+            deletedAt: true,
+            roles: {
+              select: {
+                rol: {
+                  select: {
+                    nombre: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  })
-
-  if (!employees) throw new Error('No employees found')
+    }),
+    prisma.empleado.count({ where: whereClause }),
+  ])
 
   const data = employees.map((employee) => ({
     id: employee.id_empleado,
@@ -100,9 +120,13 @@ export const getAllEmployees = async (
     telefono: employee.usuario.telefono,
     direccion: employee.usuario.direccion,
     password: employee.usuario.password,
+    estado:
+      employee.deletedAt || employee.usuario.deletedAt
+        ? 'Eliminado'
+        : ('Activo' as 'Activo' | 'Eliminado'),
   }))
 
-  return data
+  return { data, total }
 }
 
 export const createOrUpdateEmployee = async (
@@ -221,20 +245,18 @@ export const deleteEmployee = async (
       }
     }
 
-    await prisma.usuarioRol.deleteMany({
-      where: { id_usuario: usuario.id_usuario },
-    })
-
-    await prisma.empleado.delete({
+    await prisma.empleado.update({
       where: { id_empleado: empleado.id_empleado },
+      data: { deletedAt: new Date() },
     })
 
-    await prisma.usuario.delete({
+    await prisma.usuario.update({
       where: { dni },
+      data: { deletedAt: new Date() },
     })
 
     revalidatePath('/admin')
 
-    return { data: null, message: 'Empleado eliminado exitosamente', error: '' }
+    return { data: null, message: 'Empleado eliminado', error: '' }
   })
 }
