@@ -27,7 +27,7 @@ const AdminPage = async ({ searchParams }: AdminPageProps) => {
 
   return (
     <>
-      <h1 className="hidden py-2 md:block text-lg font-semibold m-4 mt-0">Gestión de citas</h1>
+      <h1 className="hidden py-2 md:block text-lg font-semibold m-4 mt-0">Gestión de empleados</h1>
 
       <section className="p-4 bg-backgrounddefault rounded-md flex-1 m-4 mt-0">
         <EmployeeManagement
