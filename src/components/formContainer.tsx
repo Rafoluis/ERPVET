@@ -358,6 +358,35 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 };
 
                 break;
+            } 
+            case "doctor": {
+                const doctors = await prisma.empleado.findMany({
+                    where: {
+                        usuario: {
+                            roles: {
+                                some: {
+                                    rol: { nombre: "ODONTOLOGO" },
+                                },
+                            },
+                        },
+                    },
+                    select: {
+                        id_empleado: true,
+                        usuario: {
+                            select: {
+                                nombre: true,
+                                apellido: true,
+                            },
+                        },
+                    },
+                });
+                relatedData = {
+                    doctores: doctors.map((d) => ({
+                        id_empleado: d.id_empleado,
+                        nombre: `${d.usuario.nombre} ${d.usuario.apellido}`,
+                    })),
+                }
+                break
             }
             default:
                 break;
