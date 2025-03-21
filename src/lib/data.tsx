@@ -39,15 +39,39 @@ export const clientesData = [
 
 export const calendarEvents = [
     {
-        title: "Math",
+        title: 'Consulta',
         allDay: false,
-        start: new Date(2024, 7, 12, 8, 0),
-        end: new Date(2024, 7, 12, 8, 45),
+        start: new Date(2025, 3, 14, 8, 0),  // Lunes, 14 de abril de 2025
+        end: new Date(2025, 3, 14, 8, 45),
     },
     {
-        title: "English",
+        title: 'Revisión',
         allDay: false,
-        start: new Date(2024, 7, 12, 9, 0),
-        end: new Date(2024, 7, 12, 9, 45),
+        start: new Date(2025, 3, 15, 9, 0),  // Martes, 15 de abril de 2025
+        end: new Date(2025, 3, 15, 9, 45),
+    },
+    {
+        title: 'Revisión',
+        allDay: false,
+        start: new Date(2025, 3, 16, 9, 0),  // Miércoles, 16 de abril de 2025
+        end: new Date(2025, 3, 16, 9, 45),
+    },
+    {
+        title: 'Revisión',
+        allDay: false,
+        start: new Date(2025, 3, 17, 9, 0),  // Jueves, 17 de abril de 2025
+        end: new Date(2025, 3, 17, 9, 45),
+    },
+    {
+        title: 'Revisión',
+        allDay: false,
+        start: new Date(2025, 3, 18, 9, 0),  // Viernes, 18 de abril de 2025
+        end: new Date(2025, 3, 18, 9, 45),
+    },
+    {
+        title: 'Revisión',
+        allDay: false,
+        start: new Date(2025, 3, 19, 9, 0),  // Sábado, 19 de abril de 2025
+        end: new Date(2025, 3, 19, 9, 45),
     },
 ];
