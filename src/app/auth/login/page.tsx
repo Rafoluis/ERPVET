@@ -29,7 +29,6 @@ const LoginPage = () => {
     })
 
     if (!response?.ok) {
-      console.log(response)
       const errorMessage = response?.error?.includes('No user found')
         ? 'El usuario no existe. Por favor, verifica tus credenciales.'
         : 'DNI o contraseña incorrectos. Inténtalo de nuevo.';   
