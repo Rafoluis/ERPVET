@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma"
 import { getServerSession } from "next-auth/next";
-import { authOptions } from '@/app/api/auth/auth';
+import { authOptions } from '@/lib/auth';
 
 const AppointmentCard = async ({ type }: { type: "appountmentTotal" | "patientsTotal" | "appountmentNext" }) => {
     const session = await getServerSession(authOptions);
