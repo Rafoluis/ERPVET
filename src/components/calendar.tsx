@@ -47,7 +47,6 @@ const eventStyleGetter = (
     };
 };
 
-
 const BigCalendar = ({ data }: { data: { title: string; start: Date | null; end: Date | null; }[] }) => {
     const filteredData = data.filter(event => event.start !== null && event.end !== null) as { title: string; start: Date; end: Date; }[];
 

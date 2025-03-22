@@ -177,7 +177,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                     })),
                 };
                 break;
-            case "boleta": {
+            case "boleta":
                 const patients = await prisma.paciente.findMany({
                     where: { deletedAt: null },
                     select: {
@@ -358,7 +358,7 @@ const FormContainer = async ({ table, type, data, id }: FormContainerProps) => {
                 };
 
                 break;
-            } 
+
             case "doctor": {
                 const doctors = await prisma.empleado.findMany({
                     where: {

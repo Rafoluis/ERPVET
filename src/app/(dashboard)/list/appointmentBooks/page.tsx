@@ -1,4 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from '@/app/api/auth/auth';
 import AppointmentCard from "@/components/appointmentCard";
 import BigCalendarContainer from "@/components/calendarContainer";
 import Pagination from "@/components/pagination";

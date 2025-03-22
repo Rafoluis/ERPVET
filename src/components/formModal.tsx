@@ -56,7 +56,7 @@ const deleteActions = {
     empleado: deleteService,
     boleta: deleteTicket,
     servicio: deleteService,
-    doctor: deleteService,
+    doctor: deleteService, /////
 };
 
 const IconComponent = ({
