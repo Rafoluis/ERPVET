@@ -1,68 +1,89 @@
-import { withAuth } from 'next-auth/middleware'
 import { NextRequest, NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
 
 const publicRoutes = ['/', '/auth/login']
 
-const protectedRoutes = [
-  '/list/appointments',
-  '/doctor',
-  '/receptionist',
-  '/patient',
-  '/admin'
-]
+const roleBasedRoutes = {
+  admin: [
+    '/list/appointments',
+    '/list/patients',
+    '/list/service',
+    '/HistoriasClinicasR',
+    '/list/ticket',
+    '/list/doctors',
+    '/admin',
+    '/company'
+  ],
+  recepcionista: [
+    '/list/appointments',
+    '/list/patients',
+    '/HistoriasClinicasR',
+    '/list/ticket',
+    '/list/doctors'
+  ],
+  odontologo: [
+    '/list/appointmentBooks',
+    '/HistoriasClinicasD'
+  ]
+}
 
-const validRoutes = [...publicRoutes, ...protectedRoutes]
+const defaultRoutes = {
+  admin: '/list/appointments',
+  recepcionista: '/list/appointments',
+  odontologo: '/list/appointmentBooks',
+  guest: '/auth/login'
+}
 
-const defaultRoute = '/list/appointments'
 
-export default withAuth(
-  function middleware(req: NextRequest) {
-    const { pathname } = req.nextUrl
-    const isAuthenticated = !!req.cookies.get('next-auth.session-token') || !!req.cookies.get('__Secure-next-auth.session-token')
+export async function middleware(req: NextRequest) {
 
-    if (publicRoutes.includes(pathname)) {
-      if (isAuthenticated && pathname === '/auth/login') {
-        return NextResponse.redirect(new URL(defaultRoute, req.url))
-      }
+  const { pathname } = req.nextUrl
+  const isAuthenticated = !!req.cookies.get('next-auth.session-token') || !!req.cookies.get('__Secure-next-auth.session-token')
+  if (pathname === '/' || pathname === '') {
+    return NextResponse.redirect(new URL('/auth/login', req.url))
+  }
+  if (publicRoutes.includes(pathname)) {
+    if (isAuthenticated && pathname === '/auth/login') {
+      const token = await getToken({ req })
+      const userRole = (token?.role as string || 'guest').toLowerCase()
+      const roleDefaultRoute = defaultRoutes[userRole as keyof typeof defaultRoutes] || defaultRoutes.guest
 
-      if (pathname === '/') {
-        return NextResponse.redirect(
-          new URL(isAuthenticated ? defaultRoute : '/auth/login', req.url)
-        )
-      }
-
-      return NextResponse.next()
-    }
-
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/auth/login', req.url))
-    }
-
-    const isValidRoute = validRoutes.some(route => pathname.startsWith(route))
-    if (!isValidRoute) {
-      return NextResponse.redirect(new URL(defaultRoute, req.url))
+      return NextResponse.redirect(new URL(roleDefaultRoute, req.url))
     }
 
     return NextResponse.next()
-  },
-  {
-    pages: {
-      signIn: '/auth/login',
-    },
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
   }
-)
+
+  if (!isAuthenticated) {
+    return NextResponse.redirect(new URL('/auth/login', req.url))
+  }
+
+  const token = await getToken({ req })
+  const userRole = (token?.role as string || 'guest').toLowerCase()
+  const roleDefaultRoute = defaultRoutes[userRole as keyof typeof defaultRoutes] || defaultRoutes.guest
+
+  const allowedRoutes = roleBasedRoutes[userRole as keyof typeof roleBasedRoutes] || []
+
+  const hasAccess = allowedRoutes.some(route => pathname.startsWith(route))
+
+  if (!hasAccess) {
+    return NextResponse.redirect(new URL(roleDefaultRoute, req.url))
+  }
+
+  return NextResponse.next()
+}
 
 export const config = {
   matcher: [
     '/',
-    '/auth/login',
+    '/auth/:path*',
     '/list/:path*',
     '/doctor/:path*',
     '/receptionist/:path*',
     '/patient/:path*',
-    '/admin/:path*'
-  ],
+    '/admin/:path*',
+    '/HistoriasClinicasR',
+    '/HistoriasClinicasD',
+    '/company'
+  ]
 }

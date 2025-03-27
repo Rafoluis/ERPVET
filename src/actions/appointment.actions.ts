@@ -91,7 +91,7 @@ const processAppointment = async (
             });
 
             if (overlappingCitas.length > 0) {
-                return { success: false, error: "El odontólogo ya tiene una cita en este horario." };
+                return { success: false, error: "El médico ya tiene una cita en este horario." };
             }
         }
 

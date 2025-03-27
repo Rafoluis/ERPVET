@@ -7,22 +7,23 @@ const menuItems = [
     {
         title: 'MENU',
         items: [
-            { label: 'Inicio', href: '/', visible: ['admin', 'recepcionista', 'doctor', 'odontologo'] },
+            //{ label: 'Inicio', href: '/', visible: ['admin', 'recepcionista', 'odontologo'] },
+            { label: 'Agenda de citas', href: '/list/appointmentBooks', visible: ['odontologo'] },
             { label: 'Gestión de citas', href: '/list/appointments', visible: ['admin', 'recepcionista'] },
             { label: 'Pacientes', href: '/list/patients', visible: ['admin', 'recepcionista'] },
             { label: 'Servicios', href: '/list/service', visible: ['admin'] },
-            { label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
-            { label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['doctor', 'odontologo'] },
+            //{ label: 'Historias Clínicas (Recepción)', href: '/HistoriasClinicasR', visible: ['admin', 'recepcionista'] },
+            //{ label: 'Historias Clínicas (Doctor)', href: '/HistoriasClinicasD', visible: ['odontologo'] },
             { label: 'Boletería', href: '/list/ticket', visible: ['admin', 'recepcionista'] },
-            { label: 'Doctores', href: '/list/doctors', visible: ['admin', 'recepcionista'] },
+            { label: 'Médicos', href: '/list/doctors', visible: ['admin', 'recepcionista'] },
         ],
-        visible: ['admin', 'recepcionista', 'doctor', 'odontologo']
+        visible: ['admin', 'recepcionista', 'odontologo']
     },
     {
         title: "OTROS",
         items: [
             { label: 'Empleados', href: '/admin', visible: ['admin'] },
-            { label: 'Empresa', href: '/company', visible: ['admin'] }
+            //{ label: 'Empresa', href: '/company', visible: ['admin'] }
         ],
         visible: ['admin']
     }

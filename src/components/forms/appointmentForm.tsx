@@ -34,11 +34,13 @@ const AppointmentForm = ({
         handleSubmit,
         formState: { errors },
         setValue,
+        trigger,
         control,
         watch,
     } = useForm<AppointmentSchema>({
         resolver: zodResolver(appointmentSchema),
         defaultValues: { servicios: [] },
+        mode: "onChange",
     });
 
     const [state, formAction] = useActionState(
@@ -122,7 +124,7 @@ const AppointmentForm = ({
             id_servicio: item.service.id_servicio,
             cantidad: item.quantity,
         }));
-        setValue("servicios", serviciosValue);
+        setValue("servicios", serviciosValue, { shouldValidate: true });
     }, [selectedServices, setValue]);
 
     const handleAddService = () => {
@@ -139,9 +141,11 @@ const AppointmentForm = ({
             );
             return alreadyExists
                 ? prevServices
-                : [...prevServices, { service: selectedService, quantity: parseInt(selectedQuantity, 10) }];
+                : [
+                    ...prevServices,
+                    { service: selectedService, quantity: parseInt(selectedQuantity, 10) },
+                ];
         });
-
         setSelectedServiceId("");
         setSelectedQuantity("1");
     };
@@ -179,6 +183,7 @@ const AppointmentForm = ({
             )
         );
     };
+
 
     const serviceColumns = [
         { header: "Servicio", accessor: "nombre", className: "text-sm font-bold p-1" },
@@ -297,7 +302,7 @@ const AppointmentForm = ({
                 )}
                 {renderAutocompleteField(
                     "id_empleado",
-                    "Odontólogo",
+                    "Médico",
                     employeeOptions,
                     type === "create" ? undefined : data?.id_empleado,
                     undefined,
@@ -321,7 +326,7 @@ const AppointmentForm = ({
                         type="datetime-local"
                     />
                 </div>
-                <div className="flex flex-col gap-2 w-1/3">
+                <div className="flex flex-col gap-2 w-full md:w-1/2">
                     <InputField
                         label="Hora Final"
                         name="hora_cita_final"

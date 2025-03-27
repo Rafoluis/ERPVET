@@ -40,8 +40,31 @@ const AutocompleteSelect = React.forwardRef<any, AutocompleteSelectProps>(
             return option.label.toLowerCase().includes(inputValue.toLowerCase());
         };
 
+        const customStyles = {
+            control: (provided: any, state: any) => ({
+                ...provided,
+                padding: "0.1rem",
+                border: "1px solid #D1D5DB", // border-gray-300
+                borderRadius: "0.5rem",
+                boxShadow: "none !important",
+                transition: "all 0.2s",
+                outline: "none !important",
+                "&:hover": {
+                    border: "1px solid #3B82F6",
+                },
+            }),
+            placeholder: (provided: any) => ({
+                ...provided,
+                color: "#6B7280", // text-gray-500
+            }),
+            singleValue: (provided: any) => ({
+                ...provided,
+                color: "#000000",
+            }),
+        };
+
         return (
-            <div className="w-full">
+            <div className="flex flex-col gap-1 w-full">
                 <label className="text-xs text-gray-500 mb-1 block">{label}</label>
                 <Select
                     ref={ref}
@@ -52,6 +75,7 @@ const AutocompleteSelect = React.forwardRef<any, AutocompleteSelectProps>(
                     placeholder={placeholder}
                     isClearable={isClearable}
                     filterOption={filterOption || defaultFilterOption}
+                    styles={customStyles}
                     className={className}
                 />
             </div>

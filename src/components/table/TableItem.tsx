@@ -19,7 +19,7 @@ const TableItem = <T,>({
   className,
 }: TableItemProps<T>) => {
   const rowClasses = clsx(
-    "border-b border-gray-200 text-sm hover:bg-backhoverbutton even:bg-backgroundgray",
+    "border-b border-gray-200 text-sm hover:bg-backgroundgray even:bg-backhoverbutton",
     className
   );
 

@@ -18,6 +18,7 @@ const EmployeeDelFormModal = ({ employee, isOpen, onClose }: Props) => {
       return
     }
     showToast('success', response.message)
+    onClose()
   }
 
   return (

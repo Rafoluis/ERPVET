@@ -7,8 +7,8 @@ const Table = ({ columns, renderRow, data, }: {
     data: any[];
 }) => {
     return (
-        <table className="w-full mt-4">
-            <thead>
+        <table className="w-full mt-4 border-t border-gray-300">
+            <thead className="border-b border-gray-300">
                 <tr className="text-left text-gray-500 text-sm">
                     {columns.map((col) => (
                         <TableColumn

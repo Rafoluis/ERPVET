@@ -25,6 +25,7 @@ export const UserSchema = z.object({
   password: z.string().min(5, 'La contraseña debe tener al menos 5 caracteres'),
   roles: z.array(z.string()).min(1, 'Debes seleccionar al menos un rol'),
   fecha_creacion: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 })
 
 export type User = z.infer<typeof UserSchema>

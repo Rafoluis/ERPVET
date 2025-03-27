@@ -11,7 +11,7 @@ type DoctorList = Empleado & { usuario: { nombre: string; apellido: string; dni:
 
 const columns = [
     {
-        header: "Nombre de odontólogo", accessor: "nombre"
+        header: "Nombre del médico", accessor: "nombre"
     },
     {
         header: "Especialidad", accessor: "especialidad", className: "hidden md:table-cell"
@@ -22,7 +22,7 @@ const columns = [
 ];
 
 const renderRow = (item: DoctorList) => (
-    <tr key={item.id_empleado} className="border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton" >
+    <tr key={item.id_empleado} className="border-b border-gray-200 even:bg-backhoverbutton text-sm hover:bg-backgroundgray" >
         <td>
             <div className="flex items-center gap-4 p-2">
                 <div className="flex flex-col">
@@ -36,9 +36,11 @@ const renderRow = (item: DoctorList) => (
         <td className="hidden md:table-cell">{item.especialidad}</td>
         <td>
             <div className="flex items-center gap-2">
+                {/*
                 <Link href={`/list/clientes/${item.id_empleado}`}>
                     <FormContainer table="cita" type="view" />
                 </Link>
+                */}
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="doctor" type="update" data={item} />
@@ -61,7 +63,9 @@ const DoctorListPage = async ({
     const p = page ? parseInt(page) : 1;
 
     const query: Prisma.EmpleadoWhereInput = {
+        deletedAt: null,
         usuario: {
+            deletedAt: null,
             roles: {
                 some: {
                     rol: {
@@ -87,11 +91,9 @@ const DoctorListPage = async ({
     }
 
     if (start || end) {
-        query.usuario = {
-            fecha_creacion: {
-                gte: start ? new Date(start) : undefined,
-                lte: end ? new Date(end) : undefined,
-            }
+        (query.usuario as any).fecha_creacion = {
+            gte: start ? new Date(start) : undefined,
+            lte: end ? new Date(end) : undefined,
         };
     }
 
@@ -141,7 +143,7 @@ const DoctorListPage = async ({
             <div className="rounded-md flex-1 m-4 mt-0">
                 <div className="flex items-center justify-between p-2">
                     <h1 className="hidden md:block text-lg font-semibold">
-                        Gestión de doctores
+                        Gestión de médicos
                     </h1>
                 </div>
             </div>
@@ -149,7 +151,7 @@ const DoctorListPage = async ({
             {/* BÚSQUEDA Y AGREGAR DOCTOR */}
             <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
                 <div className="flex items-center justify-between">
-                    <h2 className="hidden md:block text-ls font-semibold">Doctores</h2>
+                    <h2 className="hidden md:block text-ls font-semibold">Médicos</h2>
                     <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
                         <TableSearch />
                         <div className="flex items-center gap-4 self-end">

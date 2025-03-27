@@ -34,7 +34,7 @@ const EmployeeFormModal = ({ isOpen, employee, onClose }: Props) => {
       telefono: employee?.telefono ?? '',
       direccion: employee?.direccion ?? '',
       especialidad: employee?.especialidad ?? '',
-      roles: employee?.roles ?? [],
+      roles: employee?.roles ?? []
     },
   })
 
