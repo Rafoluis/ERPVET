@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
-import BigCalendar from "./calendar";
-
+import CalendarClient from "./calendarClient";
 function convertUTCToNaive(date: Date): Date {
     return new Date(
         date.getUTCFullYear(),
@@ -48,11 +47,11 @@ const BigCalendarContainer = async ({
         end: convertUTCToNaive(cita.hora_cita_final!),
     }));
 
-    console.log("data:", data)
+    console.log("data:", data);
 
     return (
-        <div style={{ minHeight: '500px' }}>
-            <BigCalendar data={data} />
+        <div style={{ minHeight: "500px" }}>
+            <CalendarClient data={data} />
         </div>
     );
 };

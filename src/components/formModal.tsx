@@ -14,6 +14,8 @@ import { deleteService } from "@/actions/service.actions";
 import ServiceForm from "./forms/serviceForm";
 import { createPortal } from "react-dom";
 import { showToast } from "@/lib/toast";
+import DoctorForm from "./forms/doctorsForms";
+import { deleteDoctor } from "@/actions/doctor.actions";
 
 interface ExtendedFormModalProps extends FormContainerProps {
     relatedData?: any;
@@ -54,7 +56,6 @@ const deleteActions = {
     boleta: deleteTicket,
     servicio: deleteService,
     doctor: deleteDoctor,
-    doctor: deleteService, /////
 };
 
 const IconComponent = ({ type }: { type: "create" | "view" | "update" | "delete" }) => {
@@ -138,9 +139,7 @@ const FormModal = ({
                     </>
                 )}
             </button>
-
             {open &&
-                { open &&
                 createPortal(
                     <div
                         className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center"
@@ -158,7 +157,7 @@ const FormModal = ({
                     </div>,
                     document.body
                 )}
-                )}
+
         </>
     );
 };

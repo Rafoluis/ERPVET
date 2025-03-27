@@ -1,5 +1,5 @@
 import { authOptions } from '@/lib/auth';
-import AppointmentCard from "@/components/appointmentCard";
+import AppointmentCard, { getCurrentDatePeru } from "@/components/appointmentCard";
 import BigCalendarContainer from "@/components/calendarContainer";
 import Pagination from "@/components/pagination";
 import Table from "@/components/table";
@@ -215,6 +215,7 @@ const AppointmentBooksListPage = async ({
 
     const calendarType = session.user.role === "ODONTOLOGO" ? "id_empleado" : "id_paciente";
     const calendarId = calendarType === "id_empleado" && empleadoId ? empleadoId : session.user.id;
+    const date = getCurrentDatePeru();
 
     return (
         <div>
@@ -227,9 +228,9 @@ const AppointmentBooksListPage = async ({
                     </h2>
                 </div>
                 <div className="flex gap-4 justify-between flex-wrap">
-                    <AppointmentCard type="appountmentTotal" />
-                    <AppointmentCard type="patientsTotal" />
-                    <AppointmentCard type="appountmentNext" />
+                    <AppointmentCard type="appountmentTotal" date={date} />
+                    <AppointmentCard type="patientsTotal" date={date} />
+                    <AppointmentCard type="appountmentNext" date={date} />
                 </div>
             </div>
             <div className="flex flex-col md:flex-row">

@@ -1,4 +1,4 @@
-import AppointmentCard from "@/components/appointmentCard"
+import AppointmentCard, { getCurrentDatePeru } from "@/components/appointmentCard"
 import FormContainer from "@/components/formContainer"
 import Pagination from "@/components/pagination"
 import Table from "@/components/table"
@@ -242,6 +242,7 @@ const AppointmentListPage = async ({
             return sort === "asc" ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
         });
     }
+    const date = getCurrentDatePeru();
 
     return (
         <div>
@@ -252,9 +253,9 @@ const AppointmentListPage = async ({
                 </div>
 
                 <div className='flex gap-4 justify-between flex-wrap'>
-                    <AppointmentCard type='appountmentTotal' />
-                    <AppointmentCard type='patientsTotal' />
-                    <AppointmentCard type='appountmentNext' />
+                    <AppointmentCard type="appountmentTotal" date={date} />
+                    <AppointmentCard type="patientsTotal" date={date} />
+                    <AppointmentCard type="appountmentNext" date={date} />
                 </div>
             </div>
 
