@@ -115,3 +115,22 @@
     color: gray !important;
     margin-bottom: 5px;
 }
+
+.custom-time-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.custom-time-input::-webkit-clear-button,
+.custom-time-input::-webkit-inner-spin-button {
+    display: none;
+}
+
+button,
+select {
+    outline: none !important;
+    box-shadow: none !important;
+}

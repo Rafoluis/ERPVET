@@ -34,19 +34,16 @@ const forms: {
         <AppointmentForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
     ),
     paciente: (setOpen, type, data, relatedData, onSuccess) => (
-        <PatientForm
-            type={type}
-            data={data}
-            setOpen={setOpen}
-            relatedData={relatedData}
-            onSuccess={onSuccess}
-        />
+        <PatientForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} onSuccess={onSuccess} />
     ),
     boleta: (setOpen, type, data, relatedData) => (
         <TicketForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
     ),
     servicio: (setOpen, type, data, relatedData) => (
         <ServiceForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
+    ),
+    doctor: (setOpen, type, data, relatedData) => (
+        <DoctorForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} />
     ),
 };
 
@@ -56,14 +53,11 @@ const deleteActions = {
     empleado: deleteService,
     boleta: deleteTicket,
     servicio: deleteService,
+    doctor: deleteDoctor,
     doctor: deleteService, /////
 };
 
-const IconComponent = ({
-    type,
-}: {
-    type: "create" | "view" | "update" | "delete";
-}) => {
+const IconComponent = ({ type }: { type: "create" | "view" | "update" | "delete" }) => {
     const icons = {
         create: <Plus size={20} color="white" />,
         view: <Eye size={18} />,
@@ -84,9 +78,7 @@ const FormModal = ({
     variant = "default",
 }: ExtendedFormModalProps) => {
     const isAppointmentPatient = table === "paciente" && type === "create" && variant === "appointment";
-    const defaultSize = type === "create" ? "w-auto px-4 py-2" : "w-7 h-7";
-    const size = isAppointmentPatient ? "w-full px-4 py-2" : (type === "create" ? "w-auto px-4 py-2" : "w-7 h-7");
-
+    const size = isAppointmentPatient ? "w-full px-4 py-2" : type === "create" ? "w-auto px-4 py-2" : "w-7 h-7";
     const bgColor =
         type === "create"
             ? "bg-backbuttondefault"
@@ -95,10 +87,8 @@ const FormModal = ({
                 : type === "view"
                     ? "bg-indigo-200"
                     : "bg-red-100";
-
     const buttonClass = `${size} flex items-center justify-center ${isAppointmentPatient ? "rounded-md" : "rounded-full"
         } ${bgColor}`;
-
 
     const [open, setOpen] = useState(false);
 
@@ -107,13 +97,11 @@ const FormModal = ({
             success: false,
             error: null,
         });
-
         const router = useRouter();
 
         useEffect(() => {
             if (state.success) {
                 showToast("success", `La ${table} ha sido eliminada`);
-                // toast(`La ${table} ha sido eliminada`);
                 setOpen(false);
                 router.refresh();
             }
@@ -145,15 +133,14 @@ const FormModal = ({
                     <>
                         <IconComponent type={type} />
                         {type === "create" && (
-                            <span className="ml-2 text-sm font-medium text-textdefault">
-                                Agregar
-                            </span>
+                            <span className="ml-2 text-sm font-medium text-textdefault">Agregar</span>
                         )}
                     </>
                 )}
             </button>
 
             {open &&
+                { open &&
                 createPortal(
                     <div
                         className="w-screen h-screen absolute left-0 top-0 bg-black bg-opacity-60 z-50 flex items-center justify-center"
@@ -164,15 +151,13 @@ const FormModal = ({
                             onClick={(e) => e.stopPropagation()}
                         >
                             <Form />
-                            <div
-                                className="absolute top-4 right-4 cursor-pointer"
-                                onClick={() => setOpen(false)}
-                            >
+                            <div className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpen(false)}>
                                 <Image src="/close.png" alt="Cerrar" width={14} height={14} />
                             </div>
                         </div>
                     </div>,
                     document.body
+                )}
                 )}
         </>
     );

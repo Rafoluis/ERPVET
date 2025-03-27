@@ -27,7 +27,7 @@ const columns = [
 ];
 
 const renderRow = (item: ServicioList) => (
-    <tr key={item.id_servicio} className="border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_servicio} className="border-b border-gray-200 even:bg-backhoverbutton text-sm hover:bg-backgroundgray">
         <td className="hidden md:table-cell p-2">{item.id_servicio}</td>
         <td className="hidden md:table-cell">{item.nombre_servicio}</td>
         <td className="hidden md:table-cell">{item.descripcion}</td>

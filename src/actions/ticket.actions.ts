@@ -77,7 +77,7 @@ export const createTicket = async (
             prisma.ticket.create({
                 data: {
                     id_paciente: data.id_paciente,
-                    fecha_emision: new Date(),
+                    fecha_emision: new Date(data.fecha_emision),
                     tipo_comprobante: data.tipo_comprobante,
                     medio_pago: data.medio_pago,
                     monto_total: totalCitasCost,
@@ -190,7 +190,7 @@ export const updateTicket = async (
                 where: { id_ticket: data.id_ticket as number },
                 data: {
                     id_paciente: data.id_paciente,
-                    fecha_emision: new Date(),
+                    fecha_emision: new Date(data.fecha_emision),
                     tipo_comprobante: data.tipo_comprobante,
                     medio_pago: data.medio_pago,
                     monto_total: totalCitasCost,

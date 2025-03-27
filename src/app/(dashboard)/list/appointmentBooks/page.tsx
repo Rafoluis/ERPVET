@@ -29,7 +29,7 @@ const columns = [
 ];
 
 const renderRow = (item: AppointmentBooksList) => (
-    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-backhoverbutton text-sm hover:bg-backgroundgray">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.paciente.usuario.nombre} ${item.paciente.usuario.apellido}`}</h3>
@@ -223,7 +223,7 @@ const AppointmentBooksListPage = async ({
                 <div className="flex items-center gap-4 p-2">
                     <h1 className="text-lg font-semibold">Agenda de citas</h1>
                     <h2 className="text-lg font-semibold text-textblue">
-                        Odontólogo: {nameComplete}
+                        Médico: {nameComplete}
                     </h2>
                 </div>
                 <div className="flex gap-4 justify-between flex-wrap">

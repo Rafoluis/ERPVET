@@ -35,7 +35,7 @@ const columns = [
 ];
 
 const renderRow = (item: TicketList) => (
-    <tr key={item.id_ticket} className="border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_ticket} className="border-b border-gray-200 even:bg-backhoverbutton text-sm hover:bg-backgroundgray">
         <td className="hidden md:table-cell p-2">{item.id_ticket}</td>
         <td className="table-cell">
             {item.fecha_emision

@@ -28,8 +28,8 @@ const InputField: React.FC<InputFieldProps> = ({
     onChange,
 }) => {
     return (
-        <div className={hidden ? "hidden" : "flex flex-col gap-2 w-full"}>
-            <label htmlFor={name} className="text-sm font-medium text-gray-700 mb-1">
+        <div className={hidden ? "hidden" : "flex flex-col gap-1 w-full"}>
+            <label htmlFor={name} className="text-xs text-gray-500 mb-1 block">
                 {label}
             </label>
             <input

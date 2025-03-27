@@ -24,7 +24,7 @@ const columns = [
 ];
 
 const renderRow = (item: PatientList) => (
-    <tr key={item.id_paciente} className="border-b border-gray-200 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_paciente} className="border-b border-gray-200 even:bg-backhoverbutton text-sm hover:bg-backgroundgray">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.usuario.nombre} ${item.usuario.apellido}`}</h3>
@@ -39,7 +39,9 @@ const renderRow = (item: PatientList) => (
         </td>
         <td>
             <div className="flex items-center gap-2">
+                {/*
                 <FormContainer table="paciente" type="view" />
+                */}
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="paciente" type="update" data={item}

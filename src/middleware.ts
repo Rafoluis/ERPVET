@@ -34,10 +34,14 @@ const defaultRoutes = {
   guest: '/auth/login'
 }
 
+
 export async function middleware(req: NextRequest) {
+
   const { pathname } = req.nextUrl
   const isAuthenticated = !!req.cookies.get('next-auth.session-token') || !!req.cookies.get('__Secure-next-auth.session-token')
-
+  if (pathname === '/' || pathname === '') {
+    return NextResponse.redirect(new URL('/auth/login', req.url))
+  }
   if (publicRoutes.includes(pathname)) {
     if (isAuthenticated && pathname === '/auth/login') {
       const token = await getToken({ req })
@@ -59,7 +63,7 @@ export async function middleware(req: NextRequest) {
   const roleDefaultRoute = defaultRoutes[userRole as keyof typeof defaultRoutes] || defaultRoutes.guest
 
   const allowedRoutes = roleBasedRoutes[userRole as keyof typeof roleBasedRoutes] || []
-  
+
   const hasAccess = allowedRoutes.some(route => pathname.startsWith(route))
 
   if (!hasAccess) {

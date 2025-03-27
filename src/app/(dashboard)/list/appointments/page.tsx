@@ -28,7 +28,7 @@ const columns = [
         header: "Hora de cita", accessor: "hora_cita_inicial", className: "hidden md:table-cell"
     },
     {
-        header: "Odontólogo asignado", accessor: "apellido", className: "hidden md:table-cell"
+        header: "Médico asignado", accessor: "apellido", className: "hidden md:table-cell"
     },
     {
         header: "Servicio", accessor: "nombre_servicio", className: "hidden md:table-cell"
@@ -45,7 +45,7 @@ const columns = [
 ];
 
 const renderRow = (item: AppointmentList) => (
-    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-backgroundgray text-sm hover:bg-backhoverbutton">
+    <tr key={item.id_cita} className="border-b border-gray-300 even:bg-backhoverbutton text-sm hover:bg-backgroundgray">
         <td className="flex items-center gap-4 p-2">
             <div className="flex flex-col">
                 <h3 className="font-semibold">{`${item.paciente.usuario.nombre} ${item.paciente.usuario.apellido}`}</h3>
@@ -86,9 +86,12 @@ const renderRow = (item: AppointmentList) => (
         </td>
         <td>
             <div className="flex items-center gap-2">
+                {/*
                 <Link href={`/list/clientes/${item.id_cita}`}>
                     <FormContainer table="cita" type="view" />
                 </Link>
+                */}
+
                 {"recepcionista" === "recepcionista" && (
                     <>
                         <FormContainer table="cita" type="update" data={item}
