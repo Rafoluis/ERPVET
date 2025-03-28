@@ -2,8 +2,8 @@ import prisma from "@/lib/prisma";
 import CalendarClient from "./calendarClient";
 import moment from "moment-timezone";
 
-function convertUTCToPeru(date: Date): Date {
-    return moment.utc(date).tz("America/Lima").toDate();
+function parseAsPeru(dateInput: string | Date): Date {
+    return moment.utc(dateInput).add(5, "hours").toDate();
 }
 
 const BigCalendarContainer = async ({
@@ -37,8 +37,8 @@ const BigCalendarContainer = async ({
 
     const data = validCitas.map((cita) => ({
         title: `${cita.paciente.usuario.nombre} ${cita.paciente.usuario.apellido}`,
-        start: convertUTCToPeru(cita.hora_cita_inicial!),
-        end: convertUTCToPeru(cita.hora_cita_final!),
+        start: parseAsPeru(cita.hora_cita_inicial!),
+        end: parseAsPeru(cita.hora_cita_final!),
     }));
 
     console.log("data:", data);
