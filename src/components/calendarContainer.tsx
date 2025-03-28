@@ -1,15 +1,9 @@
 import prisma from "@/lib/prisma";
 import CalendarClient from "./calendarClient";
-function convertUTCToNaive(date: Date): Date {
-    return new Date(
-        date.getUTCFullYear(),
-        date.getUTCMonth(),
-        date.getUTCDate(),
-        date.getUTCHours(),
-        date.getUTCMinutes(),
-        date.getUTCSeconds(),
-        date.getUTCMilliseconds()
-    );
+import moment from "moment-timezone";
+
+function convertUTCToPeru(date: Date): Date {
+    return moment.utc(date).tz("America/Lima").toDate();
 }
 
 const BigCalendarContainer = async ({
@@ -43,8 +37,8 @@ const BigCalendarContainer = async ({
 
     const data = validCitas.map((cita) => ({
         title: `${cita.paciente.usuario.nombre} ${cita.paciente.usuario.apellido}`,
-        start: convertUTCToNaive(cita.hora_cita_inicial!),
-        end: convertUTCToNaive(cita.hora_cita_final!),
+        start: convertUTCToPeru(cita.hora_cita_inicial!),
+        end: convertUTCToPeru(cita.hora_cita_final!),
     }));
 
     console.log("data:", data);
