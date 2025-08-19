@@ -88,7 +88,7 @@ const LoginPage = () => {
           </div>
         )}
 
-        <Button type='submit' className='bg-red-500' loading={isSubmitting}>
+        <Button type='submit' className='bg-backbuttondefault hover:bg-backhoverbutton' loading={isSubmitting}>
           Ingresar
         </Button>
       </form>

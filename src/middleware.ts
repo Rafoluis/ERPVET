@@ -4,33 +4,35 @@ import { getToken } from 'next-auth/jwt'
 const publicRoutes = ['/', '/auth/login']
 
 const roleBasedRoutes = {
-  admin: [
-    '/list/appointments',
+  veterinario: [
+    '/list/mascotas',
+    '/list/owner',
     '/list/patients',
-    '/list/service',
+    '/list/employees',
     '/HistoriasClinicasR',
     '/list/ticket',
     '/list/doctors',
     '/admin',
     '/company'
   ],
-  recepcionista: [
-    '/list/appointments',
-    '/list/patients',
-    '/HistoriasClinicasR',
-    '/list/ticket',
-    '/list/doctors'
-  ],
-  odontologo: [
-    '/list/appointmentBooks',
-    '/HistoriasClinicasD'
-  ]
+  // recepcionista: [
+  //   '/list/appointments',
+  //   '/list/patients',
+  //   '/HistoriasClinicasR',
+  //   '/list/ticket',
+  //   '/list/doctors'
+  // ],
+  // odontologo: [
+  //   '/list/appointmentBooks',
+  //   '/HistoriasClinicasD'
+  // ]
 }
 
 const defaultRoutes = {
-  admin: '/list/appointments',
-  recepcionista: '/list/appointments',
-  odontologo: '/list/appointmentBooks',
+  veterinario: '/list/mascotas',
+  // admin: '/list/appointments',
+  // recepcionista: '/list/appointments',
+  // odontologo: '/list/appointmentBooks',
   guest: '/auth/login'
 }
 

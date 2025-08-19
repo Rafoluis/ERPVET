@@ -13,6 +13,7 @@ export default {
         textdefault: "var(--default-white)",
         textdark: "var(--default-text-dark)",
         backhoverbutton: "var(--button-hover)",
+        backcolumtable: "var(--table-colum-bg)",
         backgrounddefault: "var(--default-white)",
         backgroundgray: "var(--default-gray)",
         backselectbutton: "var(--blue-dark-select-bg)",
@@ -26,6 +27,7 @@ export default {
         backnavbar: "var(--blue-navbar-bg)",
         textblue: "var(--blue-text)",
         textred: "var(--red-text)",
+        tablehover: "var(--table-default-hover)",
 
       },
     },

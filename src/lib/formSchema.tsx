@@ -1,3 +1,4 @@
+import { EventType } from "@prisma/client";
 import { z } from "zod";
 
 export const appointmentSchema = z.object({
@@ -164,3 +165,188 @@ export const doctorSchema = z.object({
 });
 
 export type DoctorSchema = z.infer<typeof doctorSchema>;
+
+export const mascotaSchema = z.object({
+    idMascota: z.coerce.number().optional(),
+    idPropietario: z.coerce.number({
+    invalid_type_error: "Propietario inválido",
+    required_error: "Debe seleccionar un propietario",
+    }),
+    nombre: z.string().min(1, { message: "Nombre requerido" }),
+    especie: z.string().min(1, { message: "Especie requerida" }),
+    raza: z.string().optional(),
+    sexo: z.enum(["MACHO", "HEMBRA"], {
+    required_error: "Sexo requerido",
+    }),
+    fechaNacimiento: z.coerce.date({ message: "Fecha nacimiento requerida" }),
+    peso: z.coerce.number().optional(),
+    numeroChip: z.string().optional(),
+    esterilizado: z.boolean().optional(),
+    alergias: z.string().optional(),
+    notasComportamiento: z.string().optional(),
+    img:z.string().optional()
+});
+
+export type MascotaSchema = z.infer<typeof mascotaSchema>;
+
+export const historiaSchema = z.object({
+  idHistoriaClinica: z.coerce.number().optional(),
+  idMascota: z.coerce.number({
+    invalid_type_error: "Mascota inválida",
+    required_error: "Debe seleccionar una mascota",
+  }),
+  // Datos Generales
+  tamaño: z.string().min(1, { message: "Tamaño requerido" }),
+  color: z.string().min(1, { message: "Color requerido" }),
+  señalesParticulares: z.string().min(1, { message: "Señales particulares requeridas" }),
+  finZootecnico: z.string().min(1, { message: "Fin zootécnico requerido" }),
+  origenProcedencia: z.string().min(1, { message: "Origen/Procedencia requerida" }),
+
+  // Anamnesis fija
+  enfermedadPrevia: z.string().min(1, { message: "Enfermedad previa requerida" }),
+  alimentacion: z.string().min(1, { message: "Alimentación requerida" }),
+  habitad: z.string().min(1, { message: "Hábitat requerido" }),
+  viajesRecientes: z.string().min(1, { message: "Viajes recientes requeridos" }),
+  convivencia: z.string().min(1, { message: "Convivencia requerida" }),
+  comportamiento: z.string().min(1, { message: "Comportamiento requerido" }),
+
+  // Otros campos
+  partos: z.coerce.number().min(0, { message: "Partos debe ser un número >= 0" }),
+  viveConAnimales: z.boolean({ required_error: "Indica si vive con otros animales" }),
+
+  fechaCreacion: z.coerce.date().optional(),
+
+  // Arrays relacionales
+  previasEnfermedades: z
+    .array(
+      z.object({
+        id: z.coerce.number().optional(),
+        descripcion: z.string().min(1, { message: "Descripción requerida" }),
+        fecha: z
+          .string()
+          .optional()
+          .refine((s) => !s || !isNaN(Date.parse(s)), { message: "Fecha inválida" }),
+      })
+    )
+    .optional(),
+
+  previasCirugias: z
+    .array(
+      z.object({
+        id: z.coerce.number().optional(),
+        descripcion: z.string().min(1, { message: "Descripción requerida" }),
+        fecha: z
+          .string()
+          .optional()
+          .refine((s) => !s || !isNaN(Date.parse(s)), { message: "Fecha inválida" }),
+      })
+    )
+    .optional(),
+
+  tratamientosRecientes: z
+    .array(
+      z.object({
+        id: z.coerce.number().optional(),
+        descripcion: z.string().min(1, { message: "Descripción requerida" }),
+        fechaInicio: z
+          .string()
+          .optional()
+          .refine((s) => !s || !isNaN(Date.parse(s)), { message: "Fecha de inicio inválida" }),
+        fechaFin: z
+          .string()
+          .optional()
+          .refine((s) => !s || !isNaN(Date.parse(s)), { message: "Fecha de fin inválida" }),
+      })
+    )
+    .optional(),
+});
+
+export type HistoriaSchema = z.infer<typeof historiaSchema>;
+
+export const timelineSchema = z.object({
+  id: z.coerce
+    .number()
+    .optional()
+    .describe("ID del evento en línea de tiempo (sólo para actualizaciones)"),
+  idHistoriaClinica: z.coerce
+    .number({
+      required_error: "Debe proporcionar la historia clínica",
+      invalid_type_error: "ID de historia inválido",
+    })
+    .describe("ID de la historia clínica a la que pertenece el evento"),
+  tipo: z.nativeEnum(EventType, {
+    required_error: "Tipo de evento requerido",
+  }).describe("Tipo de evento en línea de tiempo"),
+  titulo: z
+    .string()
+    .min(1, { message: "Título requerido" })
+    .describe("Título del evento"),
+  ubicacion: z
+    .string()
+    .min(1, { message: "Ubicación requerida" })
+    .describe("Ubicación del evento"),
+  descripcion: z
+    .string()
+    .min(1, { message: "Descripción requerida" })
+    .describe("Descripción del evento"),
+  detalles: z
+    .array(z.string().min(1))
+    .optional()
+    .describe("Lista de puntos detallados del evento"),
+});
+
+export type TimeLineSchema = z.infer<typeof timelineSchema>;
+
+export const registroVacunacionSchema = z.object({
+  idRegistroVacuna: z.coerce.number().optional(),
+
+  idMascota: z.coerce.number({
+    invalid_type_error: "Mascota inválida",
+    required_error: "Debe seleccionar una mascota",
+  }),
+
+  nombreVacuna: z.string()
+    .min(1, { message: "Nombre de la vacuna requerido" }),
+
+  fechaAdministracion: z.coerce.date({
+    invalid_type_error: "Fecha de administración inválida",
+  }).optional(),
+
+  fechaProxima: z.coerce.date({
+    invalid_type_error: "Fecha próxima inválida",
+  }).optional(),
+
+  lote: z.string().optional(),
+
+  veterinario: z.string().optional(),
+});
+
+export type RegistroVacunacionSchema = z.infer<typeof registroVacunacionSchema>;
+
+export const propietarioSchema = z.object({
+  idPropietario: z.coerce.number().optional(),
+  dni: z.coerce
+    .number()
+    .int({ message: "El DNI debe ser un número entero" })
+    .min(1000000, { message: "DNI demasiado corto" })
+    .max(9999999999, { message: "DNI demasiado largo" }),
+  nombre: z
+    .string()
+    .min(1, { message: "El nombre es obligatorio" }),
+  apellido: z
+    .string()
+    .min(1, { message: "El apellido es obligatorio" }),
+  correo: z
+    .string()
+    .email({ message: "Correo inválido" }),
+  telefono: z
+    .string()
+    .min(6, { message: "Teléfono muy corto" })
+    .max(15, { message: "Teléfono muy largo" }),
+  direccion: z
+    .string()
+    .optional()
+    .or(z.literal("")), // Para permitir string vacío desde formularios
+});
+
+export type PropietarioSchema = z.infer<typeof propietarioSchema>;

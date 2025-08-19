@@ -9,6 +9,7 @@ interface Props {
   iconColor?: string
   hoverBgColor?: string
   hoverIconColor?: string
+  iconSize?: string
 }
 
 const baseContainerClasses = `
@@ -38,26 +39,24 @@ const TableAction = ({
   iconColor = 'text-slate-500',
   hoverBgColor = 'hover:bg-slate-200',
   hoverIconColor,
+  iconSize = 'w-4 h-4',
 }: Props) => {
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className={cn(
-        baseContainerClasses,
-        hoverBgColor,
-        className
-      )}
+      className={cn(baseContainerClasses, hoverBgColor, className)}
     >
       {React.cloneElement(icon, {
-        size: 14,
         className: cn(
           iconColor,
           hoverIconColor && `group-hover:${hoverIconColor}`,
           baseIconClasses,
+          iconSize,
           icon.props.className
         ),
       })}
-    </div>
+    </button>
   )
 }
 

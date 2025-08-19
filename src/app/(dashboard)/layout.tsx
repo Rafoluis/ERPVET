@@ -18,8 +18,8 @@ export default function DashboardLayout({
         <div className='w-[16%] md:w-[11%] lg:w-[13%] xl:w-[12%] bg-backmenu'>
           <div className='bg-backgrounddefault m-0 mt-0 p-2'>
             <Link href='/' className='flex items-center justify-center gap-2'>
-              <Image src='/logodental.png' alt='logo' width={60} height={60} />
-              <span className='hidden lg:block font-bold'>ERPCD</span>
+              <Image src='/logoazulf.png' alt='logo' width={60} height={60} />
+              <span className='hidden lg:block font-bold'>Clínica Patitas</span>
             </Link>
           </div>
           <div className=' flex-1 justify-between p-4'>

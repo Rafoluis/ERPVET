@@ -8,161 +8,178 @@ datasource db {
 }
 
 model Usuario {
-  id_usuario     Int       @id @default(autoincrement())
-  nombre         String
-  apellido       String
-  dni            String    @unique
-  sexo           Sexo
-  email          String?   @unique
-  telefono       String    @default("")
-  direccion      String?
-  fecha_creacion DateTime  @default(now())
-  password       String
-  deletedAt      DateTime?
+  idUsuario     Int       @id @default(autoincrement())
+  nombre        String
+  apellido      String
+  dni           String    @unique
+  sexo          Sexo
+  email         String?   @unique
+  telefono      String    @default("")
+  direccion     String?
+  fechaCreacion DateTime  @default(now())
+  password      String
+  deletedAt     DateTime?
 
   empleado Empleado?
-  paciente Paciente?
   roles    UsuarioRol[]
 }
 
 model Rol {
-  id_rol    Int          @id @default(autoincrement())
+  idRol     Int          @id @default(autoincrement())
   nombre    TipoRol      @unique
   deletedAt DateTime?
   usuarios  UsuarioRol[]
 }
 
 model UsuarioRol {
-  id               Int       @id @default(autoincrement())
-  id_usuario       Int
-  id_rol           Int
-  fecha_asignacion DateTime  @default(now())
-  deletedAt        DateTime?
+  idUsuarioRol    Int       @id @default(autoincrement())
+  idUsuario       Int
+  idRol           Int
+  fechaAsignacion DateTime  @default(now())
+  deletedAt       DateTime?
 
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
-  rol     Rol     @relation(fields: [id_rol], references: [id_rol])
+  usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
+  rol     Rol     @relation(fields: [idRol], references: [idRol])
 
-  @@unique([id_usuario, id_rol])
-}
-
-model Paciente {
-  id_paciente      Int               @id @default(autoincrement())
-  id_usuario       Int               @unique
-  fecha_nacimiento DateTime
-  citas            Cita[]
-  tickets          Ticket[]
-  historiaClinica  Historia_Clinica?
-  fecha_creacion   DateTime          @default(now())
-  deletedAt        DateTime?
-
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  @@unique([idUsuario, idRol])
 }
 
 model Empleado {
-  id_empleado    Int       @id @default(autoincrement())
-  id_usuario     Int       @unique
-  especialidad   String
-  citas          Cita[]
-  fecha_creacion DateTime  @default(now())
-  deletedAt      DateTime?
+  idEmpleado    Int       @id @default(autoincrement())
+  idUsuario     Int       @unique
+  especialidad  String
+  fechaCreacion DateTime  @default(now())
+  deletedAt     DateTime?
 
-  usuario Usuario @relation(fields: [id_usuario], references: [id_usuario])
+  usuario Usuario @relation(fields: [idUsuario], references: [idUsuario])
 }
 
-model Servicio {
-  id_servicio     Int            @id @default(autoincrement())
-  nombre_servicio String
-  descripcion     String?
-  tarifa          Float
-  citas           ServicioCita[]
-  deletedAt       DateTime?
+model Propietario {
+  idPropietario Int       @id @default(autoincrement())
+  dni           Int
+  nombre        String
+  apellido      String
+  correo        String    @unique
+  telefono      String
+  direccion     String?
+  fechaCreacion DateTime  @default(now())
+  deletedAt     DateTime?
+  mascotas      Mascota[]
 }
 
-model ServicioCita {
-  id_cita     Int
-  id_servicio Int
-  cantidad    Int @default(1)
+model Mascota {
+  idMascota           Int        @id @default(autoincrement())
+  idPropietario       Int
+  nombre              String
+  especie             String
+  raza                String?
+  sexo                SexoMascot
+  fechaNacimiento     DateTime
+  peso                Float?
+  numeroChip          String?    @unique
+  esterilizado        Boolean    @default(false)
+  alergias            String?
+  notasComportamiento String?
+  fechaCreacion       DateTime   @default(now())
+  urlfoto             String?
+  deletedAt           DateTime?
 
-  cita     Cita     @relation(fields: [id_cita], references: [id_cita])
-  servicio Servicio @relation(fields: [id_servicio], references: [id_servicio])
-
-  @@id([id_cita, id_servicio])
+  propietario         Propietario          @relation(fields: [idPropietario], references: [idPropietario])
+  historialesClinicos HistoriaClinica[]
+  registrosVacunas    RegistroVacunacion[]
 }
 
-model Cita {
-  id_cita           Int            @id @default(autoincrement())
-  id_paciente       Int
-  id_empleado       Int
-  fecha_cita        DateTime
-  hora_cita_inicial DateTime?
-  hora_cita_final   DateTime?
-  monto_pagado      Float          @default(0)
-  deuda_restante    Float          @default(0)
-  estado            EstadoCita
-  servicios         ServicioCita[]
-  ticketCitas       TicketCita[]
-  deletedAt         DateTime?
+model HistoriaClinica {
+  idHistoriaClinica    Int    @id @default(autoincrement())
+  idMascota            Int    @unique
+  tamaño              String
+  color                String
+  señalesParticulares String
+  finZootecnico        String
+  origenProcedencia    String
 
-  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
-  empleado Empleado @relation(fields: [id_empleado], references: [id_empleado])
-}
-
-model Ticket {
-  id_ticket        Int       @id @default(autoincrement())
-  id_paciente      Int
-  fecha_emision    DateTime
-  tipo_comprobante String
-  medio_pago       String
-  monto_total      Float
-  monto_pagado     Float     @default(0)
-  deuda_restante   Float     @default(0)
+  enfermedadPrevia String
+  alimentacion     String
+  habitad          String
+  viajesRecientes  String
+  convivencia      String
+  comportamiento   String
+  partos           Int
+  viveConAnimales  Boolean
+  fechaCreacion    DateTime  @default(now())
   deletedAt        DateTime?
 
-  paciente    Paciente     @relation(fields: [id_paciente], references: [id_paciente])
-  pagos       Pago[]
-  ticketCitas TicketCita[]
+  previasEnfermedades   EnfermedadPrevia[]
+  previasCirugias       CirugiaPrevia[]
+  tratamientosRecientes TratamientoReciente[]
+
+  adjunto     AdjuntoHistoria[]
+  lineaTiempo LineaTiempo[]
+  mascota     Mascota           @relation(fields: [idMascota], references: [idMascota])
 }
 
-model TicketCita {
-  id_ticket Int
-  id_cita   Int
-
-  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
-  cita   Cita   @relation(fields: [id_cita], references: [id_cita])
-
-  @@id([id_ticket, id_cita])
+model EnfermedadPrevia {
+  id                Int             @id @default(autoincrement())
+  idHistoriaClinica Int
+  descripcion       String
+  fecha             DateTime?
+  historia          HistoriaClinica @relation(fields: [idHistoriaClinica], references: [idHistoriaClinica])
 }
 
-model Pago {
-  id_pago        Int        @id @default(autoincrement())
-  id_ticket      Int
-  monto          Float
-  fecha_pago     DateTime
-  medio_pago     String
-  fecha_creacion DateTime
-  estado_pago    EstadoPago @default(PENDIENTE)
-  deletedAt      DateTime?
-
-  ticket Ticket @relation(fields: [id_ticket], references: [id_ticket])
+model CirugiaPrevia {
+  id                Int             @id @default(autoincrement())
+  idHistoriaClinica Int
+  descripcion       String
+  fecha             DateTime?
+  historia          HistoriaClinica @relation(fields: [idHistoriaClinica], references: [idHistoriaClinica])
 }
 
-model Historia_Clinica {
-  id_historia    Int       @id @default(autoincrement())
-  id_paciente    Int       @unique
-  fecha_creacion DateTime  @default(now())
-  antecedentes   String?
-  tratamientos   String?
-  medicamentos   String?
-  observaciones  String?
-  deletedAt      DateTime?
-
-  paciente Paciente @relation(fields: [id_paciente], references: [id_paciente])
+model TratamientoReciente {
+  id                Int             @id @default(autoincrement())
+  idHistoriaClinica Int
+  descripcion       String
+  fechaInicio       DateTime?
+  fechaFin          DateTime?
+  historia          HistoriaClinica @relation(fields: [idHistoriaClinica], references: [idHistoriaClinica])
 }
 
-enum EstadoPago {
-  PENDIENTE
-  COMPLETADO
-  FRACCIONADO
+model AdjuntoHistoria {
+  idAdjuntosHistoria Int       @id @default(autoincrement())
+  idHistoriaClinica  Int
+  url                String
+  descripcion        String?
+  fechaCreacion      DateTime  @default(now())
+  deletedAt          DateTime?
+
+  historia HistoriaClinica @relation(fields: [idHistoriaClinica], references: [idHistoriaClinica])
+}
+
+model RegistroVacunacion {
+  idRegistroVacuna    Int       @id @default(autoincrement())
+  idMascota           Int
+  nombreVacuna        String
+  fechaAdministracion DateTime  @default(now())
+  fechaProxima        DateTime?
+  lote                String?
+  veterinario         String?
+  fechaCreacion       DateTime  @default(now())
+  deletedAt           DateTime?
+
+  mascota Mascota @relation(fields: [idMascota], references: [idMascota])
+}
+
+model LineaTiempo {
+  id                Int       @id @default(autoincrement())
+  idHistoriaClinica Int
+  tipo              EventType
+  titulo            String
+  ubicacion         String
+  descripcion       String
+  detalles          String[]  @default([])
+  fechaCreacion     DateTime  @default(now())
+  deletedAt         DateTime?
+
+  historia HistoriaClinica @relation(fields: [idHistoriaClinica], references: [idHistoriaClinica])
 }
 
 enum Sexo {
@@ -170,18 +187,20 @@ enum Sexo {
   FEMENINO
 }
 
-enum EstadoCita {
-  AGENDADO
-  COMPLETADO
-  EN_PROCESO
-  FINALIZADO
-  CANCELADO
-  PAGADA
+enum SexoMascot {
+  MACHO
+  HEMBRA
 }
 
 enum TipoRol {
-  ADMIN
-  ODONTOLOGO
-  PACIENTE
-  RECEPCIONISTA
+  // ADMIN
+  VETERINARIO
+  // PACIENTE
+  // RECEPCIONISTA
+}
+
+enum EventType {
+  CIRUGIA_ESTERILIZACION
+  CHEQUEO_SEGUIMIENTO
+  CONSULTA_INICIAL
 }

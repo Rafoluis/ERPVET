@@ -12,6 +12,7 @@ interface InputFieldProps {
     hidden?: boolean;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     min?: number;
+    fullWidth?: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -26,9 +27,10 @@ const InputField: React.FC<InputFieldProps> = ({
     value,
     min,
     onChange,
+    fullWidth = false,
 }) => {
     return (
-        <div className={hidden ? "hidden" : "flex flex-col gap-1 w-full"}>
+        <div className={hidden ? "hidden" : `flex flex-col gap-2 ${fullWidth ? "w-full" : "w-full md:w-1/4"}`}>
             <label htmlFor={name} className="text-xs text-gray-500 mb-1 block">
                 {label}
             </label>

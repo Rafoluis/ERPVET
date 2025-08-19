@@ -31,13 +31,23 @@ export const authOptions: NextAuthOptions = {
                     },
                 });
 
-                if (!user || user.roles[0].rol.nombre === 'PACIENTE') {
-                    throw new Error('No user found');
+                if (!user) {
+                    return null;
                 }
+
+                if (user.password !== credentials.password) {
+                    return null;
+                }
+
+                const firstUserRole = user.roles[0]?.rol;
+                if (!firstUserRole) {
+                    return null;
+                }
+
 
                 if (user.password === credentials.password) {
                     return {
-                        id: user.id_usuario.toString(),
+                        id: user.idUsuario.toString(),
                         dni: user.dni,
                         firstName: user.nombre,
                         lastName: user.apellido,

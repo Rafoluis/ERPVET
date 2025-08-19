@@ -1,55 +1,45 @@
-import { PrismaClient, TipoRol } from "@prisma/client";
+import { PrismaClient, TipoRol, Sexo } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
   const roles = Object.values(TipoRol);
   await prisma.rol.createMany({
-    data: roles.map((rol) => ({ nombre: rol })),
+    data: roles.map((nombre) => ({ nombre })),
     skipDuplicates: true,
   });
   console.log("Roles creados:", roles);
 
-  for (const rol of roles) {
+  for (const nombreRol of roles) {
     const usuario = await prisma.usuario.create({
       data: {
-        nombre: `${rol} Nombre`,
-        apellido: `${rol} Apellido`,
-        dni: `${Math.floor(10000000 + Math.random() * 90000000)}`, 
-        sexo: "MASCULINO",
-        email: `${rol.toLowerCase()}@example.com`,
+        nombre: `${nombreRol} Nombre`,
+        apellido: `${nombreRol} Apellido`,
+        dni: `${Math.floor(10000000 + Math.random() * 90000000)}`,
+        sexo: Sexo.MASCULINO,
+        email: `${nombreRol.toLowerCase()}@example.com`,
         telefono: `9${Math.floor(100000000 + Math.random() * 900000000)}`,
-        direccion: `${rol} Street 123`,
+        direccion: `${nombreRol} Street 123`,
         password: "12345",
         roles: {
           create: {
             rol: {
-              connect: { nombre: rol },
+              connect: { nombre: nombreRol },
             },
           },
         },
       },
     });
+    console.log(`Usuario con rol ${nombreRol} creado:`, usuario);
 
-    console.log(`Usuario con rol ${rol} creado:`, usuario);
-
-    if (rol === TipoRol.PACIENTE) {
-      await prisma.paciente.create({
+    if (nombreRol === TipoRol.VETERINARIO) {
+      const empleado = await prisma.empleado.create({
         data: {
-          id_usuario: usuario.id_usuario,
-          fecha_nacimiento: new Date("1990-01-01"), 
+          idUsuario: usuario.idUsuario,
+          especialidad: "Veterinaria",
         },
       });
-      console.log(`Paciente creado para el usuario con rol ${rol}`);
-
-    } else if (rol === TipoRol.ODONTOLOGO || rol === TipoRol.RECEPCIONISTA) {
-      await prisma.empleado.create({
-        data: {
-          id_usuario: usuario.id_usuario,
-          especialidad: rol === TipoRol.ODONTOLOGO ? "Odontología" : "Recepción", 
-        },
-      });
-      console.log(`Empleado creado para el usuario con rol ${rol}`);
+      console.log(`Empleado creado para el usuario con rol ${nombreRol}:`, empleado);
     }
   }
 }
