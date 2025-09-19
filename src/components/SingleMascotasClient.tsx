@@ -1,4 +1,3 @@
-// components/SingleMascotasClient.tsx
 "use client";
 
 import Image from 'next/image';
@@ -20,6 +19,7 @@ interface Consulta {
   id: number;
   fecha: string;
   titulo: string;
+  ubicacion: string;
   descripcion: string;
   detalles: string[];
 }
@@ -28,6 +28,7 @@ interface VaccineRecord {
   idRegistroVacuna: number;
   nombreVacuna: string;
   fechaAdministracion: string;
+  fechaProxima: string;
 }
 
 interface Props {
@@ -174,7 +175,7 @@ export default function SingleMascotasClient({
 
             {historia ? (
               <FormContainer
-                table={mode === 'consultas' ? 'timeline' : 'registroVacunacion'}
+                table={mode === 'consultas' ? 'timeline' : 'vacunacion'}
                 type="create"
                 id={
                   mode === 'consultas'
@@ -196,12 +197,12 @@ export default function SingleMascotasClient({
 
           <div className="flex flex-col justify-center items-center text-base pb-8 sm:text-lg">
             <TimelineSwitcher
-              defaultColor="bg-cyan-500"
               consultas={consultas}
               vacunaciones={vacunaciones}
               mode={mode}
-              onModeChange={setMode}
-            />
+              onModeChange={setMode} onEdit={function (item: Consulta | VaccineRecord): void {
+                throw new Error('Function not implemented.');
+              } }            />
           </div>
         </div>
       </div>

@@ -15,10 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ERPCD',
-  description: 'Sistema de gestión para clínicas dentales',
+  title: 'Pet Care',
+  description: 'Sistema de gestión para veterinarias',
   icons: {
-    icon: '/logodentalround.ico',
+    icon: '/vetlogo.ico',
   },
 };
 

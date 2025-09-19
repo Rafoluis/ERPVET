@@ -11,7 +11,6 @@ import Link from "next/link";
 
 type MascotaList = Mascota & {
   propietario: Propietario;
-  //historialesClinicos: { urlfoto: string | null }[];
 };
 
 const columns = [
@@ -25,8 +24,6 @@ const columns = [
 ];
 
 const renderRow = (item: MascotaList) => {
-  //const imgUrl = item.historialesClinicos?.[0]?.urlfoto ?? "/placeholder.png";
-
   return (
     <tr
       key={item.idMascota}
@@ -64,16 +61,16 @@ const renderRow = (item: MascotaList) => {
 
       {/* Fecha de nacimiento */}
       <td className="hidden md:table-cell p-2">
-        {new Date(item.fechaNacimiento).toLocaleDateString("es-PE", {
-          timeZone: "UTC",
-        })}
+        {item.fechaNacimiento
+          ? new Date(item.fechaNacimiento).toLocaleDateString("es-PE", { timeZone: "UTC" })
+          : "-"}
       </td>
 
       {/* Fecha de registro */}
       <td className="hidden lg:table-cell p-2">
-        {new Date(item.fechaCreacion).toLocaleDateString("es-PE", {
-          timeZone: "UTC",
-        })}
+        {item.fechaCreacion
+          ? new Date(item.fechaCreacion).toLocaleDateString("es-PE", { timeZone: "UTC" })
+          : "-"}
       </td>
 
       {/* Acciones */}
@@ -84,9 +81,7 @@ const renderRow = (item: MascotaList) => {
               <Eye size={18} color="black" />
             </button>
           </Link>
-          {/* Modal editar */}
           <FormContainer table="mascota" type="update" data={item} />
-          {/* Modal eliminar */}
           <FormContainer table="mascota" type="delete" id={item.idMascota} />
         </div>
       </td>
@@ -103,14 +98,53 @@ const MascotaListPage = async ({
   const { page, sort, column, start, end, ...queryParams } = params;
   const p = page ? parseInt(page) : 1;
 
+  // Base where
   const where: Prisma.MascotaWhereInput = { deletedAt: null };
+
+  const rawSearch = (params.search ?? "").trim();
+  if (rawSearch) {
+    const terms = rawSearch.split(/\s+/).filter(Boolean);
+
+    const orConditions: Prisma.MascotaWhereInput[] = [
+      { nombre: { contains: rawSearch, mode: "insensitive" } },
+      { propietario: { nombre: { contains: rawSearch, mode: "insensitive" } } },
+      { propietario: { apellido: { contains: rawSearch, mode: "insensitive" } } },
+    ];
+
+    if (terms.length >= 2) {
+      orConditions.push({
+        propietario: {
+          AND: [
+            { nombre: { contains: terms[0], mode: "insensitive" } },
+            { apellido: { contains: terms[1], mode: "insensitive" } },
+          ],
+        },
+      });
+      orConditions.push({
+        propietario: {
+          AND: [
+            { nombre: { contains: terms[1], mode: "insensitive" } },
+            { apellido: { contains: terms[0], mode: "insensitive" } },
+          ],
+        },
+      });
+    }
+
+    (where as any).OR = orConditions;
+  }
+
+  if (start || end) {
+    (where as any).fechaCreacion = {
+      gte: start ? new Date(start) : undefined,
+      lte: end ? new Date(end) : undefined,
+    };
+  }
 
   const [data, count] = await prisma.$transaction([
     prisma.mascota.findMany({
       where,
       include: {
         propietario: true,
-        //historialesClinicos: { select: { urlfoto: true } },
       },
       orderBy: column
         ? { [column as keyof Mascota]: sort === "asc" ? "asc" : "desc" }
@@ -125,17 +159,13 @@ const MascotaListPage = async ({
     <div>
       <div className="rounded-md flex-1 m-4 mt-0">
         <div className="flex items-center justify-between p-2">
-          <h1 className="hidden md:block text-lg font-semibold">
-            Gestión de Mascotas
-          </h1>
+          <h1 className="hidden md:block text-lg font-semibold">Gestión de Mascotas</h1>
         </div>
       </div>
 
       <div className="bg-backgrounddefault p-4 rounded-md flex-1 m-4 mt-0">
         <div className="flex items-center justify-between">
-          <h2 className="hidden md:block text-ls font-semibold">
-            Mascotas
-          </h2>
+          <h2 className="hidden md:block text-ls font-semibold">Mascotas</h2>
           <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
             <TableSearch />
             <div className="flex items-center gap-4 self-end">

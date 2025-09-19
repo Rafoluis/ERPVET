@@ -1,5 +1,3 @@
-// Tremor Date Picker [v1.0.5]
-
 "use client"
 
 import * as React from "react"

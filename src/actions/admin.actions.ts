@@ -37,7 +37,7 @@ export const getAllEmployees = async (
       endDate.setHours(23, 59, 59, 999)
     }
 
-    whereClause.fecha_creacion = {
+    whereClause.fechaCreacion = {
       ...(startDate ? { gte: startDate } : {}),
       ...(endDate ? { lte: endDate } : {}),
     }
@@ -76,9 +76,9 @@ export const getAllEmployees = async (
       skip,
       take: pageSize,
       select: {
-        id_empleado: true,
+        idEmpleado: true,
         especialidad: true,
-        fecha_creacion: true,
+        fechaCreacion: true,
         deletedAt: true,
         usuario: {
           select: {
@@ -108,12 +108,12 @@ export const getAllEmployees = async (
   ])
 
   const data = employees.map((employee) => ({
-    id: employee.id_empleado,
+    id: employee.idEmpleado,
     nombre: employee.usuario.nombre,
     apellido: employee.usuario.apellido,
     dni: employee.usuario.dni,
     especialidad: employee.especialidad,
-    fecha_creacion: employee.fecha_creacion,
+    fecha_creacion: employee.fechaCreacion,
     roles: employee.usuario.roles.map((role) => role.rol.nombre),
     sexo: employee.usuario.sexo,
     email: employee.usuario.email,
@@ -189,15 +189,15 @@ export const createOrUpdateEmployee = async (
     })
 
     const newEmployee = await prisma.empleado.upsert({
-      where: { id_usuario: newUser.id_usuario },
+      where: { idUsuario: newUser.idUsuario },
       update: {
         especialidad: employee.especialidad,
       },
       create: {
         especialidad: employee.especialidad,
-        fecha_creacion: new Date(),
+        fechaCreacion: new Date(),
         usuario: {
-          connect: { id_usuario: newUser.id_usuario },
+          connect: { idUsuario: newUser.idUsuario },
         },
       },
     })
@@ -234,7 +234,7 @@ export const deleteEmployee = async (
     }
 
     const empleado = await prisma.empleado.findUnique({
-      where: { id_usuario: usuario.id_usuario },
+      where: { idUsuario: usuario.idUsuario },
     })
 
     if (!empleado) {
@@ -246,7 +246,7 @@ export const deleteEmployee = async (
     }
 
     await prisma.empleado.update({
-      where: { id_empleado: empleado.id_empleado },
+      where: { idEmpleado: empleado.idEmpleado },
       data: { deletedAt: new Date() },
     })
 

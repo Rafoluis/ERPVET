@@ -13,6 +13,8 @@ import TimeLineForm from "./forms/timeLineForm";
 import RegistroVacunacionForm from "./forms/vacunaForm";
 import { deleteRegistroVacunacion } from "@/actions/vaccination.actions";
 import PropietarioForm from "./forms/propietarioForms";
+import EmpleadoForm from "./forms/empleadoForm";
+import { deleteEmpleado } from "@/actions/empleado.actions";
 
 interface ExtendedFormModalProps extends FormContainerProps {
     relatedData?: any;
@@ -36,8 +38,8 @@ const forms: {
     propietario: (setOpen, type, data, relatedData) => (
     <PropietarioForm type={type} data={data} setOpen={setOpen} relatedData={relatedData}/>
     ),
-    empleado: (setOpen) => (
-    <div className="p-4">Ejem</div>
+    empleado: (setOpen, type, data, relatedData) => (
+    <EmpleadoForm type={type} data={data} setOpen={setOpen} relatedData={relatedData}/>
     ),
     timeline: (setOpen, type, data, relatedData, onSuccess) => (
     <TimeLineForm type={type} data={data} setOpen={setOpen} relatedData={relatedData} onSuccess={onSuccess} />
@@ -50,7 +52,8 @@ const forms: {
 const deleteActions: Record<string, any> = {
     mascota: deleteMascota,
     propietario: deleteMascota,
-    vacunacion: deleteRegistroVacunacion
+    vacunacion: deleteRegistroVacunacion,
+    empleado: deleteEmpleado,
 };
 
 export default function FormModal({

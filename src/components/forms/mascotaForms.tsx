@@ -38,18 +38,36 @@ export default function MascotaForm({
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<MascotaSchema>({
     resolver: zodResolver(mascotaSchema),
   });
 
   const [localRelatedData, setLocalRelatedData] = useState<RelatedData | undefined>(relatedData);
+  const [showPropietarioModal, setShowPropietarioModal] = useState<boolean>(false);
   const [state, formAction] = useActionState(
     type === "create" ? createMascota : updateMascota,
     { success: false, error: null }
   );
   const [img, setImg] = useState<any>();
   const router = useRouter();
+
+  const handleNewPropietario = (newProp: { idPropietario: number; nombre: string }) => {
+  if (!newProp) return;
+  setLocalRelatedData((prev) => {
+    const current = prev?.propietarios ?? [];
+    if (current.some((p) => p.idPropietario === newProp.idPropietario)) return prev;
+    return {
+      ...(prev ?? {}),
+      propietarios: [{ idPropietario: newProp.idPropietario, nombre: newProp.nombre }, ...current],
+    };
+  });
+
+  setValue("idPropietario", newProp.idPropietario as any);
+
+  setShowPropietarioModal(false);
+};
 
   useEffect(() => {
     if (!localRelatedData) {
@@ -94,6 +112,51 @@ export default function MascotaForm({
     }
   }, [state, router, setOpen, type, onSuccess, data]);
 
+  useEffect(() => {
+    const onPropietarioCreated = (ev: Event) => {
+      try {
+        const custom = ev as CustomEvent;
+        const newProp = custom.detail as { idPropietario: number; nombre: string };
+
+        if (!newProp || !newProp.idPropietario) return;
+        setLocalRelatedData((prev) => {
+          const current = prev?.propietarios ?? [];
+          if (current.some((p) => p.idPropietario === newProp.idPropietario)) return prev;
+          return {
+            ...(prev ?? {}),
+            propietarios: [{ idPropietario: newProp.idPropietario, nombre: newProp.nombre }, ...current],
+          };
+        });
+
+        setValue("idPropietario", newProp.idPropietario as any);
+      } catch (err) {
+        console.error("Error manejando propietarioCreated:", err);
+      }
+    };
+
+    window.addEventListener("propietarioCreated", onPropietarioCreated as EventListener);
+
+    try {
+      const stored = sessionStorage.getItem("lastCreatedPropietario");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && parsed.idPropietario) {
+          // llamar al handler directamente
+          onPropietarioCreated(new CustomEvent("propietarioCreated", { detail: parsed }));
+          sessionStorage.removeItem("lastCreatedPropietario");
+        }
+      }
+    } catch (err) {
+      console.warn("Error leyendo lastCreatedPropietario:", err);
+    }
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("propietarioCreated", onPropietarioCreated as EventListener);
+    };
+  }, [setValue, setLocalRelatedData]);
+
+
   return (
     <form
       className="flex flex-col gap-8 p-2 overflow-y-auto max-h-[calc(100vh-4rem)]"
@@ -131,20 +194,6 @@ export default function MascotaForm({
               onChange={(opt) => field.onChange(opt ? Number(opt.value) : undefined)}
               label={""}
             />
-
-            {/* Fallback nativo (útil si tu Autocomplete no muestra opciones) */}
-            {/* <select
-              value={field.value ?? ""}
-              onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
-              className="w-full border p-2 rounded mt-2"
-            >
-              <option value="">-- Seleccione --</option>
-              {propietarioOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select> */}
 
             {errors.idPropietario && <p className="text-xs text-red-500">{errors.idPropietario.message}</p>}
           </div>

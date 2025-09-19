@@ -175,9 +175,14 @@ export const mascotaSchema = z.object({
     nombre: z.string().min(1, { message: "Nombre requerido" }),
     especie: z.string().min(1, { message: "Especie requerida" }),
     raza: z.string().optional(),
-    sexo: z.enum(["MACHO", "HEMBRA"], {
-    required_error: "Sexo requerido",
-    }),
+    sexo: z.preprocess(
+      (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+      z.enum(["MACHO", "HEMBRA"], {
+      required_error: "Sexo requerido",
+      invalid_type_error: "Sexo inválido",
+      })
+    ),
+
     fechaNacimiento: z.coerce.date({ message: "Fecha nacimiento requerida" }),
     peso: z.coerce.number().optional(),
     numeroChip: z.string().optional(),
@@ -350,3 +355,32 @@ export const propietarioSchema = z.object({
 });
 
 export type PropietarioSchema = z.infer<typeof propietarioSchema>;
+
+export const empleadoSchema = z.object({
+  idEmpleado: z.coerce.number().optional(),
+  idUsuario: z.coerce.number().optional(),
+  dni: z.coerce
+    .number()
+    .int({ message: "El DNI debe ser un número entero" })
+    .min(1000000, { message: "DNI demasiado corto" })
+    .max(9999999999, { message: "DNI demasiado largo" }),
+  nombre: z.string().min(1, { message: "El nombre es obligatorio" }),
+  apellido: z.string().min(1, { message: "El apellido es obligatorio" }),
+  sexo: z.preprocess(
+    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+    z.enum(["MASCULINO", "FEMENINO"], {
+      required_error: "Sexo requerido",
+      invalid_type_error: "Sexo inválido",
+    })
+  ),
+  email: z.string().email({ message: "Correo inválido" }).optional(),
+  telefono: z
+    .string()
+    .min(6, { message: "Teléfono muy corto" })
+    .max(15, { message: "Teléfono muy largo" }),
+  direccion: z.string().optional().or(z.literal("")),
+  especialidad: z.string().min(1, { message: "La especialidad es obligatoria" }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres" }),
+});
+
+export type EmpleadoSchema = z.infer<typeof empleadoSchema>;

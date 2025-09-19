@@ -74,11 +74,35 @@ export default function TimelineSwitcher({
               <h3 className="text-lg font-semibold">{c.titulo}</h3>
               <p className="text-sm">{c.descripcion}</p>
               <div className="flex flex-wrap gap-1">
-                {c.detalles.map((d, i) => (
-                  <span key={i} className="bg-sky-200 rounded-full px-2 py-0.5 text-xs">
-                    {d}
-                  </span>
-                ))}
+                {c.detalles.map((d, i) => {
+                  let label = '';
+                  let fecha: string | undefined;
+
+                  if (typeof d === 'string') {
+                    try {
+                      const parsed = JSON.parse(d);
+                      label = parsed?.name ?? String(d);
+                      fecha = parsed?.fecha;
+                    } catch {
+                      label = d;
+                    }
+                  } else if (typeof d === 'object' && d !== null) {
+                    label = (d as any).name ?? String(d);
+                    fecha = (d as any).fecha;
+                  } else {
+                    label = String(d);
+                  }
+
+                  return (
+                    <span
+                      key={i}
+                      title={fecha ? format(new Date(fecha), 'dd/MM/yyyy') : undefined}
+                      className="bg-sky-200 rounded-full px-2 py-0.5 text-xs"
+                    >
+                      {label}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           ))

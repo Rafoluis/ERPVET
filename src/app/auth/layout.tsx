@@ -26,9 +26,9 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
         <div className='w-full md:w-1/2 flex flex-col justify-center items-center px-6 sm:px-12 py-12 sm:py-16'>
           <Image
             className='mb-6'
-            src='/logovet.png'
-            width={80}
-            height={80}
+            src='/logovetfinal.png'
+            width={180}
+            height={180}
             alt='Logo'
           />
           

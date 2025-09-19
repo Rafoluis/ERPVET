@@ -266,18 +266,32 @@ export default function Historia({ idMascota, historia }: HistoriaProps) {
       <div className="space-y-2">
         {items.map((it: any, i: number) => (
           <div key={i} className="flex items-center gap-2 p-2 border rounded bg-white">
-            {fields.map(f => (
-              <input
-                key={f}
-                className="flex-1 p-1 border rounded"
-                placeholder={f}
-                defaultValue={it[f]}
-                onBlur={e => {
-                  it[f] = e.target.value;
-                }}
-              />
-            ))}
-            <button onClick={handleDelete(i, tipo, tipo === "enf" ? setEnfermedades : tipo === "cir" ? setCirugias : setTratamientos)}>
+            {fields.map(f => {
+              const isDateField = f.toLowerCase().includes("fecha"); // detecta campos de fecha
+              return (
+                <input
+                  key={f}
+                  type={isDateField ? "date" : "text"}
+                  className="flex-1 p-1 border rounded"
+                  placeholder={f}
+                  defaultValue={it[f]}
+                  onBlur={e => {
+                    it[f] = e.target.value;
+                  }}
+                />
+              );
+            })}
+            <button
+              onClick={handleDelete(
+                i,
+                tipo,
+                tipo === "enf"
+                  ? setEnfermedades
+                  : tipo === "cir"
+                  ? setCirugias
+                  : setTratamientos
+              )}
+            >
               <Trash2 size={16} className="text-red-600" />
             </button>
           </div>
@@ -285,6 +299,7 @@ export default function Historia({ idMascota, historia }: HistoriaProps) {
       </div>
     </div>
   );
+
 
   return (
     <div className="bg-gray-50 p-4 rounded-md space-y-6">
@@ -310,7 +325,7 @@ export default function Historia({ idMascota, historia }: HistoriaProps) {
         )}
       </section>
 
-      {/* Sección Anamnesis */}
+      {/* Anamnesis*/}
       <section className="border rounded-lg overflow-hidden bg-white">
         <button
           onClick={() => setExpandedAnamnesis(v => !v)}

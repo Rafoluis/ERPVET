@@ -1,16 +1,17 @@
-// app/actions/propietario.actions.ts
 "use server";
 
 import { PropietarioSchema } from "@/lib/formSchema";
 import prisma from "@/lib/prisma";
 
 type CurrentState = { success: boolean; error: string | null };
+type CreateResult = CurrentState & { created?: any }; 
 
 export const createPropietario = async (
   currentState: CurrentState,
   data: PropietarioSchema
-): Promise<CurrentState> => {
+): Promise<CreateResult> => {
   try {
+    console.time("createPropietario");
     await prisma.propietario.create({
       data: {
         dni:           data.dni,
@@ -21,8 +22,9 @@ export const createPropietario = async (
         direccion:     data.direccion ?? undefined,
       },
     });
+    console.timeEnd("createPropietario");
     return { success: true, error: null };
-  } catch (err) {
+  } catch (err) { 
     console.error("Error al crear propietario:", err);
     return { success: false, error: "Error al crear propietario" };
   }
@@ -31,7 +33,7 @@ export const createPropietario = async (
 export const updatePropietario = async (
   currentState: CurrentState,
   data: PropietarioSchema
-): Promise<CurrentState> => {
+): Promise<CreateResult> => {
   try {
     await prisma.propietario.update({
       where: { idPropietario: data.idPropietario! },

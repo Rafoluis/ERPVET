@@ -34,11 +34,53 @@ const PropietarioForm = ({ type, data, setOpen, onSuccess,relatedData }: Propiet
   );
 
   const onSubmit = handleSubmit((formData) => {
-    startTransition(() => {
-      formAction(formData);
-    });
-  });
+    startTransition(async () => {
+      try {
+        const result = await formAction(formData) as any;
+        let payload: any = null;
+        if (result && result.created) {
+          payload = result.created;
+        } else if (result && (result.idPropietario || result.id)) {
+          payload = result;
+        }
+        if (!payload) {
+          try {
+            const stored = sessionStorage.getItem("lastCreatedPropietario");
+            if (stored) payload = JSON.parse(stored);
+          } catch (e) {
+            console.warn("No se pudo leer lastCreatedPropietario:", e);
+          }
+        }
+        if (payload && (payload.idPropietario || payload.id)) {
+          const normalized = {
+            idPropietario: payload.idPropietario ?? payload.id,
+            nombre: payload.nombre ?? `${payload.nombre ?? ""} ${payload.apellido ?? ""}`.trim(),
+            ...payload,
+          };
 
+          try {
+            window.dispatchEvent(new CustomEvent("propietarioCreated", { detail: normalized }));
+          } catch (e) {
+            console.warn("dispatch propietarioCreated falló:", e);
+          }
+
+          try {
+            sessionStorage.setItem("lastCreatedPropietario", JSON.stringify(normalized));
+          } catch (e) {
+            console.warn("guardar lastCreatedPropietario falló:", e);
+          }
+
+          if (onSuccess) onSuccess(normalized);
+        } else {
+          if (onSuccess) onSuccess(formData);
+        }
+      } catch (err) {
+        console.error("Error creando propietario (formAction):", err);
+      }
+    });
+
+
+  });
   const router = useRouter();
 
   useEffect(() => {
@@ -46,12 +88,11 @@ const PropietarioForm = ({ type, data, setOpen, onSuccess,relatedData }: Propiet
       showToast("success", `El propietario fue ${type === "create" ? "creado" : "actualizado"}`);
       router.refresh();
       setOpen(false);
-      onSuccess && onSuccess(data as any);
     } else if (state.error) {
       showToast("error", "Algo salió mal");
       console.error("Error en la acción: ", state.error);
     }
-  }, [state, router, setOpen, type, onSuccess, data]);
+  }, [state, router, setOpen, type]);
 
   return (
   <form
@@ -75,10 +116,7 @@ const PropietarioForm = ({ type, data, setOpen, onSuccess,relatedData }: Propiet
         hidden
       />
     )}
-
-    {/* Grid para dos columnas */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Si quieres que la lista de mascotas ocupe las 2 columnas la pones dentro de un contenedor con col-span */}
       {relatedData?.mascotas && relatedData.mascotas.length > 0 && (
         <div className="md:col-span-2 flex flex-col gap-2">
           <label className="text-sm font-medium">Mascotas asociadas</label>

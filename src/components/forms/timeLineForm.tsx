@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch, Controller } from "react-hook-form";
+import { useForm, useWatch} from "react-hook-form";
 import InputField from "../inputField";
 import { timelineSchema, TimeLineSchema } from "@/lib/formSchema";
 import { startTransition, useActionState, useState } from "react";
@@ -74,23 +74,24 @@ export default function TimeLineForm({
   useEffect(() => {
     if (watchedTipo) {
       setValue("titulo", DEFAULT_TITLES[watchedTipo]);
-      setDetailItems([]);
+      if (isNew) {
+        setDetailItems([]);
+        setValue("detalles", []);
+      }
     }
-  }, [watchedTipo, setValue]);
+  }, [watchedTipo, setValue, isNew]);
+
 
   const handleAddDetail = () => {
-  if (!selectedDetail || !selectedDate) return;
-  setDetailItems((prev) => [
-    ...prev,
-    { name: selectedDetail, fecha: selectedDate },
-  ]);
-  setSelectedDetail("");
-  setSelectedDate("");
-  setValue(
-    "detalles",
-    detailItems.concat({ name: selectedDetail, fecha: selectedDate }).map((d) => d.name)
-  );
-}
+    if (!selectedDetail || !selectedDate) return;
+    const newItem = { name: selectedDetail, fecha: selectedDate };
+    const newItems = [...detailItems, newItem];
+    setDetailItems(newItems);
+    setSelectedDetail("");
+    setSelectedDate("");
+  };
+
+
 
   const [state, formAction] = useActionState(
     isNew ? createLineaTiempo : updateLineaTiempo,
@@ -123,11 +124,33 @@ export default function TimeLineForm({
   useEffect(() => {
     if (!isNew && data) {
       reset(data);
+      if ((data as any).tipo) {
+        setValue("tipo", (data as any).tipo);
+      }
+      const mapped = (data.detalles ?? []).map((d: any) => {
+        if (typeof d === "string") {
+          try {
+            const p = JSON.parse(d);
+            return { name: p.name ?? d, fecha: p.fecha ?? "" };
+          } catch {
+            return { name: d, fecha: "" };
+          }
+        }
+        // si viene objeto
+        return { name: d.name ?? String(d), fecha: d.fecha ?? "" };
+      });
+      setDetailItems(mapped);
+      setValue("detalles", mapped.map((m) => JSON.stringify(m)));
     }
-  }, [isNew, data, reset]);
+  }, [isNew, data, reset, setValue]);
+
+  useEffect(() => {
+    // Mantén el campo detalles consistente con detailItems (guardamos JSON strings)
+    setValue("detalles", detailItems.map((d) => JSON.stringify(d)));
+  }, [detailItems, setValue]);
+
 
   const detalleOptions = watchedTipo ? DETAIL_OPTIONS[watchedTipo] : [];
-  console.log("aaaaaaaaaaaaaaaaaaa",defaultValues.ubicacion)
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 p-4">

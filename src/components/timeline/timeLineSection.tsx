@@ -41,6 +41,7 @@ export default function TimelineSection({
       {/* Botón "Agregar" usa su propio trigger interno */}
       <div className="mb-6 flex justify-end">
         <FormModal
+          key={mode}
           table={mode === 'consultas' ? 'timeline' : 'vacunacion'}
           type="create"
           id={mode === 'consultas' ? historiaId : mascotaId}
@@ -52,6 +53,11 @@ export default function TimelineSection({
       {/* Modal de edición (sin trigger interno) */}
       {editItem && (
         <FormModal
+          key={
+            mode === 'consultas'
+              ? `update-timeline-${(editItem as Consulta).id}`
+              : `update-vacuna-${(editItem as VaccineRecord).idRegistroVacuna}`
+          }
           table={mode === 'consultas' ? 'timeline' : 'vacunacion'}
           type="update"
           id={
@@ -62,6 +68,7 @@ export default function TimelineSection({
           data={editItem}
           relatedData={mode === 'consultas' ? relatedTimeline : relatedVacunacion}
           onSuccess={() => setEditItem(null)}
+          onClose={() => setEditItem(null)}     // <-- importante: limpiar al cerrar
           hideTrigger={true}
         />
       )}

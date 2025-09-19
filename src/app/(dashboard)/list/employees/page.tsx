@@ -22,6 +22,8 @@ const columns = [
         header: "Dirección", accessor: "usuario.direccion", className: "hidden xl:table-cell",
     },
     {
+        header: "Especialidad", accessor: "especialidad", className: "hidden xl:table-cell" },
+    {
         header: "Rol(es)", accessor: "roles", className: "hidden md:table-cell",
     },
     {
@@ -35,7 +37,7 @@ const renderRow = (item: EmpleadoList) => {
     .join(", ");
 
     return (
-    <tr key={item.idEmpleado} className="border-b border-gray-200 even:bg-backhoverbutton text-sm hover:bg-backgroundgray" >
+    <tr key={item.idEmpleado} className="border-b border-gray-200 even:bg-backcolumtable text-sm hover:bg-tablehover" >
         <td>
             <div className="flex items-center gap-4 p-2">
                 <div className="flex flex-col">
@@ -54,6 +56,9 @@ const renderRow = (item: EmpleadoList) => {
 
         {/* Dirección */}
         <td className="hidden xl:table-cell p-2">{item.usuario.direccion || "-"}</td>
+
+        {/* Especialidad */}
+        <td className="hidden xl:table-cell p-2">{item.especialidad || "-"}</td>
 
         {/* Roles */}
         <td className="hidden md:table-cell p-2">{rolNames || "-"}</td>

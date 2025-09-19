@@ -1,4 +1,3 @@
-// src/lib/fetchRelatedData.ts
 import prisma from "@/lib/prisma";
 
 export const fetchRelatedData = async (
@@ -40,7 +39,6 @@ export const fetchRelatedData = async (
   }
 };
 
-/* --- simple in-memory cache --- */
 let _fetchMascotaCache: { value: any; ts: number } | null = null;
 const CACHE_TTL_MS = 3600 * 1000; // 1 hora
 
